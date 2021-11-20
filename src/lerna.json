@@ -1,4 +1,0 @@
-{
-  "packages": ["web/*", "common/*"],
-  "version": "0.0.0"
-}
