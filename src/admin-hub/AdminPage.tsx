@@ -1,63 +1,60 @@
-import { WorkItemField } from 'azure-devops-extension-api/WorkItemTracking';
-import { Button } from 'azure-devops-ui/Button';
-import { FormItem } from 'azure-devops-ui/FormItem';
+import { CommonServiceIds, IHostNavigationService } from 'azure-devops-extension-api';
+import * as DevOps from 'azure-devops-extension-sdk';
+import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header } from 'azure-devops-ui/Header';
+import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { Page } from 'azure-devops-ui/Page';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
-import { TextField } from 'azure-devops-ui/TextField';
-import React, { useEffect, useMemo, useState } from 'react';
-import { WorkItemFieldNames } from '../common/constants';
+import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
+import React, { useState } from 'react';
 
-import WorkItemService from '../common/services/WorkItemService';
-
-const CreateFieldForm = (): React.ReactElement => {
-  const [name, setName] = useState<string>('');
-
-  return (
-    <div>
-      <FormItem label="Title">
-        <TextField value={name} onChange={(_, v) => setName(v)} />
-      </FormItem>
-      <Button
-        text="Create"
-        onClick={async () => {
-          const service = new WorkItemService();
-         // await service.createField();
-        }}
-      />
-    </div>
-  );
-};
+import AdminConfigurationTab from './tabs/AdminConfigurationTab';
+import AreaConfigurationTab from './tabs/AreaConfigurationTab';
 
 const AdminPage = (): React.ReactElement => {
-  const validFields: string[] = [WorkItemFieldNames.Status];
+  const [selectedTab, setSelectedTab] = useState<string>('areas');
 
-  const [fields, setFields] = useState<WorkItemField[]>();
-  useEffect(() => {
-    async function fetchMyAPI() {
-      const service = new WorkItemService();
-      const result = await service.getFields();
-      setFields(result);
-      console.log(result);
+  const commandBarItems: IHeaderCommandBarItem[] = [
+    {
+      id: 'open-docs',
+      text: 'Open docs',
+      iconProps: { iconName: 'Help' },
+      onActivate: () => {
+        DevOps.getService<IHostNavigationService>('ms.vss-features.host-navigation-service').then(
+          value => {
+            value.openNewWindow(
+              'https://github.com/joachimdalen/azdevops-acceptance-criterias',
+              ''
+            );
+          }
+        );
+      }
     }
-    fetchMyAPI();
-  }, []);
+  ];
 
   return (
     <Surface background={SurfaceBackground.neutral}>
-      <Page>
-        <Header title="Advanced Acceptance Criterias" />
-        <div className="page-content">
-          <div>Page content</div>
-          <ul>
-            {fields &&
-              fields
-                .filter(x => validFields.includes(x.referenceName))
-                .sort((a, b) => (a.referenceName > b.referenceName ? 1 : -1))
-                .map(x => <li key={x.referenceName}>{x.referenceName}</li>)}
-          </ul>
-          <CreateFieldForm />
-        </div>
+      <Page className="flex-grow">
+        <Header
+          commandBarItems={commandBarItems}
+          title="Advanced Acceptance Criterias"
+          description="Management for Advanced Acceptance Criterias"
+        />
+        <TabBar
+          className="margin-bottom-16"
+          onSelectedTabChanged={tab => setSelectedTab(tab)}
+          selectedTabId={selectedTab}
+          tabSize={TabSize.Tall}
+        >
+          <Tab name="Configuration" id="configuration" />
+          <Tab name="Areas" id="areas" />
+        </TabBar>
+        <ConditionalChildren renderChildren={selectedTab === 'configuration'}>
+          <AdminConfigurationTab />
+        </ConditionalChildren>
+        <ConditionalChildren renderChildren={selectedTab === 'areas'}>
+          <AreaConfigurationTab />
+        </ConditionalChildren>
       </Page>
     </Surface>
   );
