@@ -1,21 +1,47 @@
 const path = require('path');
-const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
-const entries = {};
-const roots = {
-  control: 'control-container',
-  panel: 'panel-container',
-  admin: 'admin-container'
-};
-const samplesDir = path.join(__dirname, 'src');
-fs.readdirSync(samplesDir).filter(dir => {
-  if (fs.statSync(path.join(samplesDir, dir)).isDirectory()) {
-    entries[dir] = './' + path.relative(process.cwd(), path.join(samplesDir, dir, dir));
+const modules = [
+  {
+    name: 'common',
+    entry: './src/common/common',
+    generate: false
+  },
+  {
+    name: 'control',
+    entry: './src/control/module',
+    root: 'control-container',
+    generate: true
+  },
+  {
+    name: 'panel',
+    entry: './src/panel/module',
+    root: 'panel-container',
+    generate: true
+  },
+  {
+    name: 'admin-hub',
+    entry: './src/admin-hub/module',
+    root: 'admin-hub-container',
+    generate: true
+  },
+  {
+    name: 'work-hub',
+    entry: './src/work-hub/module',
+    root: 'work-hub-container',
+    generate: true
   }
-});
-// https://stackoverflow.com/questions/31735584/delete-unused-webpack-chunked-files/43017089
+];
+
+const entries = modules.reduce(
+  (obj, item) => ({
+    ...obj,
+    [item.name]: item.entry
+  }),
+  {}
+);
+
 console.log(entries);
 
 module.exports = {
@@ -45,7 +71,7 @@ module.exports = {
         { from: /\/static\/.+/, to: '/' },
         { from: 'dist/control.html', to: 'control.html' },
         { from: 'dist/panel.html', to: 'panel.html' },
-        { from: 'dist/admin.html', to: 'admin.html' }
+        { from: 'admin.html', to: 'admin-hub.html' }
       ]
     }
   },
@@ -123,15 +149,15 @@ module.exports = {
     //   ]
     // })
   ].concat(
-    Object.keys(entries)
-      .filter(x => x !== 'common')
-      .map(key => {
+    modules
+      .filter(x => x.generate)
+      .map(entry => {
         return new HtmlWebpackPlugin({
-          filename: key + '.html',
+          filename: entry.name + '.html',
           inject: false,
           templateContent: ({ htmlWebpackPlugin }) =>
-            `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="${roots[key]}"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`,
-          chunks: [key]
+            `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="${entry.root}"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`,
+          chunks: [entry.name]
         });
       })
   )

@@ -1,9 +1,14 @@
 import { IExtensionDataService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { CriteriaDocument } from '../models/CriteriaDocument';
 
 enum ScopeType {
   Default = 'Default',
   User = 'User'
+}
+
+enum CollectionNames {
+  Criterias = 'AcceptanceCriterias'
 }
 
 class StorageService {
@@ -25,25 +30,35 @@ class StorageService {
     return this.dataService;
   }
 
-  public async getData(): Promise<any> {
+  public async getWorkItemData(id: number): Promise<CriteriaDocument> {
     const dataService = await this.getDataService();
     const dataManager = await dataService.getExtensionDataManager(
       DevOps.getExtensionContext().id,
       await DevOps.getAccessToken()
     );
-    return dataManager.getValue(this.storageKey, {
+    return dataManager.getDocument(CollectionNames.Criterias, id.toString(), {
+      scopeType: this.scopeType
+    });
+  }
+  public async getData(): Promise<CriteriaDocument[]> {
+    const dataService = await this.getDataService();
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    return dataManager.getDocuments(CollectionNames.Criterias, {
       scopeType: this.scopeType
     });
   }
 
-  public async setData(data: any): Promise<any> {
+  public async setData(data: CriteriaDocument): Promise<CriteriaDocument> {
     const dataService = await this.getDataService();
     const dataManager = await dataService.getExtensionDataManager(
       DevOps.getExtensionContext().id,
       await DevOps.getAccessToken()
     );
-    return dataManager.setValue(this.storageKey, data, {
-      scopeType: this.scopeType
+    return dataManager.setDocument(CollectionNames.Criterias, data, {
+      scopeType: ScopeType.Default
     });
   }
 }

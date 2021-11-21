@@ -20,4 +20,4 @@ const AdminHub = () => {
 
   return <AdminPage />;
 };
-showRootComponent(<AdminHub />, 'admin-container');
+showRootComponent(<AdminHub />, 'admin-hub-container');

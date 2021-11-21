@@ -16,14 +16,16 @@ import {
   WorkItemTrackingServiceIds
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/common';
 import { WorkItemFieldNames } from '../common/constants';
+import CriteriaNavigationService from '../common/services/CriteriaNavigationService';
 import { appTheme, commandBarStyles } from './azure-devops-theme';
 import CriteriaList from './components/CriteriaList';
 
 const AcceptanceControl = (): React.ReactElement => {
+  const criteriaService = useMemo(() => new CriteriaNavigationService(), []);
   const [rows, setRows] = useState<IAcceptanceCriteria[]>([
     {
       id: '1',
@@ -100,7 +102,7 @@ const AcceptanceControl = (): React.ReactElement => {
       }
     };
   };
-
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     loadTheme(createTheme(appTheme));
     DevOps.init().then(async () => {
@@ -109,40 +111,8 @@ const AcceptanceControl = (): React.ReactElement => {
     });
   }, []);
 
-  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => DevOps.resize(), [ref, rows]);
 
-  useEffect(() => {
-    console.log('Resize');
-    DevOps.resize(ref.current?.scrollWidth || 200, ref.current?.scrollHeight || 600);
-  });
-
-  const getPersona = async (): Promise<IPersonaProps> => {
-    const workItemFormService = await DevOps.getService<IWorkItemFormService>(
-      WorkItemTrackingServiceIds.WorkItemFormService
-    );
-
-    const idService = await DevOps.getService<IVssIdentityService>(
-      'ms.vss-features.identity-service'
-    );
-
-    const assign = await workItemFormService.getFieldValue('System.AssignedTo', {
-      returnOriginalValue: false
-    });
-
-    const email = getEmail(assign as string);
-
-    if (email) {
-      const id = await idService.searchIdentitiesAsync(email);
-    }
-
-    return {};
-  };
-
-  const getEmail = (identifier: string) => {
-    const regex = /^.+<(?<email>.+)>$/;
-    const matches = regex.exec(identifier);
-    return matches?.groups?.email;
-  };
   const _items: ICommandBarItemProps[] = [
     {
       key: 'newItem',
@@ -150,22 +120,15 @@ const AcceptanceControl = (): React.ReactElement => {
       cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
       iconProps: { iconName: 'Add' },
       onClick: () => {
-        DevOps.getService<IHostPageLayoutService>('ms.vss-features.host-page-layout-service').then(
-          dialogService => {
-            const id = DevOps.getExtensionContext().id + '.acceptance-criterias-panel';
-            console.log(id);
-            dialogService.openCustomDialog(id, {
-              title: 'Message dialog',
-              configuration: {
-                resizable: true
-              },
-              onClose: (result: IAcceptanceCriteria | undefined) => {
-                setRows(prev => [...prev, result as IAcceptanceCriteria]);
-                console.log(result);
-              }
-            });
+        criteriaService.showCriteriaModal(res => {
+          if (res.result === 'SAVE') {
+            if (res.criteria) {
+              const items = [...rows, res.criteria];
+              setRows(items);
+            }
           }
-        );
+          console.log(res);
+        });
       }
     }
   ];

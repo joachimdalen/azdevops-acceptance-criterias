@@ -7,7 +7,7 @@ export interface IAcceptanceCriteria {
   description?: string;
   area?: string;
   requiredApprover?: IIdentity;
-  state?: AcceptanceCriteriaState;
+  state: AcceptanceCriteriaState;
 }
 
 export interface IWorkItemAcceptanceCriterias {
