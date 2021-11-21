@@ -2,6 +2,14 @@
 @import '../styles/mixins.scss';
 @include extension-container('control-container');
 
+@mixin status-tag-variant($name, $color) {
+  &-#{$name} {
+    .status-tag-indicator {
+      background-color: $color;
+    }
+  }
+}
+
 .add-criteria-button {
   .ms-Icon {
     color: rgba(var(--palette-accent2-dark, 16, 124, 16), 1);
@@ -18,6 +26,13 @@
     width: 8px;
     border-radius: 4px;
   }
+  @include status-tag-variant('unset', #9b34eb);
+  @include status-tag-variant('pending', orange);
+  @include status-tag-variant('approved', green);
+  @include status-tag-variant('rejected', red);
+}
+.flex-self-center {
+  align-self: center;
 }
 
 .acceptance-critera-title-cell {

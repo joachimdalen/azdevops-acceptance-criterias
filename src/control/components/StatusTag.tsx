@@ -1,3 +1,5 @@
+import classNames from 'classnames';
+
 import { AcceptanceCriteriaState } from '../../common/common';
 export interface StatusTagProps {
   state: AcceptanceCriteriaState;
@@ -6,6 +8,8 @@ export interface StatusTagProps {
 const StatusTag = ({ state }: StatusTagProps): React.ReactElement => {
   const getTagColor = () => {
     switch (state) {
+      case AcceptanceCriteriaState.Unset:
+        return '#9b34eb';
       case AcceptanceCriteriaState.Pending:
         return 'orange';
       case AcceptanceCriteriaState.Approved:
@@ -16,8 +20,8 @@ const StatusTag = ({ state }: StatusTagProps): React.ReactElement => {
   };
 
   return (
-    <span className="status-tag">
-      <div className="status-tag-indicator" style={{ backgroundColor: getTagColor() }}></div>
+    <span className={classNames('status-tag', [`status-tag-${state}`])}>
+      <div className="status-tag-indicator"></div>
       {state}
     </span>
   );
