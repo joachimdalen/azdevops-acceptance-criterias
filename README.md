@@ -1,1 +1,1 @@
-# Adcanced Acceptance Criterias
+# Advanced Acceptance Criterias

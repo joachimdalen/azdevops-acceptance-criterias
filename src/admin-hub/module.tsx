@@ -4,8 +4,8 @@ import { createTheme, initializeIcons, loadTheme } from '@fluentui/react';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { useEffect } from 'react';
 
-import { appTheme } from '../control/azure-devops-theme';
-import { showRootComponent } from '../control/common';
+import { appTheme } from '../wi-control/azure-devops-theme';
+import { showRootComponent } from '../wi-control/common';
 import AdminPage from './AdminPage';
 
 initializeIcons();

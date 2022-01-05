@@ -1,1 +1,0 @@
-# Adcanced Acceptance Criterias

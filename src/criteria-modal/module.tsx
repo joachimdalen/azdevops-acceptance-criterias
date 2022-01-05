@@ -16,8 +16,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/common';
 import useDropdownSelection from '../common/hooks/useDropdownSelection';
 import { CriteriaModalResult } from '../common/services/CriteriaNavigationService';
-import { appTheme } from '../control/azure-devops-theme';
-import { showRootComponent } from '../control/common';
+import { appTheme } from '../wi-control/azure-devops-theme';
+import { showRootComponent } from '../wi-control/common';
 type NullableString = string | undefined;
 const PanelContent = (): React.ReactElement => {
   const identityProvider = useMemo(() => {

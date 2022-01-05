@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json.schemastore.org/vss-extension",
+  "manifestVersion": 1,
+  "baseUri": "https://localhost:3000",
+  "public": false,
+  "id": "acceptance-criterias-dev",
+  "name": "Acceptance Criterias - DEV",
+  "publisher": "JoachimDalen",
+  "version": "0.0.1",
+  "description": "An extension to manage acceptance criterias",
+  "categories": ["Azure Boards"],
+  "demands": ["api-version/5.1"],
+  "tags": ["work items", "state", "auto update"],
+  "scopes": ["vso.work_write"],
+  "icons": {
+    "default": "extension-icon.png"
+  },
+  "content": {
+    "details": { "path": "marketplace/docs/README.md" },
+    "changelog": { "path": "marketplace/docs/CHANGELOG.md" }
+  },
+  "links": {
+    "repository": {
+      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias"
+    },
+    "support": {
+      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues"
+    },
+    "privacypolicy": {
+      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/master/PRIVACY.md"
+    },
+    "license": {
+      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/master/LICENSE"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias"
+  },
+  "branding": {
+    "color": "#198695",
+    "theme": "dark"
+  },
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services.Cloud"
+    }
+  ],
+  "files": [
+    {
+      "path": "marketplace/docs/images",
+      "addressable": true
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "marketplace/docs/images/rule-editor.png"
+    },
+    {
+      "path": "marketplace/docs/images/rule-modal.png"
+    },
+    {
+      "path": "marketplace/docs/images/rule-tester-result.png"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "criteria-panel",
+      "type": "ms.vss-web.external-content",
+      "targets": [],
+      "properties": {
+        "uri": "criteria-panel.html"
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.acceptance-criterias-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin-hub",
+      "type": "ms.vss-web.hub",
+      "description": "Configuration hub for Acceptance Criterias",
+      "targets": ["ms.vss-web.project-admin-hub-group"],
+      "properties": {
+        "name": "Acceptance Criterias (DEV)",
+        "order": 1,
+        "uri": "admin-hub.html"
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.acceptance-criterias-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "acceptance-criterias-enabled",
+      "type": "ms.vss-web.feature",
+      "description": "Enables acceptance criteria user hub and admin hub",
+      "targets": ["ms.vss-web.managed-features"],
+      "properties": {
+        "name": "Acceptance Criterias",
+        "userConfigurable": false,
+        "hostConfigurable": true,
+        "hostScopes": ["project"],
+        "links": {
+          "learn": {
+            "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias#post-install-activation"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "repository": "joachimdalen/azdevops-acceptance-criterias",
+  "changelogTitle": {
+    "size": "h1",
+    "format": "Changelog"
+  },
+  "releaseTitleFormat": {
+    "size": "h2",
+    "format": "{{version}} ({{publishDate}})"
+  },
+  "moduleTitleFormat": {
+    "size": "h4",
+    "format": "`{{name}}@{{version}}`"
+  },
+  "moduleChangesTitle": {
+    "size": "h2",
+    "format": ":package: Module changes"
+  },
+  "sectionSplitter": "---",
+  "typeSize": "h3",
+  "typeMapping": {
+    "feature": ":rocket: Features ({{changeCount}})",
+    "fix": ":bug: Fixes ({{changeCount}})",
+    "tests": ":test_tube: Tests ({{changeCount}})",
+    "other": ":speech_balloon: Other ({{changeCount}})",
+    "docs": ":memo: Documentation ({{changeCount}})",
+    "maint": ":hammer_and_wrench: Maintenance ({{changeCount}})"
+  },
+  "attributionTitleFormat": {
+    "size": "h2",
+    "format": ":star2: Contributors"
+  },
+  "attributionSubTitle": {
+    "format": "Thank you to the following for contributing to the latest release"
+  },
+  "attributionLinkTextFormat": {
+    "format": "@{{ghUsername}}"
+  },
+  "knownAuthors": ["joachimdalen"],
+  "useDescriptiveIssues": true,
+  "useDescriptivePullRequests": true,
+  "replaceEmojis": {
+    "types": true,
+    "changelogTitle": true,
+    "releaseTitle": true,
+    "moduleTitle": true,
+    "attributionTitle": true,
+    "attributionSubTitle": true,
+    "moduleChangesTitle": true,
+    "githubIssues": false,
+    "githubPullRequests": false,
+    "notes": true,
+    "summary": true
+  }
+}
