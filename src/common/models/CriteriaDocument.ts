@@ -1,6 +1,6 @@
 import { IAcceptanceCriteria } from './IAcceptanceCriteria';
 
-enum FullCriteriaStatus {
+export enum FullCriteriaStatus {
   Partial = 'partial',
   Approved = 'approved',
   Rejected = 'rejected'

@@ -1,3 +1,4 @@
 export enum WorkItemFieldNames {
-  Status = 'Jd.AdvancedAcceptanceCriteria.Status'
+  Status = 'Jd.AdvancedAcceptanceCriteria.Status',
+  ItemCound = 'Jd.AdvancedAcceptanceCriteria.Count'
 }

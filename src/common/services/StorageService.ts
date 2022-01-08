@@ -1,5 +1,6 @@
 import { IExtensionDataService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
+
 import { CriteriaDocument } from '../models/CriteriaDocument';
 
 enum ScopeType {
@@ -12,13 +13,11 @@ enum CollectionNames {
 }
 
 class StorageService {
-  private storageKey: string;
   private scopeType: ScopeType;
   private dataService?: IExtensionDataService;
 
-  public constructor(storageKey: string, scope: ScopeType) {
-    this.storageKey = storageKey;
-    this.scopeType = scope;
+  public constructor() {
+    this.scopeType = ScopeType.Default;
   }
 
   private async getDataService(): Promise<IExtensionDataService> {
@@ -30,14 +29,15 @@ class StorageService {
     return this.dataService;
   }
 
-  public async getWorkItemData(id: number): Promise<CriteriaDocument> {
+  public async getWorkItemData(id: number): Promise<CriteriaDocument | undefined> {
     const dataService = await this.getDataService();
     const dataManager = await dataService.getExtensionDataManager(
       DevOps.getExtensionContext().id,
       await DevOps.getAccessToken()
     );
     return dataManager.getDocument(CollectionNames.Criterias, id.toString(), {
-      scopeType: this.scopeType
+      scopeType: this.scopeType,
+      defaultValue: undefined
     });
   }
   public async getData(): Promise<CriteriaDocument[]> {

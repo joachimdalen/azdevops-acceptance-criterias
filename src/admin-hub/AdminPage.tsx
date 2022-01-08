@@ -46,7 +46,7 @@ const AdminPage = (): React.ReactElement => {
           selectedTabId={selectedTab}
           tabSize={TabSize.Tall}
         >
-          <Tab name="Configuration" id="configuration" />
+          <Tab name="Configuration" id="configuration" iconProps={{ iconName: 'Settings' }} />
           <Tab name="Areas" id="areas" />
         </TabBar>
         <ConditionalChildren renderChildren={selectedTab === 'configuration'}>
