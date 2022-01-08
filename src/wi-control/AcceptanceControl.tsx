@@ -2,12 +2,11 @@ import {
   CommandBar,
   createTheme,
   ICommandBarItemProps,
-  IPersonaProps,
   loadTheme,
-  Separator
+  Separator,
+  Spinner,
+  SpinnerSize
 } from '@fluentui/react';
-import { IHostPageLayoutService } from 'azure-devops-extension-api';
-import { IVssIdentityService } from 'azure-devops-extension-api/Identities';
 import {
   IWorkItemChangedArgs,
   IWorkItemFieldChangedArgs,
@@ -16,16 +15,22 @@ import {
   WorkItemTrackingServiceIds
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/common';
-import { WorkItemFieldNames } from '../common/constants';
+import { DevOpsError } from '../common/DevOpsError';
+import { CriteriaDocument } from '../common/models/CriteriaDocument';
 import CriteriaNavigationService from '../common/services/CriteriaNavigationService';
+import { StorageService } from '../common/services/StorageService';
+import WorkItemService from '../common/services/WorkItemService';
 import { appTheme, commandBarStyles } from './azure-devops-theme';
 import CriteriaList from './components/CriteriaList';
 
 const AcceptanceControl = (): React.ReactElement => {
   const criteriaService = useMemo(() => new CriteriaNavigationService(), []);
+  const [criteriaDocument, setCriteriaDocument] = useState<CriteriaDocument>();
+  const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<IAcceptanceCriteria[]>([
     {
       id: '1',
@@ -53,66 +58,21 @@ const AcceptanceControl = (): React.ReactElement => {
     }
   ]);
 
-  const provider = () => {
-    return {
-      // Called when the active work item is modified
-      onFieldChanged: (args: IWorkItemFieldChangedArgs) => {
-        console.log(`onFieldChanged`, args);
-      },
-
-      // Called when a new work item is being loaded in the UI
-      onLoaded: async (args: IWorkItemLoadedArgs) => {
-        console.log(`onLoaded`, args);
-
-        // const service = new WorkItemService();
-        // const wit = await service.getWorkItem(args.id);
-        // console.log(wit);
-        const workItemFormService = await DevOps.getService<IWorkItemFormService>(
-          WorkItemTrackingServiceIds.WorkItemFormService
-        );
-
-        const fields = await workItemFormService.getFields();
-        console.log(fields);
-
-        const result = await workItemFormService.setFieldValue(
-          WorkItemFieldNames.Status,
-          'Accepted'
-        );
-        console.log('result', result);
-      },
-
-      // Called when the active work item is being unloaded in the UI
-      onUnloaded: (args: IWorkItemChangedArgs) => {
-        console.log(`onUnloaded`, args);
-      },
-
-      // Called after the work item has been saved
-      onSaved: async (args: IWorkItemChangedArgs) => {
-        console.log(`onSaved`, args);
-      },
-
-      // Called when the work item is reset to its unmodified state (undo)
-      onReset: (args: IWorkItemChangedArgs) => {
-        console.log(`onReset`, args);
-      },
-
-      // Called when the work item has been refreshed from the server
-      onRefreshed: (args: IWorkItemChangedArgs) => {
-        console.log(`onRefreshed`, args);
-      }
-    };
-  };
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     loadTheme(createTheme(appTheme));
     DevOps.init().then(async () => {
       console.log('Loaded...');
-      DevOps.register(DevOps.getContributionId(), provider);
-      DevOps.resize();
+      //  DevOps.register(DevOps.getContributionId(), provider);
+
+      //TMP
+      setLoading(false);
     });
   }, []);
 
-  useEffect(() => DevOps.resize(), [ref, rows]);
+  // useEffect(() => {
+  //   DevOps.resize();
+  // }, [ref, rows]);
 
   const _items: ICommandBarItemProps[] = [
     {
@@ -124,6 +84,16 @@ const AcceptanceControl = (): React.ReactElement => {
         criteriaService.showCriteriaModal(res => {
           if (res.result === 'SAVE') {
             if (res.criteria) {
+              DevOps.getService<IWorkItemFormService>('ms.vss-work-web.work-item-form').then(
+                witService => {
+                  witService.getId().then(id => {
+                    const storageService = new StorageService();
+                    const workItemService = new WorkItemService();
+                    const document = workItemService.createNewDocument(id, [res.criteria!]);
+                    console.log(document);
+                  });
+                }
+              );
               const items = [...rows, res.criteria];
               setRows(items);
             }
@@ -133,8 +103,43 @@ const AcceptanceControl = (): React.ReactElement => {
       }
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="acceptance-control-loader">
+        <Spinner size={SpinnerSize.large} label="Loading acceptance criterias" />
+      </div>
+    );
+  }
+
+  // if (!loading && criteriaDocument === undefined) {
+  //   return (
+  //     <div className="flex-grow">
+  //       <ZeroData
+  //         className="flex-self-center"
+  //         imageAltText=""
+  //         secondaryText="No acceptance criterias have been added"
+  //         iconProps={{ iconName: 'Add' }}
+  //         actionText="Add acceptance criteria"
+  //         actionType={ZeroDataActionType.ctaButton}
+  //         onActionClick={() => {
+  //           criteriaService.showCriteriaModal(res => {
+  //             if (res.result === 'SAVE') {
+  //               if (res.criteria) {
+  //                 const items = [...rows, res.criteria];
+  //                 setRows(items);
+  //               }
+  //             }
+  //             console.log(res);
+  //           });
+  //         }}
+  //       />
+  //     </div>
+  //   );
+  // }
+
   return (
-    <div style={{ height: '100%', width: '100%' }} ref={ref}>
+    <div className="acceptance-control-container" ref={ref}>
       <div>
         <CommandBar styles={commandBarStyles} items={_items} />
         <Separator />

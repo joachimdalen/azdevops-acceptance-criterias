@@ -1,6 +1,7 @@
+@import 'azure-devops-ui/Core/override.css';
 @import 'azure-devops-ui/Core/_platformCommon.scss';
 @import '../styles/mixins.scss';
-@include extension-container('control-container');
+@include extension-container('wi-control-container');
 
 @mixin status-tag-variant($name, $color) {
   &-#{$name} {
@@ -41,4 +42,17 @@
     width: 100%;
     align-self: center;
   }
+}
+.acceptance-control-container {
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.acceptance-control-loader {
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: center;
 }

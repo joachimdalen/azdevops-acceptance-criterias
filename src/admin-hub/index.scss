@@ -1,3 +1,7 @@
 @import 'azure-devops-ui/Core/_platformCommon.scss';
 @import '../styles/mixins.scss';
 @include extension-container('admin-hub-container');
+
+.admin-container {
+  background-color: var(--background-color, rgba(255, 255, 255, 1));
+}

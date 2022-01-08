@@ -6,7 +6,7 @@
   "id": "acceptance-criterias-dev",
   "name": "Acceptance Criterias - DEV",
   "publisher": "JoachimDalen",
-  "version": "0.0.5",
+  "version": "0.0.8",
   "description": "An extension to manage acceptance criterias",
   "categories": ["Azure Boards"],
   "demands": ["api-version/5.1"],
@@ -46,12 +46,7 @@
       "id": "Microsoft.VisualStudio.Services.Cloud"
     }
   ],
-  "files": [
-    {
-      "path": "marketplace/docs/images",
-      "addressable": true
-    }
-  ],
+  "files": [],
   "screenshots": [],
   "contributions": [
     {
@@ -65,7 +60,7 @@
         {
           "name": "Feature",
           "properties": {
-            "featureId": "joachimdalen.acceptance-criterias-dev.acceptance-criterias-enabled"
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
           }
         }
       ]
@@ -84,23 +79,31 @@
         {
           "name": "Feature",
           "properties": {
-            "featureId": "joachimdalen.acceptance-criterias-dev.acceptance-criterias-enabled"
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
           }
         }
       ]
     },
     {
-      "id": "sample-work-item-form-control",
-      "type": "ms.vss-work-web.work-item-form-control",
-      "description": "Custom work item form control",
+      "id": "work-hub",
+      "type": "ms.vss-web.hub",
+      "targets": ["ms.vss-work-web.work-hub-group"],
+      "properties": {
+        "name": "Acceptance Criterias (DEV)",
+        "uri": "work-hub.html"
+      }
+    },
+    {
+      "id": "criterias-control-page",
+      "type": "ms.vss-work-web.work-item-form-page",
       "targets": ["ms.vss-work-web.work-item-form"],
       "properties": {
-        "name": "Advanced Acceptance Criterias",
+        "name": "Acceptance Criterias",
         "uri": "wi-control.html"
       }
     },
     {
-      "id": "acceptance-criterias-enabled",
+      "id": "feature-enabled",
       "type": "ms.vss-web.feature",
       "description": "Enables acceptance criteria user hub and admin hub",
       "targets": ["ms.vss-web.managed-features"],

@@ -1,4 +1,4 @@
-import { IHostPageLayoutService } from 'azure-devops-extension-api';
+import { IHostPageLayoutService, PanelSize } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
 
 import { IAcceptanceCriteria } from '../common';
@@ -24,9 +24,9 @@ class CriteriaNavigationService {
       const id = this.getFullId(this.CriteriaModalSuffix);
       dialogService.openPanel(id, {
         title: 'Acceptance Criteria',
+        size: 2,
         configuration: {
-          criteria,
-          resizable: true
+          criteria
         },
         onClose: (result: CriteriaModalResult | undefined) => {
           if (result === undefined) {

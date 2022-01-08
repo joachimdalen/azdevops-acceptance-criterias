@@ -42,7 +42,10 @@ const PanelContent = (): React.ReactElement => {
   ];
   useEffect(() => {
     loadTheme(createTheme(appTheme));
-    DevOps.init().then(async () => {
+    DevOps.init({
+      loaded: false,
+      applyTheme: true
+    }).then(async () => {
       console.log('Loaded...');
       DevOps.resize();
     });
@@ -103,56 +106,58 @@ const PanelContent = (): React.ReactElement => {
   };
 
   return (
-    <div className="flex-grow">
-      <ConditionalChildren renderChildren={!loading}>
-        <div className="rhythm-vertical-16 flex-grow">
-          <FormItem label="Required Approver">
-            <IdentityPickerDropdown
-              pickerProvider={identityProvider}
-              value={identity}
-              onChange={identity => setIdentity(identity)}
-            />
-          </FormItem>
-          <FormItem label="Title">
-            <TextField
-              width={TextFieldWidth.auto}
-              placeholder="Acceptance title.."
-              value={title}
-              onChange={(_, val) => setTitle(val)}
-            />
-          </FormItem>
-          <FormItem label="Status">
-            <Dropdown
-              placeholder="Select an Option"
-              items={dropdownItems}
-              selection={stateSelection}
-              onSelect={(_, i) => setState(i.id as AcceptanceCriteriaState)}
-            />
-          </FormItem>
-          <FormItem label="Business Area">
-            <Dropdown
-              placeholder="Select an Option"
-              items={areaItems}
-              selection={areaSelection}
-              onSelect={(_, i) => setBusinessArea(i.id)}
-            />
-          </FormItem>
-          <FormItem label="Description">
-            <TextField
-              width={TextFieldWidth.auto}
-              placeholder="Short description.."
-              multiline
-              value={description}
-              rows={5}
-              onChange={(_, val) => setDescription(val)}
-            />
-          </FormItem>
-        </div>
-        <ButtonGroup className="justify-space-between margin-top-16">
-          <Button text="Close" onClick={() => dismiss()} />
-          <Button text="Save" primary iconProps={{ iconName: 'Save' }} onClick={() => save()} />
-        </ButtonGroup>
-      </ConditionalChildren>
+    <div className="flex-column flex-grow">
+      <div className="flex-grow">
+        <ConditionalChildren renderChildren={!loading}>
+          <div className="rhythm-vertical-16 flex-grow">
+            <FormItem label="Required Approver">
+              <IdentityPickerDropdown
+                pickerProvider={identityProvider}
+                value={identity}
+                onChange={identity => setIdentity(identity)}
+              />
+            </FormItem>
+            <FormItem label="Title">
+              <TextField
+                width={TextFieldWidth.auto}
+                placeholder="Acceptance title.."
+                value={title}
+                onChange={(_, val) => setTitle(val)}
+              />
+            </FormItem>
+            <FormItem label="Status">
+              <Dropdown
+                placeholder="Select an Option"
+                items={dropdownItems}
+                selection={stateSelection}
+                onSelect={(_, i) => setState(i.id as AcceptanceCriteriaState)}
+              />
+            </FormItem>
+            <FormItem label="Business Area">
+              <Dropdown
+                placeholder="Select an Option"
+                items={areaItems}
+                selection={areaSelection}
+                onSelect={(_, i) => setBusinessArea(i.id)}
+              />
+            </FormItem>
+            <FormItem label="Description">
+              <TextField
+                width={TextFieldWidth.auto}
+                placeholder="Short description.."
+                multiline
+                value={description}
+                rows={5}
+                onChange={(_, val) => setDescription(val)}
+              />
+            </FormItem>
+          </div>
+        </ConditionalChildren>
+      </div>
+      <ButtonGroup className="justify-space-between margin-top-16">
+        <Button text="Close" onClick={() => dismiss()} />
+        <Button text="Save" primary iconProps={{ iconName: 'Save' }} onClick={() => save()} />
+      </ButtonGroup>
     </div>
   );
 };

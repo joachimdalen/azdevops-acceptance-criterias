@@ -4,7 +4,12 @@ import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { Page } from 'azure-devops-ui/Page';
-import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
+import {
+  ISurfaceContext,
+  Surface,
+  SurfaceBackground,
+  SurfaceContext
+} from 'azure-devops-ui/Surface';
 import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
 import React, { useState } from 'react';
 
@@ -41,20 +46,23 @@ const AdminPage = (): React.ReactElement => {
           description="Management for Advanced Acceptance Criterias"
         />
         <TabBar
-          className="margin-bottom-16"
+          className="margin-bottom-16 margin-top-8"
           onSelectedTabChanged={tab => setSelectedTab(tab)}
           selectedTabId={selectedTab}
-          tabSize={TabSize.Tall}
+          tabSize={TabSize.Compact}
         >
           <Tab name="Configuration" id="configuration" iconProps={{ iconName: 'Settings' }} />
           <Tab name="Areas" id="areas" />
         </TabBar>
-        <ConditionalChildren renderChildren={selectedTab === 'configuration'}>
-          <AdminConfigurationTab />
-        </ConditionalChildren>
-        <ConditionalChildren renderChildren={selectedTab === 'areas'}>
-          <AreaConfigurationTab />
-        </ConditionalChildren>
+
+        <Surface background={SurfaceBackground.normal}>
+          <ConditionalChildren renderChildren={selectedTab === 'configuration'}>
+            <AdminConfigurationTab />
+          </ConditionalChildren>
+          <ConditionalChildren renderChildren={selectedTab === 'areas'}>
+            <AreaConfigurationTab />
+          </ConditionalChildren>
+        </Surface>
       </Page>
     </Surface>
   );
