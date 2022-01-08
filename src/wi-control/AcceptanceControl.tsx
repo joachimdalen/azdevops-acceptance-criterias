@@ -108,6 +108,7 @@ const AcceptanceControl = (): React.ReactElement => {
     DevOps.init().then(async () => {
       console.log('Loaded...');
       DevOps.register(DevOps.getContributionId(), provider);
+      DevOps.resize();
     });
   }, []);
 

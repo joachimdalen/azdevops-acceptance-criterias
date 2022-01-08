@@ -9,4 +9,4 @@ initializeIcons();
 const App = () => {
   return <AcceptanceControl />;
 };
-showRootComponent(<App />, 'container');
+showRootComponent(<App />, 'wi-control-container');

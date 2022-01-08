@@ -44,11 +44,12 @@ const PanelContent = (): React.ReactElement => {
     loadTheme(createTheme(appTheme));
     DevOps.init().then(async () => {
       console.log('Loaded...');
+      DevOps.resize();
     });
     DevOps.ready().then(() => {
       const config = DevOps.getConfiguration();
       console.log(config);
-      if (config.dialog) {
+      if (config.panel) {
         if (config.criteria) {
           const criteria = config.criteria as IAcceptanceCriteria;
           console.log('Setting criteria', criteria);
@@ -73,16 +74,16 @@ const PanelContent = (): React.ReactElement => {
 
   const dismiss = () => {
     const config = DevOps.getConfiguration();
-    if (config.dialog) {
+    if (config.panel) {
       const res: CriteriaModalResult = {
         result: 'CANCEL'
       };
-      config.dialog.close(res);
+      config.panel.close(res);
     }
   };
   const save = () => {
     const config = DevOps.getConfiguration();
-    if (config.dialog) {
+    if (config.panel) {
       const ac: IAcceptanceCriteria = {
         id: '1234',
         order: 4,
@@ -97,7 +98,7 @@ const PanelContent = (): React.ReactElement => {
         result: 'SAVE',
         criteria: ac
       };
-      config.dialog.close(res);
+      config.panel.close(res);
     }
   };
 
@@ -155,4 +156,4 @@ const PanelContent = (): React.ReactElement => {
     </div>
   );
 };
-showRootComponent(<PanelContent />, 'panel-container');
+showRootComponent(<PanelContent />, 'criteria-panel-container');

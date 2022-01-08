@@ -56,17 +56,7 @@
       "addressable": true
     }
   ],
-  "screenshots": [
-    {
-      "path": "marketplace/docs/images/rule-editor.png"
-    },
-    {
-      "path": "marketplace/docs/images/rule-modal.png"
-    },
-    {
-      "path": "marketplace/docs/images/rule-tester-result.png"
-    }
-  ],
+  "screenshots": [],
   "contributions": [
     {
       "id": "criteria-panel",

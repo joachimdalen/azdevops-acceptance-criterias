@@ -6,11 +6,11 @@
   "id": "acceptance-criterias-dev",
   "name": "Acceptance Criterias - DEV",
   "publisher": "JoachimDalen",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "An extension to manage acceptance criterias",
   "categories": ["Azure Boards"],
   "demands": ["api-version/5.1"],
-  "tags": ["work items", "state", "auto update"],
+  "tags": ["acceptance criterias"],
   "scopes": ["vso.work_write"],
   "icons": {
     "default": "extension-icon.png"
@@ -52,17 +52,7 @@
       "addressable": true
     }
   ],
-  "screenshots": [
-    {
-      "path": "marketplace/docs/images/rule-editor.png"
-    },
-    {
-      "path": "marketplace/docs/images/rule-modal.png"
-    },
-    {
-      "path": "marketplace/docs/images/rule-tester-result.png"
-    }
-  ],
+  "screenshots": [],
   "contributions": [
     {
       "id": "criteria-panel",
@@ -98,6 +88,16 @@
           }
         }
       ]
+    },
+    {
+      "id": "sample-work-item-form-control",
+      "type": "ms.vss-work-web.work-item-form-control",
+      "description": "Custom work item form control",
+      "targets": ["ms.vss-work-web.work-item-form"],
+      "properties": {
+        "name": "Advanced Acceptance Criterias",
+        "uri": "wi-control.html"
+      }
     },
     {
       "id": "acceptance-criterias-enabled",

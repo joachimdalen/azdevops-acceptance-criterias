@@ -9,7 +9,7 @@ export interface CriteriaModalResult {
 }
 
 class CriteriaNavigationService {
-  private readonly CriteriaModalSuffix: string = '.acceptance-criterias-panel';
+  private readonly CriteriaModalSuffix: string = '.criteria-panel';
   private readonly HostPageLayoutServiceId: string = 'ms.vss-features.host-page-layout-service';
 
   private getFullId(suffix: string): string {
@@ -22,7 +22,7 @@ class CriteriaNavigationService {
   ): Promise<void> {
     DevOps.getService<IHostPageLayoutService>(this.HostPageLayoutServiceId).then(dialogService => {
       const id = this.getFullId(this.CriteriaModalSuffix);
-      dialogService.openCustomDialog(id, {
+      dialogService.openPanel(id, {
         title: 'Acceptance Criteria',
         configuration: {
           criteria,

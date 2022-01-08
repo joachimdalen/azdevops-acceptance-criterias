@@ -4,7 +4,6 @@ import {
   IWorkItemLoadedArgs,
   WorkItemTrackingServiceIds
 } from 'azure-devops-extension-api/WorkItemTracking';
-import WorkItemListener from '../observer/WorkItemListener';
 import { IExtensionContext } from 'azure-devops-extension-sdk';
 export const mockInit = jest.fn();
 export const mockRegister = jest.fn();
@@ -53,12 +52,16 @@ export let spyWorkItemCallBackAccessor: workItemCallBackType;
  * Mocked register returns empty data structure
  */
 export function register(instanceId: string, instance: any) {
-  if (typeof instance === typeof WorkItemListener) {
-    console.log('wuk');
-    spyWorkItemCallBackAccessor = instance;
-  }
+  spyWorkItemCallBackAccessor = instance;
 
-  mockRegister(instanceId, instance);
+  // TODO: Fix
+  
+  // if (typeof instance === typeof WorkItemListener) {
+  //   console.log('wuk');
+  //   spyWorkItemCallBackAccessor = instance;
+  // }
+
+  // mockRegister(instanceId, instance);
 }
 
 /**

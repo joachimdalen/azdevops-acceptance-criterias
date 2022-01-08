@@ -17,4 +17,4 @@ if (module.hot) {
 const App = () => {
   return <AcceptanceControl />;
 };
-showRootComponent(<App />, 'control-container');
+showRootComponent(<App />, 'wi-control-container');
