@@ -1,7 +1,10 @@
-import { IHostPageLayoutService, PanelSize } from 'azure-devops-extension-api';
-import * as DevOps from 'azure-devops-extension-sdk';
+import { DevOpsService, IDevOpsService } from '@joachimdalen/azdevops-ext-core';
 
 import { IAcceptanceCriteria } from '../common';
+
+export enum PanelIds {
+  CriteriaPanel = 'criteria-panel'
+}
 
 export interface CriteriaModalResult {
   result: 'CANCEL' | 'SAVE';
@@ -9,20 +12,19 @@ export interface CriteriaModalResult {
 }
 
 class CriteriaNavigationService {
-  private readonly CriteriaModalSuffix: string = '.criteria-panel';
-  private readonly HostPageLayoutServiceId: string = 'ms.vss-features.host-page-layout-service';
+  private _devOpsService: IDevOpsService;
 
-  private getFullId(suffix: string): string {
-    return DevOps.getExtensionContext().id + suffix;
+  constructor() {
+    this._devOpsService = new DevOpsService();
   }
 
   public async showCriteriaModal(
     onClose: (result: CriteriaModalResult) => void,
     criteria?: IAcceptanceCriteria
   ): Promise<void> {
-    DevOps.getService<IHostPageLayoutService>(this.HostPageLayoutServiceId).then(dialogService => {
-      const id = this.getFullId(this.CriteriaModalSuffix);
-      dialogService.openPanel(id, {
+    await this._devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
+      PanelIds.CriteriaPanel,
+      {
         title: 'Acceptance Criteria',
         size: 2,
         configuration: {
@@ -35,8 +37,8 @@ class CriteriaNavigationService {
             onClose(result);
           }
         }
-      });
-    });
+      }
+    );
   }
 }
 

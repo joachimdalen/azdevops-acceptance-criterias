@@ -28,7 +28,9 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     alias: {
-      'azure-devops-extension-sdk': path.resolve('node_modules/azure-devops-extension-sdk')
+      'azure-devops-extension-sdk': path.resolve('node_modules/azure-devops-extension-sdk'),
+      react: path.resolve('node_modules/react'),
+      'react-dom': path.resolve('node_modules/react-dom')
     }
   },
   // stats: 'errors-only',
