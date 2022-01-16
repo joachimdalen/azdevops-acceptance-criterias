@@ -16,7 +16,7 @@ import { CriteriaModalResult, PanelIds } from '../common/common';
 import { CriteriaDocument } from '../common/models/CriteriaDocument';
 import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/models/IAcceptanceCriteria';
 import CriteriaService from '../common/services/CriteriaService';
-import CriteriaList from './components/CriteriaList';
+import CriteriaList from '../common/components/CriteriaList';
 
 const AcceptanceControl = (): React.ReactElement => {
   const [devOpsService, criteriaService] = useMemo(

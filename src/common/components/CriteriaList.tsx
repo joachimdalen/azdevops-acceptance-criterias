@@ -13,10 +13,10 @@ import { IHostPageLayoutService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { useMemo } from 'react';
 
-import { PanelIds } from '../../common/common';
-import { IAcceptanceCriteria } from '../../common/models/IAcceptanceCriteria';
-import ActionMenu from './ActionMenu';
-import StatusTag from './StatusTag';
+import ActionMenu from '../../wi-control/components/ActionMenu';
+import StatusTag from '../../wi-control/components/StatusTag';
+import { PanelIds } from '../common';
+import { IAcceptanceCriteria } from '../models/IAcceptanceCriteria';
 interface CriteriaListProps {
   rows: IAcceptanceCriteria[];
 }
