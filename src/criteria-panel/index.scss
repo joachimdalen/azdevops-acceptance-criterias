@@ -1,2 +1,4 @@
-@import '../styles/mixins.scss';
+@import 'azure-devops-ui/Core/override.css';
+@import 'azure-devops-ui/Core/_platformCommon.scss';
+@import '@joachimdalen/azdevops-ext-core/dist/styles/mixins.scss';
 @include extension-container('criteria-panel-container');

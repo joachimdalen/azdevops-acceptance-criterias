@@ -5,7 +5,6 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { CriteriaDocument } from '../models/CriteriaDocument';
 import SettingDocument from '../models/SettingDocument';
 
-
 enum ScopeType {
   Default = 'Default',
   User = 'User'
@@ -17,10 +16,7 @@ enum CollectionNames {
 }
 
 export interface IStorageService {
-  getCriteriasForWorkItem(
-    workItemId: string,
-    projectId: string
-  ): Promise<CriteriaDocument | undefined>;
+  getCriteriasForWorkItem(workItemId: string): Promise<CriteriaDocument | undefined>;
   getAllCriterias(): Promise<CriteriaDocument[]>;
   setCriteriaDocument(data: CriteriaDocument): Promise<CriteriaDocument>;
 }

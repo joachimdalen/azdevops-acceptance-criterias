@@ -1,5 +1,4 @@
 import { getClient } from 'azure-devops-extension-api';
-import { IdentityServiceIds, IVssIdentityService } from 'azure-devops-extension-api/Identities';
 import {
   FieldType,
   FieldUsage,
@@ -8,8 +7,6 @@ import {
   WorkItemField,
   WorkItemTrackingRestClient
 } from 'azure-devops-extension-api/WorkItemTracking';
-import { IAcceptanceCriteria } from '../common';
-import { CriteriaDocument, FullCriteriaStatus } from '../models/CriteriaDocument';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { IIdentity } from 'azure-devops-ui/IdentityPicker';
 class WorkItemService {
@@ -52,19 +49,6 @@ class WorkItemService {
     // return identity;
     console.log(user);
     return undefined;
-  }
-
-  public async createNewDocument(workItemId: number, acceptanceCriterias: IAcceptanceCriteria[]) {
-    const creator = await this.getCurrentIdentity();
-    const document: CriteriaDocument = {
-      id: '',
-      workItemId: workItemId,
-      criterias: acceptanceCriterias,
-      created: new Date(),
-      state: FullCriteriaStatus.Partial,
-      lastUpdated: undefined
-    };
-    return document;
   }
 }
 export default WorkItemService;

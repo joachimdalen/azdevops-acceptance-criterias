@@ -1,4 +1,4 @@
-import { SurfaceContext, ISurfaceContext, SurfaceBackground } from 'azure-devops-ui/Surface';
+import { ISurfaceContext, SurfaceBackground,SurfaceContext } from 'azure-devops-ui/Surface';
 
 export interface PageWrapperProps {
   children: React.ReactElement | React.ReactElement[];

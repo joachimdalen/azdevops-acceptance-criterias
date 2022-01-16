@@ -1,11 +1,9 @@
 import './index.scss';
 
 import { createTheme, initializeIcons, loadTheme } from '@fluentui/react';
+import { appTheme, showRootComponent, webLogger } from '@joachimdalen/azdevops-ext-core';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { useEffect } from 'react';
-
-import { appTheme } from '../wi-control/azure-devops-theme';
-import { showRootComponent } from '../wi-control/common';
 
 initializeIcons();
 
@@ -13,7 +11,7 @@ const WorkHub = () => {
   useEffect(() => {
     loadTheme(createTheme(appTheme));
     DevOps.init().then(async () => {
-      console.log('Loaded work hub...');
+      webLogger.information('Loaded work hub...');
     });
   }, []);
 

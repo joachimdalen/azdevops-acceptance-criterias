@@ -8,24 +8,25 @@ import {
   Persona,
   PersonaSize
 } from '@fluentui/react';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core';
 import { IHostPageLayoutService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { useMemo } from 'react';
 
-import { IAcceptanceCriteria } from '../../common/common';
-import CriteriaNavigationService from '../../common/services/CriteriaNavigationService';
+import { PanelIds } from '../../common/common';
+import { IAcceptanceCriteria } from '../../common/models/IAcceptanceCriteria';
 import ActionMenu from './ActionMenu';
 import StatusTag from './StatusTag';
 interface CriteriaListProps {
   rows: IAcceptanceCriteria[];
 }
 const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
-  const criteriaService = useMemo(() => new CriteriaNavigationService(), []);
+  const devOpsService = useMemo(() => new DevOpsService(), []);
   const columns: IColumn[] = [
     {
-      key: 'id',
+      key: 'order',
       name: '#',
-      fieldName: 'id',
+      fieldName: 'order',
       minWidth: 20,
       maxWidth: 30
     },
@@ -44,7 +45,13 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
               className="title"
               styles={{ root: { color: 'rgba(var(--palette-neutral-100), 1)' } }}
               onClick={async () => {
-                await criteriaService.showCriteriaModal(res => console.log(res), item);
+                await devOpsService.showPanel(PanelIds.CriteriaPanel, {
+                  size: 2,
+                  configuration: {
+                    criteria: item,
+                    isReadOnly: true
+                  }
+                });
               }}
             >
               {item.title}

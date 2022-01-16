@@ -1,22 +1,17 @@
-import { CommonServiceIds, IHostNavigationService } from 'azure-devops-extension-api';
-import * as DevOps from 'azure-devops-extension-sdk';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { Page } from 'azure-devops-ui/Page';
-import {
-  ISurfaceContext,
-  Surface,
-  SurfaceBackground,
-  SurfaceContext
-} from 'azure-devops-ui/Surface';
+import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import AdminConfigurationTab from './tabs/AdminConfigurationTab';
 import AreaConfigurationTab from './tabs/AreaConfigurationTab';
 
 const AdminPage = (): React.ReactElement => {
+  const [devOpsService] = useMemo(() => [new DevOpsService()], []);
   const [selectedTab, setSelectedTab] = useState<string>('areas');
 
   const commandBarItems: IHeaderCommandBarItem[] = [
@@ -25,14 +20,7 @@ const AdminPage = (): React.ReactElement => {
       text: 'Open docs',
       iconProps: { iconName: 'Help' },
       onActivate: () => {
-        DevOps.getService<IHostNavigationService>('ms.vss-features.host-navigation-service').then(
-          value => {
-            value.openNewWindow(
-              'https://github.com/joachimdalen/azdevops-acceptance-criterias',
-              ''
-            );
-          }
-        );
+        devOpsService.openLink('https://github.com/joachimdalen/azdevops-acceptance-criterias');
       }
     }
   ];

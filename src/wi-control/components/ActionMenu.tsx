@@ -7,7 +7,7 @@ import {
   OverflowSet
 } from '@fluentui/react';
 
-const ActionMenu = () => {
+const ActionMenu = (): JSX.Element => {
   const noOp = () => undefined;
 
   const onRenderItem = (item: IOverflowSetItemProps): JSX.Element => {

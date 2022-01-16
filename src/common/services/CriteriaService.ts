@@ -1,5 +1,6 @@
 import { ActionResult } from '../models/ActionResult';
-import { CriteriaDocument } from '../models/CriteriaDocument';
+import { CriteriaDocument, FullCriteriaStatus } from '../models/CriteriaDocument';
+import { IAcceptanceCriteria } from '../models/IAcceptanceCriteria';
 import { IStorageService, StorageService } from './StorageService';
 
 class CriteriaService {
@@ -17,11 +18,22 @@ class CriteriaService {
     return this._isInitialized;
   }
 
-  public async load(force = false): Promise<ActionResult<CriteriaDocument[]>> {
+  public async load(
+    scopedId: string | undefined = undefined,
+    force = false
+  ): Promise<ActionResult<CriteriaDocument[]>> {
     if (this._isInitialized && !force) return { success: true, data: this._data };
     try {
-      const data = await this._dataStore.getAllCriterias();
-      this._data = data;
+      const data =
+        scopedId !== undefined
+          ? await this._dataStore.getCriteriasForWorkItem(scopedId)
+          : await this._dataStore.getAllCriterias();
+
+      if (data === undefined) {
+        this._data = [];
+      } else {
+        this._data = Array.isArray(data) ? data : [data];
+      }
     } catch (error: any) {
       if (error?.status !== 404) {
         throw new Error(error);
@@ -29,6 +41,26 @@ class CriteriaService {
     }
     this._isInitialized = true;
     return { success: true, data: this._data };
+  }
+
+  public async createOrUpdate(
+    workItemId: string,
+    criteria: IAcceptanceCriteria
+  ): Promise<CriteriaDocument | undefined> {
+    const existingDocument = this._data.find(x => x.id === workItemId);
+
+    if (existingDocument === undefined) {
+      const document: CriteriaDocument = {
+        id: workItemId,
+        created: new Date(),
+        state: FullCriteriaStatus.Partial,
+        criterias: [criteria]
+      };
+      const created = await this._dataStore.setCriteriaDocument(document);
+      this._data = [...this._data, created];
+      return created;
+    }
+    return undefined;
   }
 }
 

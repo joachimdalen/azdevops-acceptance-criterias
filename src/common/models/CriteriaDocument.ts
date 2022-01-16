@@ -8,7 +8,6 @@ export enum FullCriteriaStatus {
 
 export interface CriteriaDocument {
   id: string;
-  workItemId: number;
   criterias: IAcceptanceCriteria[];
   state: FullCriteriaStatus;
   lastUpdated?: Date;

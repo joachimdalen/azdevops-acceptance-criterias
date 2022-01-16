@@ -1,10 +1,9 @@
 import './index.scss';
 
 import { initializeIcons } from '@fluentui/react';
-import { useResizeTimeout } from '@joachimdalen/azdevops-ext-core';
+import { showRootComponent, useResizeTimeout } from '@joachimdalen/azdevops-ext-core';
 
 import AcceptanceControl from './AcceptanceControl';
-import { showRootComponent } from './common';
 initializeIcons();
 
 const App = () => {

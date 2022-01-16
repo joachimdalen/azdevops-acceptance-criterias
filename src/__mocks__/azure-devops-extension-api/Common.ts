@@ -1,5 +1,6 @@
-import { RestClientFactory, IVssRestClientOptions } from 'azure-devops-extension-api';
+import { IVssRestClientOptions,RestClientFactory } from 'azure-devops-extension-api';
 import { WorkItemTrackingRestClient } from 'azure-devops-extension-api/WorkItemTracking';
+
 import { WitRestClient } from './Wit';
 
 export const getClient = <T>(
