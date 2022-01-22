@@ -15,8 +15,8 @@ import { Filter } from 'azure-devops-ui/Utilities/Filter';
 import { useEffect, useMemo, useState } from 'react';
 
 import CriteriaList from '../common/components/CriteriaList';
-import { CriteriaDocument } from '../common/models/CriteriaDocument';
 import CriteriaService from '../common/services/CriteriaService';
+import { CriteriaDocument } from '../common/types';
 
 const WorkHub = (): JSX.Element => {
   const [criteriaService] = useMemo(() => [new CriteriaService()], []);

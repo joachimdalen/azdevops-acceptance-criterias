@@ -2,8 +2,8 @@ import { DevOpsService, IDevOpsService } from '@joachimdalen/azdevops-ext-core';
 import { IExtensionDataService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
 
-import { CriteriaDocument } from '../models/CriteriaDocument';
 import SettingDocument from '../models/SettingDocument';
+import { CriteriaDocument } from '../types';
 
 enum ScopeType {
   Default = 'Default',
@@ -85,6 +85,19 @@ class StorageService implements IStorageService {
       await DevOps.getAccessToken()
     );
     return dataManager.getDocuments(this._criteriaCollection, {
+      scopeType: this.scopeType
+    });
+  }
+  public async delete(id: string): Promise<void> {
+    const dataService = await this.getDataService();
+    if (this._criteriaCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    return dataManager.deleteDocument(this._criteriaCollection, id, {
       scopeType: this.scopeType
     });
   }

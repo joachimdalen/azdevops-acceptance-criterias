@@ -8,7 +8,7 @@ import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
 import React, { useMemo, useState } from 'react';
 
 import AdminConfigurationTab from './tabs/AdminConfigurationTab';
-import AreaConfigurationTab from './tabs/AreaConfigurationTab';
+import DocumentTab from './tabs/DocumentTab';
 
 const AdminPage = (): React.ReactElement => {
   const [devOpsService] = useMemo(() => [new DevOpsService()], []);
@@ -48,7 +48,7 @@ const AdminPage = (): React.ReactElement => {
             <AdminConfigurationTab />
           </ConditionalChildren>
           <ConditionalChildren renderChildren={selectedTab === 'areas'}>
-            <AreaConfigurationTab />
+            <DocumentTab />
           </ConditionalChildren>
         </Surface>
       </Page>

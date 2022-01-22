@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 
-import { AcceptanceCriteriaState } from '../../common/models/IAcceptanceCriteria';
+import { AcceptanceCriteriaState } from '../../common/types';
+
 export interface StatusTagProps {
   state: AcceptanceCriteriaState;
 }

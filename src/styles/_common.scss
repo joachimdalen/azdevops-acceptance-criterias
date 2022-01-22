@@ -1,0 +1,9 @@
+.bg-dark {
+  background-color: $backgroundColor;
+}
+.border-bottom-light {
+  border-bottom: 1px solid $neutral-alpha-30;
+}
+.color-error {
+  color: $status-error-text;
+}

@@ -13,10 +13,9 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { CriteriaModalResult, PanelIds } from '../common/common';
-import { CriteriaDocument } from '../common/models/CriteriaDocument';
-import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/models/IAcceptanceCriteria';
-import CriteriaService from '../common/services/CriteriaService';
 import CriteriaList from '../common/components/CriteriaList';
+import CriteriaService from '../common/services/CriteriaService';
+import { AcceptanceCriteriaState,CriteriaDocument, IAcceptanceCriteria } from '../common/types';
 import WorkItemListener from './WorkItemListener';
 
 const AcceptanceControl = (): React.ReactElement => {
@@ -26,32 +25,7 @@ const AcceptanceControl = (): React.ReactElement => {
   }, []);
   const [criteriaDocument, setCriteriaDocument] = useState<CriteriaDocument>();
   const [loading, setLoading] = useState(true);
-  const [rows, setRows] = useState<IAcceptanceCriteria[]>([
-    {
-      id: '1',
-      order: 1,
-      title: 'User must be able to accept terms - NEWd',
-      description: '',
-      area: 'Technical',
-      state: AcceptanceCriteriaState.Approved
-    },
-    {
-      id: '2',
-      order: 2,
-      title: 'User must be able to accept terms',
-      description: '',
-      area: 'Technical',
-      state: AcceptanceCriteriaState.Pending
-    },
-    {
-      id: '3',
-      order: 3,
-      title: 'User must be able to accept terms',
-      description: '',
-      area: 'Technical',
-      state: AcceptanceCriteriaState.Rejected
-    }
-  ]);
+  const [rows, setRows] = useState<IAcceptanceCriteria[]>();
 
   useEffect(() => {
     loadTheme(createTheme(appTheme));
@@ -64,17 +38,17 @@ const AcceptanceControl = (): React.ReactElement => {
         'ms.vss-work-web.work-item-form'
       );
 
-      const id = await formService.getId();
+      // const id = await formService.getId();
 
-      const result = await criteriaService.load(id.toString());
+      // const result = await criteriaService.load(id.toString());
 
-      console.log(result);
-      if (result.success && result.data) {
-        if (result.data.length > 0) {
-          console.log('setting', result.data[0]);
-          setCriteriaDocument(result.data[0]);
-        }
-      }
+      // console.log(result);
+      // if (result.success && result.data) {
+      //   if (result.data.length > 0) {
+      //     console.log('setting', result.data[0]);
+      //     setCriteriaDocument(result.data[0]);
+      //   }
+      // }
 
       setLoading(false);
     }

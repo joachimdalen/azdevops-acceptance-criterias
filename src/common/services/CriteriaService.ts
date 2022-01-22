@@ -1,6 +1,5 @@
 import { ActionResult } from '../models/ActionResult';
-import { CriteriaDocument, FullCriteriaStatus } from '../models/CriteriaDocument';
-import { IAcceptanceCriteria } from '../models/IAcceptanceCriteria';
+import { CriteriaDocument, FullCriteriaStatus, IAcceptanceCriteria } from '../types';
 import { IStorageService, StorageService } from './StorageService';
 
 class CriteriaService {
@@ -52,7 +51,6 @@ class CriteriaService {
     if (existingDocument === undefined) {
       const document: CriteriaDocument = {
         id: workItemId,
-        created: new Date(),
         state: FullCriteriaStatus.Partial,
         criterias: [criteria]
       };

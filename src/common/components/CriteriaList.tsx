@@ -11,13 +11,14 @@ import {
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core';
 import { IHostPageLayoutService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
-import { useMemo } from 'react';
 import { Icon } from 'azure-devops-ui/Icon';
+import { useMemo } from 'react';
 
 import ActionMenu from '../../wi-control/components/ActionMenu';
 import StatusTag from '../../wi-control/components/StatusTag';
 import { PanelIds } from '../common';
-import { IAcceptanceCriteria } from '../models/IAcceptanceCriteria';
+import { IAcceptanceCriteria } from '../types';
+
 interface CriteriaListProps {
   rows: IAcceptanceCriteria[];
 }
@@ -32,7 +33,7 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
       maxWidth: 30,
       onRender: (item: IAcceptanceCriteria, num, col) => {
         return (
-          <div className='flex-row flex-center'>
+          <div className="flex-row flex-center">
             <Icon iconName="More" />
             {item.order}
           </div>
@@ -62,7 +63,7 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
                 });
               }}
             >
-              {item.title}
+              {'hello'}
             </Link>
             <ActionMenu />
           </div>
