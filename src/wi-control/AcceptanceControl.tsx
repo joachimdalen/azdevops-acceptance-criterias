@@ -7,7 +7,12 @@ import {
   Spinner,
   SpinnerSize
 } from '@fluentui/react';
-import { appTheme, commandBarStyles, DevOpsService } from '@joachimdalen/azdevops-ext-core';
+import {
+  appTheme,
+  commandBarStyles,
+  DevOpsService,
+  webLogger
+} from '@joachimdalen/azdevops-ext-core';
 import { IWorkItemFormService } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -15,7 +20,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CriteriaModalResult, PanelIds } from '../common/common';
 import CriteriaList from '../common/components/CriteriaList';
 import CriteriaService from '../common/services/CriteriaService';
-import { AcceptanceCriteriaState,CriteriaDocument, IAcceptanceCriteria } from '../common/types';
+import { AcceptanceCriteriaState, CriteriaDocument, IAcceptanceCriteria } from '../common/types';
 import WorkItemListener from './WorkItemListener';
 
 const AcceptanceControl = (): React.ReactElement => {
@@ -28,29 +33,43 @@ const AcceptanceControl = (): React.ReactElement => {
   const [rows, setRows] = useState<IAcceptanceCriteria[]>();
 
   useEffect(() => {
-    loadTheme(createTheme(appTheme));
-
     async function initModule() {
-      await DevOps.init();
-      await DevOps.ready();
-      DevOps.register(DevOps.getContributionId(), new WorkItemListener());
-      const formService = await DevOps.getService<IWorkItemFormService>(
-        'ms.vss-work-web.work-item-form'
-      );
+      try {
+        await DevOps.init({
+          loaded: false,
+          applyTheme: true
+        });
+        webLogger.information('Loading rule presets panel...');
+        await DevOps.ready();
 
-      // const id = await formService.getId();
+        DevOps.register(DevOps.getContributionId(), new WorkItemListener());
 
-      // const result = await criteriaService.load(id.toString());
+        loadTheme(createTheme(appTheme));
 
-      // console.log(result);
-      // if (result.success && result.data) {
-      //   if (result.data.length > 0) {
-      //     console.log('setting', result.data[0]);
-      //     setCriteriaDocument(result.data[0]);
-      //   }
-      // }
+        const formService = await DevOps.getService<IWorkItemFormService>(
+          'ms.vss-work-web.work-item-form'
+        );
 
-      setLoading(false);
+        const id = await formService.getId();
+
+        const loadResult = await criteriaService.load(id.toString());
+
+        if (loadResult.success && loadResult.data) {
+          if (loadResult.data.length > 0) {
+            console.log('setting', loadResult.data[0]);
+            setCriteriaDocument(loadResult.data[0]);
+          }
+        }
+
+        setLoading(false);
+
+        await DevOps.notifyLoadSucceeded();
+        DevOps.resize();
+      } catch (error) {
+        webLogger.error('Failed to get project configuration', error);
+      } finally {
+        setLoading(false);
+      }
     }
 
     initModule();
@@ -69,11 +88,9 @@ const AcceptanceControl = (): React.ReactElement => {
           console.log('Close result', result);
           if (result?.result === 'SAVE' && result.criteria) {
             console.log(result.criteria);
-            const formService = await DevOps.getService<IWorkItemFormService>(
-              'ms.vss-work-web.work-item-form'
-            );
-            const id = await formService.getId();
-            await criteriaService.createOrUpdate(id.toString(), result.criteria);
+
+            const id = await devOpsService.getCurrentWorkItemId();
+            if (id) await criteriaService.createOrUpdate(id.toString(), result.criteria);
           }
         }
       }

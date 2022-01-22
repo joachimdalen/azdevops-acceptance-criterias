@@ -1,5 +1,3 @@
-import { IIdentity } from 'azure-devops-ui/IdentityPicker';
-
 export interface CriteriaDocument {
   // work item id
   id: string;
@@ -9,7 +7,7 @@ export interface CriteriaDocument {
 export interface IAcceptanceCriteria {
   id: string;
   order?: number;
-  requiredApprover?: IIdentity;
+  requiredApprover?: IInternalIdentity;
   state: AcceptanceCriteriaState;
   type: 'scenario' | 'rule' | 'custom';
   scenario?: IScenario;
@@ -53,4 +51,10 @@ export interface IScenarioCriteria {
   id: string;
   type: 'given' | 'and' | 'when' | 'then';
   text?: string;
+}
+
+export interface IInternalIdentity {
+  entityId: string;
+  image?: string;
+  displayName: string;
 }

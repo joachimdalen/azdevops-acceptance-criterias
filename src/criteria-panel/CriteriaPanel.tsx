@@ -14,11 +14,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { CriteriaModalResult } from '../common/common';
-import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/types';
+import { AcceptanceCriteriaState, IAcceptanceCriteria, IInternalIdentity } from '../common/types';
+import CustomCriteriaSection from './components/CustomCriteriaSection';
 import RuleCriteriaSection from './components/RuleCriteriaSection';
 import ScenarioCriteria from './components/ScenarioCriteria';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import CustomCriteriaSection from './components/CustomCriteriaSection';
 type NullableString = string | undefined;
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -66,7 +66,14 @@ const CriteriaPanel = (): React.ReactElement => {
           console.log('Setting criteria', criteria);
 
           setState(criteria.state);
-          setIdentity(criteria.requiredApprover);
+          (async () => {
+            if (criteria.requiredApprover) {
+              const identityResult = (await identityProvider.getEntityFromUniqueAttribute(
+                criteria.requiredApprover?.entityId
+              )) as IIdentity;
+              setIdentity(identityResult);
+            }
+          })();
         }
 
         DevOps.notifyLoadSucceeded().then(() => {
@@ -94,9 +101,17 @@ const CriteriaPanel = (): React.ReactElement => {
   const save = () => {
     const config = DevOps.getConfiguration();
     if (config.panel) {
+      const id: IInternalIdentity | undefined =
+        identity.value !== undefined
+          ? {
+              entityId: identity.value.entityId,
+              image: identity.value?.image,
+              displayName: identity.value.displayName || 'Unknwon User'
+            }
+          : undefined;
       const ac: IAcceptanceCriteria = {
         id: uuidV4(),
-        requiredApprover: identity?.value,
+        requiredApprover: id,
         state: state,
         type: panelState.type,
         custom: panelState.type === 'custom' ? panelState.custom : undefined,
@@ -108,8 +123,7 @@ const CriteriaPanel = (): React.ReactElement => {
         result: 'SAVE',
         criteria: ac
       };
-      console.log(res);
-      //   config.panel.close(res);
+      config.panel.close(res);
     }
   };
 
