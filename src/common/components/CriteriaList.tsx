@@ -12,6 +12,7 @@ import { DevOpsService } from '@joachimdalen/azdevops-ext-core';
 import { IHostPageLayoutService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { useMemo } from 'react';
+import { Icon } from 'azure-devops-ui/Icon';
 
 import ActionMenu from '../../wi-control/components/ActionMenu';
 import StatusTag from '../../wi-control/components/StatusTag';
@@ -28,7 +29,15 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
       name: '#',
       fieldName: 'order',
       minWidth: 20,
-      maxWidth: 30
+      maxWidth: 30,
+      onRender: (item: IAcceptanceCriteria, num, col) => {
+        return (
+          <div className='flex-row flex-center'>
+            <Icon iconName="More" />
+            {item.order}
+          </div>
+        );
+      }
     },
     {
       key: 'title',
@@ -37,7 +46,6 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
       className: 'flex-self-center',
       minWidth: 100,
       maxWidth: 300,
-      isResizable: true,
       onRender: (item: IAcceptanceCriteria, num, col) => {
         return (
           <div className="acceptance-critera-title-cell">
@@ -68,7 +76,6 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
       className: 'flex-self-center',
       minWidth: 100,
       maxWidth: 300,
-      isResizable: true,
       onRender: (item, num, col) => {
         return <StatusTag state={item.state} />;
       }
@@ -79,8 +86,7 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
       fieldName: 'area',
       className: 'flex-self-center',
       minWidth: 100,
-      maxWidth: 300,
-      isResizable: true
+      maxWidth: 300
     },
     {
       key: 'approver',
@@ -89,7 +95,6 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
       className: 'flex-self-center',
       minWidth: 100,
       maxWidth: 300,
-      isResizable: true,
       onRender: (item: IAcceptanceCriteria, num, col) => {
         if (!item.requiredApprover) return <span>Unassigned</span>;
         return (
@@ -135,6 +140,8 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
       }
     }
   ];
+
+  console.log('rendering');
 
   return (
     <DetailsList

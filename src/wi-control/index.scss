@@ -1,15 +1,8 @@
 @import 'azure-devops-ui/Core/override.css';
 @import 'azure-devops-ui/Core/_platformCommon.scss';
 @import '@joachimdalen/azdevops-ext-core/dist/styles/mixins.scss';
+@import '../styles/criteria-list';
 @include extension-container('wi-control-container');
-
-@mixin status-tag-variant($name, $color) {
-  &-#{$name} {
-    .status-tag-indicator {
-      background-color: $color;
-    }
-  }
-}
 
 .add-criteria-button {
   .ms-Icon {
@@ -17,32 +10,6 @@
   }
 }
 
-.status-tag {
-  display: flex;
-  align-items: center;
-  text-transform: uppercase;
-  &-indicator {
-    margin-right: 4px;
-    height: 8px;
-    width: 8px;
-    border-radius: 4px;
-  }
-  @include status-tag-variant('unset', #9b34eb);
-  @include status-tag-variant('pending', orange);
-  @include status-tag-variant('approved', green);
-  @include status-tag-variant('rejected', red);
-}
-.flex-self-center {
-  align-self: center;
-}
-
-.acceptance-critera-title-cell {
-  display: flex;
-  .title {
-    width: 100%;
-    align-self: center;
-  }
-}
 .acceptance-control-container {
   padding: 5px;
   display: flex;

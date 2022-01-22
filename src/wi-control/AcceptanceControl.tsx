@@ -17,12 +17,13 @@ import { CriteriaDocument } from '../common/models/CriteriaDocument';
 import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/models/IAcceptanceCriteria';
 import CriteriaService from '../common/services/CriteriaService';
 import CriteriaList from '../common/components/CriteriaList';
+import WorkItemListener from './WorkItemListener';
 
 const AcceptanceControl = (): React.ReactElement => {
-  const [devOpsService, criteriaService] = useMemo(
-    () => [new DevOpsService(), new CriteriaService()],
-    []
-  );
+  const [devOpsService, criteriaService] = useMemo(() => {
+    console.log(111);
+    return [new DevOpsService(), new CriteriaService()];
+  }, []);
   const [criteriaDocument, setCriteriaDocument] = useState<CriteriaDocument>();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<IAcceptanceCriteria[]>([
@@ -57,6 +58,8 @@ const AcceptanceControl = (): React.ReactElement => {
 
     async function initModule() {
       await DevOps.init();
+      await DevOps.ready();
+      DevOps.register(DevOps.getContributionId(), new WorkItemListener());
       const formService = await DevOps.getService<IWorkItemFormService>(
         'ms.vss-work-web.work-item-form'
       );
@@ -107,17 +110,19 @@ const AcceptanceControl = (): React.ReactElement => {
   //   DevOps.resize();
   // }, [ref, rows]);
 
-  const _items: ICommandBarItemProps[] = [
-    {
-      key: 'newItem',
-      text: 'New Acceptance Criteria',
-      cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
-      iconProps: { iconName: 'Add' },
-      onClick: () => {
-        showPanel();
+  const _items: ICommandBarItemProps[] = useMemo(() => {
+    return [
+      {
+        key: 'newItem',
+        text: 'New Acceptance Criteria',
+        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
+        iconProps: { iconName: 'Add' },
+        onClick: () => {
+          showPanel();
+        }
       }
-    }
-  ];
+    ];
+  }, []);
 
   if (loading) {
     return (
