@@ -9,7 +9,7 @@ import { capitalizeFirstLetter, move } from '../../common/common';
 import { IScenario, IScenarioCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
-const ScenarioCriteria = (): JSX.Element => {
+const ScenarioCriteriaSection = (): JSX.Element => {
   const { dispatch } = useCriteriaPanelContext();
   const [scenario, setScenario] = useState('');
   const [items, setItems] = useState<IScenarioCriteria[]>([]);
@@ -150,4 +150,4 @@ const ScenarioCriteria = (): JSX.Element => {
   );
 };
 
-export default ScenarioCriteria;
+export default ScenarioCriteriaSection;

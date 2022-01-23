@@ -2,36 +2,27 @@ import './index.scss';
 
 import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme, PanelWrapper, useDropdownSelection } from '@joachimdalen/azdevops-ext-core';
-import { PeoplePickerProvider } from 'azure-devops-extension-api/Identities';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { useObservable } from 'azure-devops-ui/Core/Observable';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
-import { IdentityPickerDropdown, IIdentity } from 'azure-devops-ui/IdentityPicker';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
-import { CriteriaModalResult } from '../common/common';
+import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
+import IdentityPicker from '../common/components/IdentityPicker';
 import { AcceptanceCriteriaState, IAcceptanceCriteria, IInternalIdentity } from '../common/types';
 import CustomCriteriaSection from './components/CustomCriteriaSection';
 import RuleCriteriaSection from './components/RuleCriteriaSection';
-import ScenarioCriteria from './components/ScenarioCriteria';
+import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-type NullableString = string | undefined;
+
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
-  const identityProvider = useMemo(() => {
-    return new PeoplePickerProvider();
-  }, []);
-
   const [isReadOnly, setIsReadOnly] = useState(false);
-
-  const [identity, setIdentity] = useObservable<IIdentity | undefined>(undefined);
-
+  const [identity, setIdentity] = useState<IInternalIdentity | undefined>(undefined);
   const [state, setState] = useState<AcceptanceCriteriaState>(AcceptanceCriteriaState.Unset);
-
   const [loading, setLoading] = useState(true);
   const dropdownItems: IListBoxItem<any>[] = [
     { id: AcceptanceCriteriaState.Unset, text: 'Unset' },
@@ -40,11 +31,6 @@ const CriteriaPanel = (): React.ReactElement => {
     { id: AcceptanceCriteriaState.Rejected, text: 'Rejected' }
   ];
 
-  const typeItems: IListBoxItem<any>[] = [
-    { id: 'scenario', text: 'Scenario Based' },
-    { id: 'rule', text: 'Rule Based' },
-    { id: 'custom', text: 'Simple' }
-  ];
   useEffect(() => {
     loadTheme(createTheme(appTheme));
     DevOps.init({
@@ -64,16 +50,8 @@ const CriteriaPanel = (): React.ReactElement => {
         if (config.criteria) {
           const criteria = config.criteria as IAcceptanceCriteria;
           console.log('Setting criteria', criteria);
-
           setState(criteria.state);
-          (async () => {
-            if (criteria.requiredApprover) {
-              const identityResult = (await identityProvider.getEntityFromUniqueAttribute(
-                criteria.requiredApprover?.entityId
-              )) as IIdentity;
-              setIdentity(identityResult);
-            }
-          })();
+          setIdentity(criteria.requiredApprover);
         }
 
         DevOps.notifyLoadSucceeded().then(() => {
@@ -87,7 +65,7 @@ const CriteriaPanel = (): React.ReactElement => {
 
   const stateSelection = useDropdownSelection(dropdownItems, state);
 
-  const typeSelection = useDropdownSelection(typeItems, panelState.type);
+  const typeSelection = useDropdownSelection(criteriaTypeItems, panelState.type);
 
   const dismiss = () => {
     const config = DevOps.getConfiguration();
@@ -101,17 +79,9 @@ const CriteriaPanel = (): React.ReactElement => {
   const save = () => {
     const config = DevOps.getConfiguration();
     if (config.panel) {
-      const id: IInternalIdentity | undefined =
-        identity.value !== undefined
-          ? {
-              entityId: identity.value.entityId,
-              image: identity.value?.image,
-              displayName: identity.value.displayName || 'Unknwon User'
-            }
-          : undefined;
       const ac: IAcceptanceCriteria = {
         id: uuidV4(),
-        requiredApprover: id,
+        requiredApprover: identity,
         state: state,
         type: panelState.type,
         custom: panelState.type === 'custom' ? panelState.custom : undefined,
@@ -145,7 +115,7 @@ const CriteriaPanel = (): React.ReactElement => {
             <Dropdown
               disabled={isReadOnly}
               placeholder="Select an Option"
-              items={typeItems}
+              items={criteriaTypeItems}
               selection={typeSelection}
               onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
             />
@@ -162,12 +132,7 @@ const CriteriaPanel = (): React.ReactElement => {
         </div>
 
         <FormItem label="Required Approver">
-          <IdentityPickerDropdown
-            disabled={isReadOnly}
-            pickerProvider={identityProvider}
-            value={identity}
-            onChange={identity => setIdentity(identity)}
-          />
+          <IdentityPicker identity={identity} onChange={i => console.log(i)} />
         </FormItem>
       </div>
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
@@ -181,60 +146,6 @@ const CriteriaPanel = (): React.ReactElement => {
       </ConditionalChildren>
     </PanelWrapper>
   );
-
-  // return (
-  //   <div className="flex-column flex-grow">
-  //     <div className="flex-grow">
-  //       <div className="rhythm-vertical-16 flex-grow">
-  //         <FormItem label="Required Approver">
-  //           <IdentityPickerDropdown
-  //             pickerProvider={identityProvider}
-  //             value={identity}
-  //             onChange={identity => setIdentity(identity)}
-  //           />
-  //         </FormItem>
-  //         <FormItem label="Title">
-  //           <TextField
-  //             width={TextFieldWidth.auto}
-  //             placeholder="Acceptance title.."
-  //             value={title}
-  //             onChange={(_, val) => setTitle(val)}
-  //           />
-  //         </FormItem>
-  //         <FormItem label="Status">
-  //           <Dropdown
-  //             placeholder="Select an Option"
-  //             items={dropdownItems}
-  //             selection={stateSelection}
-  //             onSelect={(_, i) => setState(i.id as AcceptanceCriteriaState)}
-  //           />
-  //         </FormItem>
-  //         <FormItem label="Business Area">
-  //           <Dropdown
-  //             placeholder="Select an Option"
-  //             items={areaItems}
-  //             selection={areaSelection}
-  //             onSelect={(_, i) => setBusinessArea(i.id)}
-  //           />
-  //         </FormItem>
-  //         <FormItem label="Description">
-  //           <TextField
-  //             width={TextFieldWidth.auto}
-  //             placeholder="Short description.."
-  //             multiline
-  //             value={description}
-  //             rows={5}
-  //             onChange={(_, val) => setDescription(val)}
-  //           />
-  //         </FormItem>
-  //       </div>
-  //     </div>
-  //     <ButtonGroup className="justify-space-between flex-center margin-bottom-16">
-  //       <Button text="Close" onClick={() => dismiss()} />
-  //       <Button text="Save" primary iconProps={{ iconName: 'Save' }} onClick={() => save()} />
-  //     </ButtonGroup>
-  //   </div>
-  // );
 };
 
 export default CriteriaPanel;

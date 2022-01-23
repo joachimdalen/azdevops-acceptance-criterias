@@ -46,9 +46,9 @@ class CriteriaService {
     workItemId: string,
     criteria: IAcceptanceCriteria
   ): Promise<CriteriaDocument | undefined> {
-    const existingDocument = this._data.find(x => x.id === workItemId);
+    const existingDocumentIndex = this._data.findIndex(x => x.id === workItemId);
 
-    if (existingDocument === undefined) {
+    if (existingDocumentIndex === -1) {
       const document: CriteriaDocument = {
         id: workItemId,
         state: FullCriteriaStatus.Partial,
@@ -57,6 +57,13 @@ class CriteriaService {
       const created = await this._dataStore.setCriteriaDocument(document);
       this._data = [...this._data, created];
       return created;
+    } else {
+      const document = this._data[existingDocumentIndex];
+      const newDocument = { ...document };
+      newDocument.criterias = [...newDocument.criterias, criteria];
+      const updated = await this._dataStore.setCriteriaDocument(newDocument);
+      this._data[existingDocumentIndex] = newDocument;
+      return updated;
     }
     return undefined;
   }

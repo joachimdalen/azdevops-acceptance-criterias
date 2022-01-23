@@ -36,11 +36,11 @@ export interface ICriteria {
 }
 export interface ICustomCriteria {
   id: string;
+  text: string;
 }
 export interface IRuleCriteria {
   id: string;
-  title: string;
-  checked: boolean;
+  text: string;
 }
 
 export interface IScenario {
@@ -57,4 +57,11 @@ export interface IInternalIdentity {
   entityId: string;
   image?: string;
   displayName: string;
+}
+
+export interface WorkItemTypeTagProps {
+  iconUrl?: string;
+  iconSize?: number;
+  text?: string;
+  classNames?: string;
 }

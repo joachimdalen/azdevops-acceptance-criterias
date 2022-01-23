@@ -16,7 +16,7 @@ import { useMemo } from 'react';
 
 import ActionMenu from '../../wi-control/components/ActionMenu';
 import StatusTag from '../../wi-control/components/StatusTag';
-import { PanelIds } from '../common';
+import { capitalizeFirstLetter, getCriteriaTitle, PanelIds } from '../common';
 import { IAcceptanceCriteria } from '../types';
 
 interface CriteriaListProps {
@@ -63,11 +63,22 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
                 });
               }}
             >
-              {'hello'}
+              {getCriteriaTitle(item)}
             </Link>
             <ActionMenu />
           </div>
         );
+      }
+    },
+    {
+      key: 'type',
+      name: 'Type',
+      fieldName: 'type',
+      className: 'flex-self-center',
+      minWidth: 100,
+      maxWidth: 300,
+      onRender: (item: IAcceptanceCriteria, num, col) => {
+        return capitalizeFirstLetter(item.type);
       }
     },
     {
@@ -80,14 +91,6 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
       onRender: (item, num, col) => {
         return <StatusTag state={item.state} />;
       }
-    },
-    {
-      key: 'area',
-      name: 'Area',
-      fieldName: 'area',
-      className: 'flex-self-center',
-      minWidth: 100,
-      maxWidth: 300
     },
     {
       key: 'approver',

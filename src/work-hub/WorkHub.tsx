@@ -1,30 +1,41 @@
 import { createTheme, loadTheme } from '@fluentui/react';
 import {
   appTheme,
-  useDropdownSelection,
+  getWorkItemReferenceName,
+  getWorkItemTypeDisplayName,
+  getWorkTypeFromReferenceName,
+  isDefined,
   VersionDisplay,
-  webLogger
+  webLogger,
+  WorkItemService
 } from '@joachimdalen/azdevops-ext-core';
+import { WorkItem, WorkItemType } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
-import { DropdownFilterBarItem } from 'azure-devops-ui/Dropdown';
-import { FilterBar } from 'azure-devops-ui/FilterBar';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import { Page } from 'azure-devops-ui/Page';
-import { KeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
-import { Filter } from 'azure-devops-ui/Utilities/Filter';
 import { useEffect, useMemo, useState } from 'react';
 
 import CriteriaList from '../common/components/CriteriaList';
 import CriteriaService from '../common/services/CriteriaService';
-import { CriteriaDocument } from '../common/types';
+import { CriteriaDocument, WorkItemTypeTagProps } from '../common/types';
+import CriteriaTree from './components/CriteriaTree';
+import HubFilterBar from './components/HubFilterBar';
 
 const WorkHub = (): JSX.Element => {
-  const [criteriaService] = useMemo(() => [new CriteriaService()], []);
+  const [criteriaService, workItemService] = useMemo(
+    () => [new CriteriaService(), new WorkItemService()],
+    []
+  );
+  const [types, setTypes] = useState<WorkItemType[]>([]);
   const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
+  const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   useEffect(() => {
     async function initModule() {
       loadTheme(createTheme(appTheme));
       await DevOps.init();
+      const loadedTypes = await workItemService.getWorkItemTypes();
+
+      setTypes(loadedTypes);
       webLogger.information('Loaded work hub...');
       const result = await criteriaService.load();
 
@@ -39,9 +50,39 @@ const WorkHub = (): JSX.Element => {
     initModule();
   }, []);
 
-  const filter = useMemo(() => new Filter(), []);
-  const stateSelection = useDropdownSelection([]);
   const criterias = useMemo(() => documents.flatMap(x => x.criterias), [documents]);
+  const workItemIds = useMemo(() => documents.map(x => parseInt(x.id)), [documents]);
+
+  const wiMap: Map<string, WorkItemTypeTagProps> = useMemo(() => {
+    const mp = new Map<string, WorkItemTypeTagProps>();
+    console.log(workItems);
+    workItems.map(wi => {
+      const refName = getWorkItemReferenceName(wi, types);
+      console.log(refName);
+      if (!refName) return;
+      const t = getWorkTypeFromReferenceName(refName, types);
+      const pro: WorkItemTypeTagProps = {
+        iconSize: 16,
+        iconUrl: t?.icon.url,
+        text: t?.name
+      };
+      mp.set(wi.id.toString(), pro);
+    });
+
+    console.log(mp);
+    return mp;
+  }, [workItems]);
+
+  useEffect(() => {
+    async function load() {
+      if (workItemIds.length > 0) {
+        const wi = await workItemService.getWorkItems(workItemIds);
+        setWorkItems(wi);
+      }
+    }
+    load();
+  }, [workItemIds]);
+
   return (
     <Page className="flex-grow">
       <Header
@@ -50,27 +91,12 @@ const WorkHub = (): JSX.Element => {
         description={<VersionDisplay moduleVersion={process.env.WORK_HUB_VERSION} />}
       />
 
-      <div className="page-content padding-16 flex-grow">
-        <FilterBar filter={filter}>
-          <KeywordFilterBarItem filterItemKey="Placeholder" />
-          <DropdownFilterBarItem
-            filterItemKey="listMulti"
-            filter={filter}
-            items={[]}
-            selection={stateSelection}
-            placeholder="State"
-          />
-          <DropdownFilterBarItem
-            filterItemKey="listMulti"
-            filter={filter}
-            items={[]}
-            selection={stateSelection}
-            placeholder="Required Approver"
-          />
-        </FilterBar>
+      <div className="padding-8 flex-grow">
+        <HubFilterBar criterias={criterias} />
 
         <div className="padding-8">
-          <CriteriaList rows={criterias} />
+          {/* <CriteriaList rows={criterias} /> */}
+          <CriteriaTree criterias={documents} types={types} workItems={wiMap} />
         </div>
       </div>
     </Page>

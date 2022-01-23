@@ -1,3 +1,4 @@
+import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { IAcceptanceCriteria } from './types';
 
 export enum PanelIds {
@@ -20,3 +21,15 @@ export const move = <T>(array: T[], index: number, delta: number): void => {
   const indexes = [index, newIndex].sort((a, b) => a - b);
   array.splice(indexes[0], 2, array[indexes[1]], array[indexes[0]]);
 };
+
+export const getCriteriaTitle = (criteria: IAcceptanceCriteria): string | undefined => {
+  if (criteria.type === 'custom') return criteria.custom?.text;
+  if (criteria.type === 'rule') return criteria.rule?.text;
+  return criteria.scenario?.scenario;
+};
+
+export const criteriaTypeItems: IListBoxItem<any>[] = [
+  { id: 'scenario', text: 'Scenario Based' },
+  { id: 'rule', text: 'Rule Based' },
+  { id: 'custom', text: 'Simple' }
+];
