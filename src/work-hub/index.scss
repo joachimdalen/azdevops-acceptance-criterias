@@ -2,4 +2,5 @@
 @import 'azure-devops-ui/Core/_platformCommon.scss';
 @import '@joachimdalen/azdevops-ext-core/dist/styles/mixins.scss';
 @import '../styles/criteria-list';
+@import '../styles/common';
 @include extension-container('work-hub-container');

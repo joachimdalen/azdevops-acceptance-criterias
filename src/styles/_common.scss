@@ -7,3 +7,33 @@
 .color-error {
   color: $status-error-text;
 }
+
+.progress-bar {
+  width: 100%;
+  &-container {
+    background: rgba(var(--palette-neutral-10, 218, 218, 218), 1);
+    position: relative;
+    height: 8px;
+  }
+  &-bar {
+    background-color: var(--communication-background, rgba(0, 120, 212, 1));
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform-origin: left;
+    transform: scaleX(0);
+    width: 100%;
+  }
+  &-status-completed {
+    background-color: var(--status-success-text, rgba(127, 184, 0, 1));
+  }
+  &-status-close {
+    background-color: var(--status-warning-text, rgba(184, 94, 6, 1));
+  }
+  &-container {
+    background: rgba(var(--palette-neutral-10, 218, 218, 218), 1);
+    position: relative;
+    height: 8px;
+  }
+}

@@ -1,5 +1,10 @@
 import { ActionResult } from '../models/ActionResult';
-import { CriteriaDocument, FullCriteriaStatus, IAcceptanceCriteria } from '../types';
+import {
+  AcceptanceCriteriaState,
+  CriteriaDocument,
+  FullCriteriaStatus,
+  IAcceptanceCriteria
+} from '../types';
 import { IStorageService, StorageService } from './StorageService';
 
 class CriteriaService {
@@ -42,6 +47,38 @@ class CriteriaService {
     return { success: true, data: this._data };
   }
 
+  public async toggleCompletion(
+    id: string,
+    complete: boolean
+  ): Promise<CriteriaDocument | undefined> {
+    const doc = this._data.find(x => x.criterias.some(y => y.id === id));
+
+    if (doc) {
+      const criteria = doc.criterias.find(x => x.id === id);
+      if (criteria) {
+        if (
+          criteria.state === AcceptanceCriteriaState.AwaitingApproval ||
+          criteria.state === AcceptanceCriteriaState.Completed
+        ) {
+          criteria.state = AcceptanceCriteriaState.New;
+          criteria.approval = undefined;
+        } else {
+          if (criteria.requiredApprover) {
+            criteria.state = AcceptanceCriteriaState.AwaitingApproval;
+          } else {
+            criteria.state = AcceptanceCriteriaState.Completed;
+          }
+
+          criteria.approval = {
+            completedAt: new Date()
+          };
+        }
+        console.log(criteria);
+        return this.createOrUpdate(doc.id, criteria);
+      }
+    }
+  }
+
   public async createOrUpdate(
     workItemId: string,
     criteria: IAcceptanceCriteria
@@ -60,12 +97,17 @@ class CriteriaService {
     } else {
       const document = this._data[existingDocumentIndex];
       const newDocument = { ...document };
-      newDocument.criterias = [...newDocument.criterias, criteria];
+      const index = document.criterias.findIndex(x => x.id === criteria.id);
+      if (index > -1) {
+        newDocument.criterias[index] = criteria;
+      } else {
+        newDocument.criterias = [...newDocument.criterias, criteria];
+      }
+
       const updated = await this._dataStore.setCriteriaDocument(newDocument);
-      this._data[existingDocumentIndex] = newDocument;
+      this._data[existingDocumentIndex] = updated;
       return updated;
     }
-    return undefined;
   }
 }
 

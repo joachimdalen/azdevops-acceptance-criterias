@@ -18,15 +18,16 @@
 .status-tag {
   display: flex;
   align-items: center;
-  text-transform: uppercase;
+  text-transform: capitalize;
   &-indicator {
     margin-right: 4px;
     height: 8px;
     width: 8px;
     border-radius: 4px;
   }
-  @include status-tag-variant('unset', #9b34eb);
-  @include status-tag-variant('pending', orange);
+  @include status-tag-variant('new', #7e7e7e);
+  @include status-tag-variant('completed', blue);
+  @include status-tag-variant('awaitingapproval', teal);
   @include status-tag-variant('approved', green);
   @include status-tag-variant('rejected', red);
 }

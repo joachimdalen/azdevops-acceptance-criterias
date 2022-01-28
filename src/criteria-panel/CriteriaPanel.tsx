@@ -22,11 +22,11 @@ const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [identity, setIdentity] = useState<IInternalIdentity | undefined>(undefined);
-  const [state, setState] = useState<AcceptanceCriteriaState>(AcceptanceCriteriaState.Unset);
+  const [state, setState] = useState<AcceptanceCriteriaState>(AcceptanceCriteriaState.New);
   const [loading, setLoading] = useState(true);
   const dropdownItems: IListBoxItem<any>[] = [
-    { id: AcceptanceCriteriaState.Unset, text: 'Unset' },
-    { id: AcceptanceCriteriaState.Pending, text: 'Pending' },
+    { id: AcceptanceCriteriaState.New, text: 'New' },
+    { id: AcceptanceCriteriaState.Completed, text: 'Completed' },
     { id: AcceptanceCriteriaState.Approved, text: 'Approved' },
     { id: AcceptanceCriteriaState.Rejected, text: 'Rejected' }
   ];
@@ -132,7 +132,7 @@ const CriteriaPanel = (): React.ReactElement => {
         </div>
 
         <FormItem label="Required Approver">
-          <IdentityPicker identity={identity} onChange={i => console.log(i)} />
+          <IdentityPicker identity={identity} onChange={i => setIdentity(i)} />
         </FormItem>
       </div>
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>

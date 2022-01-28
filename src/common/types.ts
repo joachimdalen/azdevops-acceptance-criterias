@@ -13,17 +13,27 @@ export interface IAcceptanceCriteria {
   scenario?: IScenario;
   rule?: IRuleCriteria;
   custom?: ICustomCriteria;
+  approval?: IAcceptanceCriteriaApproval;
 }
+
+export interface IAcceptanceCriteriaApproval {
+  approvedBy?: IInternalIdentity;
+  approvedAt?: Date;
+  completedAt?: Date;
+}
+
 export enum FullCriteriaStatus {
   Partial = 'partial',
+  Completed = 'completed',
   Approved = 'approved',
   Rejected = 'rejected'
 }
 
 export enum AcceptanceCriteriaState {
-  Unset = 'unset',
+  New = 'new',
+  Completed = 'completed',
+  AwaitingApproval = 'awaitingapproval',
   Approved = 'approved',
-  Pending = 'pending',
   Rejected = 'rejected'
 }
 
@@ -62,6 +72,6 @@ export interface IInternalIdentity {
 export interface WorkItemTypeTagProps {
   iconUrl?: string;
   iconSize?: number;
-  text?: string;
+  type?: string;
   classNames?: string;
 }

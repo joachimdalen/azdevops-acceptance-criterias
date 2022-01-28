@@ -1,38 +1,62 @@
 import { getInitials, Persona, PersonaSize } from '@fluentui/react';
-import { distrinctBy, isDefined } from '@joachimdalen/azdevops-ext-core';
+import { distrinct, distrinctBy, isDefined } from '@joachimdalen/azdevops-ext-core';
 import { DropdownFilterBarItem } from 'azure-devops-ui/Dropdown';
 import { FilterBar } from 'azure-devops-ui/FilterBar';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
+import { SimpleTableCell } from 'azure-devops-ui/Table';
 import { KeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import {
   DropdownMultiSelection,
   DropdownSelection
 } from 'azure-devops-ui/Utilities/DropdownSelection';
-import { Filter, FILTER_CHANGE_EVENT, FilterOperatorType } from 'azure-devops-ui/Utilities/Filter';
-import { useMemo } from 'react';
+import {
+  Filter,
+  FILTER_CHANGE_EVENT,
+  FilterOperatorType,
+  IFilterState
+} from 'azure-devops-ui/Utilities/Filter';
+import { useEffect, useMemo } from 'react';
 
-import { criteriaTypeItems } from '../../common/common';
+import { capitalizeFirstLetter, criteriaTypeItems } from '../../common/common';
 import { IAcceptanceCriteria } from '../../common/types';
+import StatusTag from '../../wi-control/components/StatusTag';
 
 interface HubFilterBarProps {
   criterias: IAcceptanceCriteria[];
+  showFilter: boolean;
+  onFilterChanged: (filter: IFilterState) => void;
 }
 
-const HubFilterBar = ({ criterias }: HubFilterBarProps): JSX.Element => {
+const HubFilterBar = ({
+  criterias,
+  showFilter,
+  onFilterChanged
+}: HubFilterBarProps): JSX.Element | null => {
   const filter = useMemo(() => {
+    console.log('creating filter');
     const f = new Filter();
     f.setFilterItemState('approvers', {
       value: [],
       operator: FilterOperatorType.and
     });
-    f.subscribe(() => {
-      console.log(JSON.stringify(f.getState(), null, 4));
-    }, FILTER_CHANGE_EVENT);
 
     return f;
   }, []);
+
+  useEffect(() => {
+    filter.subscribe(() => {
+      console.log(JSON.stringify(filter.getState(), null, 4));
+      onFilterChanged(filter.getState());
+    }, FILTER_CHANGE_EVENT);
+
+    return filter.unsubscribe(() => {
+      console.log(JSON.stringify(filter.getState(), null, 4));
+      onFilterChanged(filter.getState());
+    }, FILTER_CHANGE_EVENT);
+  }, [filter, onFilterChanged]);
   const approversSelection = useMemo(() => new DropdownMultiSelection(), []);
   const typeSelection = useMemo(() => new DropdownSelection(), []);
+  const stateSelection = useMemo(() => new DropdownSelection(), []);
   const approvers = useMemo(() => {
     const approvers = criterias.map(x => x.requiredApprover).filter(isDefined);
     const distApprovers = distrinctBy(approvers, 'entityId');
@@ -61,6 +85,26 @@ const HubFilterBar = ({ criterias }: HubFilterBarProps): JSX.Element => {
     });
   }, [approvers]);
 
+  const stateItems: IListBoxItem[] = useMemo(() => {
+    return criterias
+      .map(x => x.state)
+      .filter(distrinct)
+      .map(c => {
+        const item: IListBoxItem = {
+          id: c,
+          text: capitalizeFirstLetter(c),
+          render: (ri, ci, tc, ti) => (
+            <SimpleTableCell columnIndex={ci} tableColumn={tc}>
+              <StatusTag state={c} />
+            </SimpleTableCell>
+          )
+        };
+        return item;
+      });
+  }, [criterias]);
+
+  if (!showFilter) return null;
+
   return (
     <FilterBar filter={filter}>
       <KeywordFilterBarItem filterItemKey="title" />
@@ -77,6 +121,13 @@ const HubFilterBar = ({ criterias }: HubFilterBarProps): JSX.Element => {
         items={approverItems}
         selection={approversSelection}
         placeholder="Required Approver"
+      />
+      <DropdownFilterBarItem
+        filterItemKey="state"
+        filter={filter}
+        items={stateItems}
+        selection={stateSelection}
+        placeholder="States"
       />
     </FilterBar>
   );

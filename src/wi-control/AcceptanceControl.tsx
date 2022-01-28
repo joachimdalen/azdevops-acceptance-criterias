@@ -15,12 +15,14 @@ import {
 } from '@joachimdalen/azdevops-ext-core';
 import { IWorkItemFormService } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { CriteriaModalResult, PanelIds } from '../common/common';
 import CriteriaList from '../common/components/CriteriaList';
 import CriteriaService from '../common/services/CriteriaService';
 import { AcceptanceCriteriaState, CriteriaDocument, IAcceptanceCriteria } from '../common/types';
+import CriteriaView from './components/CriteriaView';
 import WorkItemListener from './WorkItemListener';
 
 const AcceptanceControl = (): React.ReactElement => {
@@ -115,6 +117,34 @@ const AcceptanceControl = (): React.ReactElement => {
     ];
   }, []);
 
+  const [viewMode, setViewMode] = useState<'table' | 'list'>('list');
+
+  const _farItems: ICommandBarItemProps[] = useMemo(() => {
+    const items: ICommandBarItemProps[] = [
+      {
+        key: 'newItem',
+        text: 'Show Edit',
+        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
+        iconProps: { iconName: 'Table' },
+        checked: viewMode === 'table',
+        onClick: () => {
+          setViewMode('table');
+        }
+      },
+      {
+        key: 'newItem',
+        text: 'Show Process View',
+        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
+        iconProps: { iconName: 'List' },
+        checked: viewMode === 'list',
+        onClick: () => {
+          setViewMode('list');
+        }
+      }
+    ];
+    return items;
+  }, [viewMode]);
+
   if (loading) {
     return (
       <div className="acceptance-control-loader">
@@ -123,39 +153,25 @@ const AcceptanceControl = (): React.ReactElement => {
     );
   }
 
-  // if (!loading && criteriaDocument === undefined) {
-  //   return (
-  //     <div className="flex-grow">
-  //       <ZeroData
-  //         className="flex-self-center"
-  //         imageAltText=""
-  //         secondaryText="No acceptance criterias have been added"
-  //         iconProps={{ iconName: 'Add' }}
-  //         actionText="Add acceptance criteria"
-  //         actionType={ZeroDataActionType.ctaButton}
-  //         onActionClick={() => {
-  //           criteriaService.showCriteriaModal(res => {
-  //             if (res.result === 'SAVE') {
-  //               if (res.criteria) {
-  //                 const items = [...rows, res.criteria];
-  //                 setRows(items);
-  //               }
-  //             }
-  //             console.log(res);
-  //           });
-  //         }}
-  //       />
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="acceptance-control-container">
       <div>
-        <CommandBar styles={commandBarStyles} items={_items} />
+        <CommandBar styles={commandBarStyles} items={_items} farItems={_farItems} />
         <Separator />
       </div>
-      <CriteriaList rows={criteriaDocument?.criterias || []} />
+      <ConditionalChildren renderChildren={viewMode === 'table'}>
+        <CriteriaList rows={criteriaDocument?.criterias || []} />
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={viewMode === 'list'}>
+        <CriteriaView
+          criteria={criteriaDocument}
+          onApprove={async (id: string, complete: boolean) => {
+            console.log(id, complete);
+            const ll = await criteriaService.toggleCompletion(id, complete);
+            console.log(ll);
+          }}
+        />
+      </ConditionalChildren>
     </div>
   );
 };
