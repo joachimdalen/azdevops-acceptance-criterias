@@ -7,10 +7,18 @@ export interface StatusTagProps {
 }
 
 const StatusTag = ({ state }: StatusTagProps): React.ReactElement => {
+  const getDisplayName = (state: AcceptanceCriteriaState) => {
+    switch (state) {
+      case AcceptanceCriteriaState.AwaitingApproval:
+        return 'Awaiting Approval';
+      default:
+        return state;
+    }
+  };
   return (
     <span className={classNames('status-tag', [`status-tag-${state}`])}>
       <div className="status-tag-indicator"></div>
-      {state}
+      {getDisplayName(state)}
     </span>
   );
 };

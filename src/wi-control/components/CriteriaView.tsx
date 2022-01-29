@@ -1,32 +1,35 @@
 import { getInitials, Persona, PersonaSize } from '@fluentui/react';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
+import { Checkbox } from 'azure-devops-ui/Checkbox';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { Icon } from 'azure-devops-ui/Icon';
-import { ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
-import { ExpandableTreeCell, ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
+import { IMenuItem, MenuItemType } from 'azure-devops-ui/Menu';
+import {
+  ColumnFill,
+  ColumnMore,
+  ColumnSorting,
+  ISimpleTableCell,
+  SimpleTableCell
+} from 'azure-devops-ui/Table';
+import { ExpandableTreeCell, ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
   ITreeItemEx,
   ITreeItemProvider,
   TreeItemProvider
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import React, { useMemo, useState } from 'react';
-import { Checkbox } from 'azure-devops-ui/Checkbox';
+import React, { useMemo } from 'react';
+
 import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
 import { ProgressBarLabelType } from '../../common/components/ProgressBar';
-import {
-  AcceptanceCriteriaState,
-  CriteriaDocument,
-  IScenario,
-  IScenarioCriteria
-} from '../../common/types';
+import { AcceptanceCriteriaState, CriteriaDocument, IScenario } from '../../common/types';
 import StatusTag from '../../wi-control/components/StatusTag';
-import CriteriaService from '../../common/services/CriteriaService';
 
 interface CriteriaViewProps {
   criteria?: CriteriaDocument;
   onApprove: (id: string, complete: boolean) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
 interface IDynamicProperties {
   [key: string]: any;
@@ -101,7 +104,7 @@ const getIcon = (type: string) => {
       return 'Add';
   }
 };
-const CriteriaView = ({ criteria, onApprove }: CriteriaViewProps): JSX.Element => {
+const CriteriaView = ({ criteria, onApprove, onDelete }: CriteriaViewProps): JSX.Element => {
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
     const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = (criteria?.criterias || []).map(x => {
       const children: ITreeItem<IWorkItemCriteriaCell>[] = [];
@@ -138,6 +141,25 @@ const CriteriaView = ({ criteria, onApprove }: CriteriaViewProps): JSX.Element =
 
     return new TreeItemProvider<IWorkItemCriteriaCell>(rootItems);
   }, [criteria]);
+  const moreColumn = new ColumnMore((listItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
+    return {
+      id: 'sub-menu',
+      items: [
+        { id: 'edit', text: 'Edit', iconProps: { iconName: 'Edit' } },
+        { id: 'divider', itemType: MenuItemType.Divider },
+        {
+          id: 'delete',
+          text: 'Delete',
+          iconProps: { iconName: 'Delete' },
+          onActivate: () => {
+            if (listItem?.underlyingItem?.data?.id) {
+              onDelete(listItem.underlyingItem.data.id);
+            }
+          }
+        }
+      ]
+    };
+  });
   const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'title',
     minWidth: 200,
@@ -178,11 +200,11 @@ const CriteriaView = ({ criteria, onApprove }: CriteriaViewProps): JSX.Element =
             </ConditionalChildren>
             <ConditionalChildren renderChildren={data.rowType === 'details'}>
               <div className="flex-column">
-                <div className="font-weight-semibold "> {data.scenario?.scenario}</div>
+                <div className="font-weight-semibold"> {data.scenario?.scenario}</div>
                 <div className="margin-top-8">
                   {data.scenario?.criterias.map(g => {
                     return (
-                      <span>
+                      <span key={g.id}>
                         <span className="font-weight-heavy">{capitalizeFirstLetter(g.type)}</span>{' '}
                         {g.text}{' '}
                       </span>
@@ -290,7 +312,7 @@ const CriteriaView = ({ criteria, onApprove }: CriteriaViewProps): JSX.Element =
           <ConditionalChildren renderChildren={data.rowType === 'item'}>
             <div className="rhythm-horizontal-8 flex-row flex-center">
               <Icon iconName={getIcon(data.type)} />
-              <span>{data.type}</span>
+              <span>{capitalizeFirstLetter(data.type)}</span>
             </div>
           </ConditionalChildren>
         </SimpleTableCell>
@@ -328,10 +350,7 @@ const CriteriaView = ({ criteria, onApprove }: CriteriaViewProps): JSX.Element =
         >
           <ConditionalChildren renderChildren={data.rowType === 'item'}>
             <Checkbox
-              checked={
-                data?.state === AcceptanceCriteriaState.Completed ||
-                data.state === AcceptanceCriteriaState.Approved
-              }
+              checked={data?.state !== AcceptanceCriteriaState.New}
               onChange={(e, checked: boolean) => {
                 onApprove(data.id, checked);
               }}
@@ -346,7 +365,15 @@ const CriteriaView = ({ criteria, onApprove }: CriteriaViewProps): JSX.Element =
   return (
     <Tree<IWorkItemCriteriaCell>
       ariaLabel="Basic tree"
-      columns={[toggleCell, titleCell, criteriaState, approverCell, typeCell]}
+      columns={[
+        toggleCell,
+        titleCell,
+        criteriaState,
+        approverCell,
+        typeCell,
+        ColumnFill,
+        moreColumn as any
+      ]}
       itemProvider={treeProvider as any}
       onToggle={(event: any, treeItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
         treeProvider.toggle(treeItem.underlyingItem);

@@ -7,7 +7,7 @@ import AcceptanceControl from './AcceptanceControl';
 initializeIcons();
 
 const App = () => {
-  //useResizeTimeout(1000);
+  //useResizeTimeout(4000);
   return <AcceptanceControl />;
 };
 showRootComponent(<App />, 'wi-control-container');

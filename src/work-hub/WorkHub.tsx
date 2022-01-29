@@ -23,7 +23,10 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import { Page } from 'azure-devops-ui/Page';
+import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
+import { Card } from 'azure-devops-ui/Card';
+import { createDecipheriv } from 'crypto';
 import { useEffect, useMemo, useState } from 'react';
 
 import { getCriteriaTitle } from '../common/common';
@@ -31,30 +34,34 @@ import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../common/types';
 import CriteriaTree from './components/CriteriaTree';
 import HubFilterBar from './components/HubFilterBar';
+import { useWorkHubContext } from './WorkHubContext';
 
 const WorkHub = (): JSX.Element => {
   const [criteriaService, workItemService] = useMemo(
     () => [new CriteriaService(), new WorkItemService()],
     []
   );
-  const [types, setTypes] = useState<WorkItemType[]>([]);
   const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
   const [visibleDocuments, setVisibleDocuments] = useState<CriteriaDocument[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [showFilter, setShowFilter] = useState(true);
+  const { dispatch, state: workHubState } = useWorkHubContext();
   useEffect(() => {
     async function initModule() {
       setLoading(true);
       loadTheme(createTheme(appTheme));
       await DevOps.init();
       const loadedTypes = await workItemService.getWorkItemTypes();
-      const tags = await workItemService.getTags();
-      console.log(tags);
+      const teams = await criteriaService.getUserTeams();
 
-      setTypes(loadedTypes);
+      dispatch({ type: 'SET_WI_TYPES', data: loadedTypes });
+      dispatch({ type: 'SET_TEAMS', data: teams });
+
       webLogger.information('Loaded work hub...');
-      const result = await criteriaService.load();
+      const result = await criteriaService.load(data => {
+        setDocuments(data);
+      });
 
       console.log(result);
       if (result.success && result.data) {
@@ -80,9 +87,9 @@ const WorkHub = (): JSX.Element => {
       .filter(distrinct)
       .map(y => {
         if (mp.has(y)) return;
-        const refName = getWorkItemReferenceNameFromDisplayName(y, types);
+        const refName = getWorkItemReferenceNameFromDisplayName(y, workHubState.workItemTypes);
         if (refName === undefined) return;
-        const t = getWorkTypeFromReferenceName(refName, types);
+        const t = getWorkTypeFromReferenceName(refName, workHubState.workItemTypes);
         const pro: WorkItemTypeTagProps = {
           iconSize: 16,
           iconUrl: t?.icon.url,
@@ -200,35 +207,35 @@ const WorkHub = (): JSX.Element => {
   }, []);
 
   return (
-    <Page className="flex-grow">
-      <ConditionalChildren renderChildren={!loading}>
-        <Header
-          title="Acceptance Criterias"
-          titleSize={TitleSize.Large}
-          description={<VersionDisplay moduleVersion={process.env.WORK_HUB_VERSION} />}
-        />
-
-        <div className="padding-8 flex-grow">
-          <CommandBar items={_items} farItems={_farItems} />
-          <Separator />
-          <HubFilterBar
-            criterias={criterias}
-            showFilter={showFilter}
-            onFilterChanged={filter => applyFilter(filter)}
+    <Surface background={SurfaceBackground.neutral}>
+      <Page className="flex-grow">
+        <ConditionalChildren renderChildren={!loading}>
+          <Header
+            title="Acceptance Criterias"
+            titleSize={TitleSize.Large}
+            description={<VersionDisplay moduleVersion={process.env.WORK_HUB_VERSION} />}
           />
 
-          <div className="padding-8">
-            {/* <CriteriaList rows={criterias} /> */}
-            <CriteriaTree
-              criterias={visibleDocuments}
-              types={types}
-              workItems={workItems}
-              workItemTypes={wiMap}
+          <div className="page-content flex-grow margin-top-8">
+            <CommandBar items={_items} farItems={_farItems} />
+            <Separator />
+            <HubFilterBar
+              criterias={criterias}
+              showFilter={showFilter}
+              onFilterChanged={filter => applyFilter(filter)}
             />
+
+            <Card className="margin-top-16" contentProps={{ contentPadding: false }}>
+              <CriteriaTree
+                criterias={visibleDocuments}
+                workItems={workItems}
+                workItemTypes={wiMap}
+              />
+            </Card>
           </div>
-        </div>
-      </ConditionalChildren>
-    </Page>
+        </ConditionalChildren>
+      </Page>
+    </Surface>
   );
 };
 

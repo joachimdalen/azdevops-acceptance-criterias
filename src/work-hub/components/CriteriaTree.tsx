@@ -1,39 +1,38 @@
+import { getInitials, Persona, PersonaSize } from '@fluentui/react';
+import {
+  getWorkItemTitle,
+  getWorkItemTypeDisplayName,
+  IInternalIdentity,
+  isLoggedInUser
+} from '@joachimdalen/azdevops-ext-core';
 import { WorkItem, WorkItemType } from 'azure-devops-extension-api/WorkItemTracking';
+import * as DevOps from 'azure-devops-extension-sdk';
+import { Button } from 'azure-devops-ui/Button';
+import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
+import { Icon } from 'azure-devops-ui/Icon';
 import { ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
-import {
-  ExpandableTreeCell,
-  ITreeColumn,
-  renderExpandableTreeCell,
-  renderTreeCell,
-  Tree
-} from 'azure-devops-ui/TreeEx';
+import { Tooltip } from 'azure-devops-ui/TooltipEx';
+import { ExpandableTreeCell, ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
   ITreeItemEx,
   ITreeItemProvider,
   TreeItemProvider
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import { useMemo } from 'react';
 import cx from 'classnames';
+import { useMemo } from 'react';
+
 import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
+import ProgressBar, { ProgressBarLabelType } from '../../common/components/ProgressBar';
 import {
   AcceptanceCriteriaState,
   CriteriaDocument,
   WorkItemTypeTagProps
 } from '../../common/types';
-import {
-  getWorkItemTitle,
-  getWorkItemTypeDisplayName,
-  IInternalIdentity
-} from '@joachimdalen/azdevops-ext-core';
-
-import { Tooltip } from 'azure-devops-ui/TooltipEx';
-import { getInitials, Persona, PersonaSize } from '@fluentui/react';
-import ProgressBar, { ProgressBarLabelType } from '../../common/components/ProgressBar';
-import { Icon } from 'azure-devops-ui/Icon';
 import StatusTag from '../../wi-control/components/StatusTag';
+import { useWorkHubContext } from '../WorkHubContext';
 const WorkItemTypeTag = ({
   iconUrl,
   title,
@@ -56,7 +55,6 @@ const WorkItemTypeTag = ({
 
 interface CriteriaTreeProps {
   criterias: CriteriaDocument[];
-  types: WorkItemType[];
   workItemTypes: Map<string, WorkItemTypeTagProps>;
   workItems: WorkItem[];
 }
@@ -70,6 +68,7 @@ interface IProgressStatus {
   type: ProgressBarLabelType;
 }
 interface IWorkItemCriteriaCell extends IExtendedTableCell {
+  criteriaId?: string;
   workItemId: string;
   title: string;
   rowType: 'workItem' | 'criteria';
@@ -131,6 +130,28 @@ const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
 };
 
 const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps): JSX.Element => {
+  const { dispatch, state: workHubState } = useWorkHubContext();
+  const approvable = useMemo(
+    () =>
+      criterias
+        .flatMap(x => x.criterias)
+        .filter(x => {
+          if (x.requiredApprover) {
+            if (isLoggedInUser(x.requiredApprover)) {
+              return true;
+            }
+            console.log(workHubState.teams, x.requiredApprover);
+            if (workHubState.teams.some(y => y.id === x.requiredApprover?.id)) {
+              console.log('Can approve from team');
+              return true;
+            }
+          }
+          return false;
+        })
+        .map(x => x.id),
+    [criterias]
+  );
+  console.log(approvable);
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
     const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = criterias.map(x => {
       const criteriaRows = x.criterias.map(y => {
@@ -142,6 +163,7 @@ const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps
             type: capitalizeFirstLetter(y.type) as any,
             state: y.state,
             requiredApprover: y.requiredApprover,
+            criteriaId: y.id,
             progress: {
               maxValue: 1,
               value: y.state === 'approved' ? 1 : 0,
@@ -268,18 +290,68 @@ const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
           tableColumn={treeColumn}
         >
-          <ConditionalChildren renderChildren={data.requiredApprover === undefined}>
-            <span>Unassigned</span>
+          <ConditionalChildren renderChildren={data.rowType === 'criteria'}>
+            <ConditionalChildren renderChildren={data.requiredApprover === undefined}>
+              <div className="secondary-text">
+                <Icon iconName="Contact" />
+                <span className="margin-left-8">Unassigned</span>
+              </div>
+            </ConditionalChildren>
+            <ConditionalChildren renderChildren={data.requiredApprover !== undefined}>
+              {data.requiredApprover && (
+                <Persona
+                  text={data.requiredApprover.displayName}
+                  size={PersonaSize.size24}
+                  imageInitials={getInitials(data.requiredApprover.displayName, false)}
+                  imageUrl={data.requiredApprover.image}
+                />
+              )}
+            </ConditionalChildren>
           </ConditionalChildren>
-          <ConditionalChildren renderChildren={data.requiredApprover !== undefined}>
-            {data.requiredApprover && (
-              <Persona
-                text={data.requiredApprover.displayName}
-                size={PersonaSize.size24}
-                imageInitials={getInitials(data.requiredApprover.displayName, false)}
-                imageUrl={data.requiredApprover.image}
-              />
-            )}
+        </SimpleTableCell>
+      );
+    },
+    width: -100
+  };
+  const actionCell: ITreeColumn<IWorkItemCriteriaCell> = {
+    id: 'actions',
+    minWidth: 200,
+    name: '',
+    renderCell: (
+      rowIndex: number,
+      columnIndex: number,
+      treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
+      treeItem: ITreeItemEx<IWorkItemCriteriaCell>
+    ) => {
+      const underlyingItem = treeItem.underlyingItem;
+      const data = ObservableLike.getValue(underlyingItem.data);
+      const treeCell = data && data[treeColumn.id];
+      // Do not include padding if the table cell has an href
+      const hasLink = !!(
+        treeCell &&
+        typeof treeCell !== 'string' &&
+        typeof treeCell !== 'number' &&
+        treeCell.href
+      );
+
+      const canProcess =
+        data.state === AcceptanceCriteriaState.AwaitingApproval &&
+        data.criteriaId !== undefined &&
+        approvable.includes(data.criteriaId);
+
+      // const approver = identities.get(data.requiredApprover);
+      return (
+        <SimpleTableCell
+          className={treeColumn.className}
+          columnIndex={columnIndex}
+          contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
+          tableColumn={treeColumn}
+        >
+          <ConditionalChildren renderChildren={canProcess}>
+            <ButtonGroup>
+              <Button text="Approve" primary iconProps={{ iconName: 'CheckMark' }} />
+              <Button text="Reject" danger iconProps={{ iconName: 'Cancel' }} />
+            </ButtonGroup>
           </ConditionalChildren>
         </SimpleTableCell>
       );
@@ -313,7 +385,9 @@ const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
           tableColumn={treeColumn}
         >
-          <ConditionalChildren renderChildren={data.progress !== undefined}>
+          <ConditionalChildren
+            renderChildren={data.rowType === 'workItem' && data.progress !== undefined}
+          >
             {data.progress && (
               <ProgressBar
                 maxValue={data.progress.maxValue}
@@ -333,7 +407,15 @@ const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps
   return (
     <Tree<IWorkItemCriteriaCell>
       ariaLabel="Basic tree"
-      columns={[workItemCell, titleCell, progressCell, criteriaState, approverCell, typeItemCell]}
+      columns={[
+        workItemCell,
+        titleCell,
+        progressCell,
+        criteriaState,
+        approverCell,
+        typeItemCell,
+        actionCell
+      ]}
       itemProvider={treeProvider as any}
       onToggle={(event: any, treeItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
         treeProvider.toggle(treeItem.underlyingItem);

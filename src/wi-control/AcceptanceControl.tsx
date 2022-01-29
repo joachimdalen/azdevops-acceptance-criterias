@@ -13,15 +13,14 @@ import {
   DevOpsService,
   webLogger
 } from '@joachimdalen/azdevops-ext-core';
+import { IMessageDialogOptions } from 'azure-devops-extension-api';
 import { IWorkItemFormService } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
-import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { CriteriaModalResult, PanelIds } from '../common/common';
-import CriteriaList from '../common/components/CriteriaList';
 import CriteriaService from '../common/services/CriteriaService';
-import { AcceptanceCriteriaState, CriteriaDocument, IAcceptanceCriteria } from '../common/types';
+import { CriteriaDocument, IAcceptanceCriteria } from '../common/types';
 import CriteriaView from './components/CriteriaView';
 import WorkItemListener from './WorkItemListener';
 
@@ -54,7 +53,12 @@ const AcceptanceControl = (): React.ReactElement => {
 
         const id = await formService.getId();
 
-        const loadResult = await criteriaService.load(id.toString());
+        const loadResult = await criteriaService.load(data => {
+          if (data.length > 0) {
+            console.log('Setting data', data);
+            setCriteriaDocument(data[0]);
+          }
+        }, id.toString());
 
         if (loadResult.success && loadResult.data) {
           if (loadResult.data.length > 0) {
@@ -122,19 +126,19 @@ const AcceptanceControl = (): React.ReactElement => {
   const _farItems: ICommandBarItemProps[] = useMemo(() => {
     const items: ICommandBarItemProps[] = [
       {
-        key: 'newItem',
+        key: 'showTable',
         text: 'Show Edit',
-        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
+        cacheKey: 'myCacheKey',
         iconProps: { iconName: 'Table' },
         checked: viewMode === 'table',
         onClick: () => {
-          setViewMode('table');
+          DevOps.resize();
         }
       },
       {
-        key: 'newItem',
+        key: 'showProcess',
         text: 'Show Process View',
-        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
+        cacheKey: 'myCacheKey',
         iconProps: { iconName: 'List' },
         checked: viewMode === 'list',
         onClick: () => {
@@ -159,19 +163,29 @@ const AcceptanceControl = (): React.ReactElement => {
         <CommandBar styles={commandBarStyles} items={_items} farItems={_farItems} />
         <Separator />
       </div>
-      <ConditionalChildren renderChildren={viewMode === 'table'}>
-        <CriteriaList rows={criteriaDocument?.criterias || []} />
-      </ConditionalChildren>
-      <ConditionalChildren renderChildren={viewMode === 'list'}>
-        <CriteriaView
-          criteria={criteriaDocument}
-          onApprove={async (id: string, complete: boolean) => {
-            console.log(id, complete);
-            const ll = await criteriaService.toggleCompletion(id, complete);
-            console.log(ll);
-          }}
-        />
-      </ConditionalChildren>
+
+      <CriteriaView
+        criteria={criteriaDocument}
+        onApprove={async (id: string, complete: boolean) => {
+          console.log(id, complete);
+          const ll = await criteriaService.toggleCompletion(id, complete);
+          console.log(ll);
+        }}
+        onDelete={async (id: string) => {
+          await devOpsService.showConfirmationDialog({
+            title: 'Delete criteria?',
+            cancelText: 'Cancel',
+            lightDismiss: false,
+            okText: 'Delete',
+            showCancel: true,
+            onClose: async (result: boolean | undefined) => {
+              if (result) {
+                await criteriaService.deleteCriteria(id);
+              }
+            }
+          });
+        }}
+      />
     </div>
   );
 };

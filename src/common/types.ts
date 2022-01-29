@@ -1,3 +1,5 @@
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
+
 export interface CriteriaDocument {
   // work item id
   id: string;
@@ -23,6 +25,7 @@ export interface IAcceptanceCriteriaApproval {
 }
 
 export enum FullCriteriaStatus {
+  New = 'new',
   Partial = 'partial',
   Completed = 'completed',
   Approved = 'approved',
@@ -62,13 +65,6 @@ export interface IScenarioCriteria {
   type: 'given' | 'and' | 'when' | 'then';
   text?: string;
 }
-
-export interface IInternalIdentity {
-  entityId: string;
-  image?: string;
-  displayName: string;
-}
-
 export interface WorkItemTypeTagProps {
   iconUrl?: string;
   iconSize?: number;

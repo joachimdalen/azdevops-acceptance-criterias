@@ -10,7 +10,7 @@
   "demands": ["api-version/5.1"],
   "tags": ["work items", "state", "auto update"],
   "galleryFlags": ["Public", "Preview"],
-  "scopes": ["vso.work_write"],
+  "scopes": ["vso.work_write", "vso.project"],
   "icons": {
     "default": "extension-icon.png"
   },

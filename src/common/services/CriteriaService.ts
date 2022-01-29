@@ -1,3 +1,4 @@
+import { getClient } from 'azure-devops-extension-api';
 import { ActionResult } from '../models/ActionResult';
 import {
   AcceptanceCriteriaState,
@@ -6,11 +7,13 @@ import {
   IAcceptanceCriteria
 } from '../types';
 import { IStorageService, StorageService } from './StorageService';
-
+import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
+type CriteriaServiceOnChange = (data: CriteriaDocument[]) => void;
 class CriteriaService {
   private readonly _dataStore: IStorageService;
   private _isInitialized = false;
   private _data: CriteriaDocument[];
+  private _changeHandler?: CriteriaServiceOnChange;
 
   constructor(dataStore?: IStorageService) {
     this._dataStore = dataStore || new StorageService();
@@ -23,6 +26,7 @@ class CriteriaService {
   }
 
   public async load(
+    onDataChanged: CriteriaServiceOnChange,
     scopedId: string | undefined = undefined,
     force = false
   ): Promise<ActionResult<CriteriaDocument[]>> {
@@ -44,7 +48,33 @@ class CriteriaService {
       }
     }
     this._isInitialized = true;
+    this._changeHandler = onDataChanged;
+
+    this.emitChange();
     return { success: true, data: this._data };
+  }
+
+  private emitChange() {
+    if (this._changeHandler) {
+      this._changeHandler(this._data);
+    }
+  }
+
+  public async deleteCriteria(id: string): Promise<CriteriaDocument | undefined> {
+    const doc = this._data.find(x => x.criterias.some(y => y.id === id));
+
+    if (doc) {
+      const criteria = doc.criterias.find(x => x.id === id);
+      if (criteria) {
+        const newDoc = { ...doc };
+        newDoc.criterias = newDoc.criterias.filter(x => x.id !== criteria.id);
+        const existingDocumentIndex = this._data.findIndex(x => x.id === doc.id);
+        const updated = await this._dataStore.setCriteriaDocument(newDoc);
+        this._data[existingDocumentIndex] = updated;
+        this.emitChange();
+        return updated;
+      }
+    }
   }
 
   public async toggleCompletion(
@@ -74,7 +104,9 @@ class CriteriaService {
           };
         }
         console.log(criteria);
-        return this.createOrUpdate(doc.id, criteria);
+        const updated = await this.createOrUpdate(doc.id, criteria);
+        this.emitChange();
+        return updated;
       }
     }
   }
@@ -107,6 +139,43 @@ class CriteriaService {
       const updated = await this._dataStore.setCriteriaDocument(newDocument);
       this._data[existingDocumentIndex] = updated;
       return updated;
+    }
+  }
+
+  public async getUserTeams(): Promise<WebApiTeam[]> {
+    const client = getClient(CoreRestClient);
+    const teams = await client.getAllTeams(true);
+    return teams;
+  }
+
+  private setFullState(doc: CriteriaDocument) {
+    const news = doc.criterias.some(x => x.state === AcceptanceCriteriaState.New);
+    const completed = doc.criterias.some(x => x.state === AcceptanceCriteriaState.Completed);
+    const approved = doc.criterias.some(x => x.state === AcceptanceCriteriaState.Approved);
+    const rejected = doc.criterias.some(x => x.state === AcceptanceCriteriaState.Rejected);
+
+
+    if(news && !completed && !approved && !rejected){
+      doc.state = FullCriteriaStatus.New;
+    }
+
+    if (news) {
+      doc.state = FullCriteriaStatus.Partial;
+      return doc;
+    }
+
+    if (completed && !approved && !rejected) {
+      doc.state = FullCriteriaStatus.Completed;
+      return doc;
+    }
+
+    if (approved && !rejected) {
+      doc.state = FullCriteriaStatus.Approved;
+      return doc;
+    }
+    if (rejected) {
+      doc.state = FullCriteriaStatus.Rejected;
+      return doc;
     }
   }
 }

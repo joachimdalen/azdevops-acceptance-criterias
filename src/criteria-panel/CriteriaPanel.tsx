@@ -1,7 +1,13 @@
 import './index.scss';
 
 import { createTheme, loadTheme } from '@fluentui/react';
-import { appTheme, PanelWrapper, useDropdownSelection } from '@joachimdalen/azdevops-ext-core';
+import {
+  appTheme,
+  IdentityPicker,
+  IInternalIdentity,
+  PanelWrapper,
+  useDropdownSelection
+} from '@joachimdalen/azdevops-ext-core';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
@@ -11,8 +17,7 @@ import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
-import IdentityPicker from '../common/components/IdentityPicker';
-import { AcceptanceCriteriaState, IAcceptanceCriteria, IInternalIdentity } from '../common/types';
+import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/types';
 import CustomCriteriaSection from './components/CustomCriteriaSection';
 import RuleCriteriaSection from './components/RuleCriteriaSection';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
@@ -132,7 +137,13 @@ const CriteriaPanel = (): React.ReactElement => {
         </div>
 
         <FormItem label="Required Approver">
-          <IdentityPicker identity={identity} onChange={i => setIdentity(i)} />
+          <IdentityPicker
+            identity={identity}
+            onChange={i => {
+              setIdentity(i);
+              console.log(i);
+            }}
+          />
         </FormItem>
       </div>
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
