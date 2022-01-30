@@ -1,7 +1,7 @@
 import './index.scss';
 
 import { createTheme, initializeIcons, loadTheme } from '@fluentui/react';
-import { appTheme, showRootComponent } from '@joachimdalen/azdevops-ext-core';
+import { appTheme, showRootComponent, webLogger } from '@joachimdalen/azdevops-ext-core';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { useEffect } from 'react';
 
@@ -13,7 +13,7 @@ const AdminHub = () => {
   useEffect(() => {
     loadTheme(createTheme(appTheme));
     DevOps.init().then(async () => {
-      console.log('Loaded admin hub...');
+      webLogger.information('Loaded admin hub...');
     });
   }, []);
 

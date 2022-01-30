@@ -8,6 +8,7 @@ import {
 } from '../types';
 import { IStorageService, StorageService } from './StorageService';
 import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
+import { getLoggedInUser, IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
 type CriteriaServiceOnChange = (data: CriteriaDocument[]) => void;
 class CriteriaService {
   private readonly _dataStore: IStorageService;
@@ -77,6 +78,33 @@ class CriteriaService {
     }
   }
 
+  public async approveCriteria(id: string) {
+    const doc = this._data.find(x => x.criterias.some(y => y.id === id));
+    const approver = await getLoggedInUser();
+    if (doc) {
+      const criteria = doc.criterias.find(x => x.id === id);
+      if (criteria) {
+        if (criteria.approval !== undefined) {
+          criteria.approval = {
+            ...criteria.approval,
+            approvedAt: new Date(),
+            approvedBy: approver
+          };
+        } else {
+          criteria.approval = {
+            completedAt: new Date(),
+            approvedAt: new Date(),
+            approvedBy: approver
+          };
+        }
+
+        criteria.state = AcceptanceCriteriaState.Approved;
+        await this.createOrUpdate(doc.id, criteria);
+        this.emitChange();
+      }
+    }
+  }
+
   public async toggleCompletion(
     id: string,
     complete: boolean
@@ -88,7 +116,9 @@ class CriteriaService {
       if (criteria) {
         if (
           criteria.state === AcceptanceCriteriaState.AwaitingApproval ||
-          criteria.state === AcceptanceCriteriaState.Completed
+          criteria.state === AcceptanceCriteriaState.Completed ||
+          criteria.state === AcceptanceCriteriaState.Approved ||
+          criteria.state === AcceptanceCriteriaState.Rejected
         ) {
           criteria.state = AcceptanceCriteriaState.New;
           criteria.approval = undefined;
@@ -103,7 +133,6 @@ class CriteriaService {
             completedAt: new Date()
           };
         }
-        console.log(criteria);
         const updated = await this.createOrUpdate(doc.id, criteria);
         this.emitChange();
         return updated;
@@ -120,7 +149,7 @@ class CriteriaService {
     if (existingDocumentIndex === -1) {
       const document: CriteriaDocument = {
         id: workItemId,
-        state: FullCriteriaStatus.Partial,
+        state: FullCriteriaStatus.New,
         criterias: [criteria]
       };
       const created = await this._dataStore.setCriteriaDocument(document);
@@ -136,7 +165,8 @@ class CriteriaService {
         newDocument.criterias = [...newDocument.criterias, criteria];
       }
 
-      const updated = await this._dataStore.setCriteriaDocument(newDocument);
+      const stateDoc = this.setFullState(newDocument);
+      const updated = await this._dataStore.setCriteriaDocument(stateDoc);
       this._data[existingDocumentIndex] = updated;
       return updated;
     }
@@ -148,18 +178,20 @@ class CriteriaService {
     return teams;
   }
 
-  private setFullState(doc: CriteriaDocument) {
+  private setFullState(document: CriteriaDocument) {
+    const doc = { ...document };
     const news = doc.criterias.some(x => x.state === AcceptanceCriteriaState.New);
     const completed = doc.criterias.some(x => x.state === AcceptanceCriteriaState.Completed);
     const approved = doc.criterias.some(x => x.state === AcceptanceCriteriaState.Approved);
     const rejected = doc.criterias.some(x => x.state === AcceptanceCriteriaState.Rejected);
+    const awaiting = doc.criterias.some(x => x.state === AcceptanceCriteriaState.AwaitingApproval);
 
-
-    if(news && !completed && !approved && !rejected){
+    if (news && !completed && !approved && !rejected) {
       doc.state = FullCriteriaStatus.New;
+      return doc;
     }
 
-    if (news) {
+    if (news || awaiting) {
       doc.state = FullCriteriaStatus.Partial;
       return doc;
     }
@@ -177,6 +209,8 @@ class CriteriaService {
       doc.state = FullCriteriaStatus.Rejected;
       return doc;
     }
+
+    return doc;
   }
 }
 

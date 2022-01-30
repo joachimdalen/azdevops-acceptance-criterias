@@ -18,18 +18,18 @@ import {
   webLogger,
   WorkItemService
 } from '@joachimdalen/azdevops-ext-core';
-import { WorkItem, WorkItemType } from 'azure-devops-extension-api/WorkItemTracking';
+import { WorkItem } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { Card } from 'azure-devops-ui/Card';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import { Page } from 'azure-devops-ui/Page';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
-import { Card } from 'azure-devops-ui/Card';
-import { createDecipheriv } from 'crypto';
 import { useEffect, useMemo, useState } from 'react';
 
 import { getCriteriaTitle } from '../common/common';
+import { getLocalItem, LocalStorageKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../common/types';
 import CriteriaTree from './components/CriteriaTree';
@@ -61,15 +61,24 @@ const WorkHub = (): JSX.Element => {
       webLogger.information('Loaded work hub...');
       const result = await criteriaService.load(data => {
         setDocuments(data);
+
+        const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
+        if (filter !== undefined && Object.keys(filter).length > 0) {
+          console.log(filter);
+          applyFilter(filter);
+        } else {
+          setVisibleDocuments(data);
+        }
+
+        webLogger.information('Set', data);
       });
 
-      console.log(result);
-      if (result.success && result.data) {
-        if (result.data.length > 0) {
-          setDocuments(result.data);
-          setVisibleDocuments(result.data);
-        }
-      }
+      // if (result.success && result.data) {
+      //   if (result.data.length > 0) {
+      //     setDocuments(result.data);
+      //     setVisibleDocuments(result.data);
+      //   }
+      // }
       setLoading(false);
     }
 
@@ -100,17 +109,6 @@ const WorkHub = (): JSX.Element => {
 
     return mp;
   }, [workItems]);
-
-  const identities: Map<string, IInternalIdentity> = useMemo(() => {
-    const mp = new Map<string, IInternalIdentity>();
-    const approvers = criterias.map(x => x.requiredApprover).filter(isDefined);
-    distrinctBy(approvers, 'entityId').map(y => {
-      if (mp.has(y.entityId)) return;
-      mp.set(y.entityId, y);
-    });
-
-    return mp;
-  }, [criterias]);
 
   const innerFilter = (
     items: CriteriaDocument[],
@@ -154,7 +152,7 @@ const WorkHub = (): JSX.Element => {
     if (state) {
       items = innerFilter(items, v => v.state.indexOf(state.value) > -1);
     }
-    console.log(items);
+
     setVisibleDocuments(items);
   };
 
@@ -230,6 +228,9 @@ const WorkHub = (): JSX.Element => {
                 criterias={visibleDocuments}
                 workItems={workItems}
                 workItemTypes={wiMap}
+                onApprove={async (id: string) => {
+                  await criteriaService.approveCriteria(id);
+                }}
               />
             </Card>
           </div>

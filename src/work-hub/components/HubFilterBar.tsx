@@ -18,6 +18,7 @@ import {
 import { useEffect, useMemo } from 'react';
 
 import { capitalizeFirstLetter, criteriaTypeItems } from '../../common/common';
+import { getLocalItem, LocalStorageKeys, setLocalItem } from '../../common/localStorage';
 import { IAcceptanceCriteria } from '../../common/types';
 import StatusTag from '../../wi-control/components/StatusTag';
 
@@ -33,12 +34,17 @@ const HubFilterBar = ({
   onFilterChanged
 }: HubFilterBarProps): JSX.Element | null => {
   const filter = useMemo(() => {
-    console.log('creating filter');
     const f = new Filter();
-    f.setFilterItemState('approvers', {
-      value: [],
-      operator: FilterOperatorType.and
-    });
+    const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
+    if (filter !== undefined && Object.keys(filter).length > 0) {
+      console.log(filter);
+      f.setState(filter);
+    } else {
+      f.setFilterItemState('approvers', {
+        value: [],
+        operator: FilterOperatorType.and
+      });
+    }
 
     return f;
   }, []);
@@ -46,11 +52,11 @@ const HubFilterBar = ({
   useEffect(() => {
     filter.subscribe(() => {
       console.log(JSON.stringify(filter.getState(), null, 4));
+      setLocalItem(LocalStorageKeys.FilterState, filter.getState());
       onFilterChanged(filter.getState());
     }, FILTER_CHANGE_EVENT);
 
     return filter.unsubscribe(() => {
-      console.log(JSON.stringify(filter.getState(), null, 4));
       onFilterChanged(filter.getState());
     }, FILTER_CHANGE_EVENT);
   }, [filter, onFilterChanged]);

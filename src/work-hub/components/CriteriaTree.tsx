@@ -1,9 +1,11 @@
 import { getInitials, Persona, PersonaSize } from '@fluentui/react';
 import {
+  getLoggedInUser,
   getWorkItemTitle,
   getWorkItemTypeDisplayName,
   IInternalIdentity,
-  isLoggedInUser
+  isLoggedInUser,
+  webLogger
 } from '@joachimdalen/azdevops-ext-core';
 import { WorkItem, WorkItemType } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
@@ -29,8 +31,10 @@ import ProgressBar, { ProgressBarLabelType } from '../../common/components/Progr
 import {
   AcceptanceCriteriaState,
   CriteriaDocument,
+  FullCriteriaStatus,
   WorkItemTypeTagProps
 } from '../../common/types';
+import FullStatusTag from '../../wi-control/components/FullStatusTag';
 import StatusTag from '../../wi-control/components/StatusTag';
 import { useWorkHubContext } from '../WorkHubContext';
 const WorkItemTypeTag = ({
@@ -57,6 +61,7 @@ interface CriteriaTreeProps {
   criterias: CriteriaDocument[];
   workItemTypes: Map<string, WorkItemTypeTagProps>;
   workItems: WorkItem[];
+  onApprove: (id: string) => Promise<void>;
 }
 interface IDynamicProperties {
   [key: string]: any;
@@ -74,6 +79,7 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
   rowType: 'workItem' | 'criteria';
   type: '' | 'rule' | 'scenario' | 'custom';
   state: AcceptanceCriteriaState;
+  fullState?: FullCriteriaStatus;
   requiredApprover?: IInternalIdentity;
   progress?: IProgressStatus;
 }
@@ -120,7 +126,12 @@ const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
         contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
         tableColumn={treeColumn}
       >
-        <StatusTag state={data.state} />
+        <ConditionalChildren renderChildren={data.rowType === 'criteria'}>
+          <StatusTag state={data.state} />
+        </ConditionalChildren>
+        <ConditionalChildren renderChildren={data.rowType === 'workItem'}>
+          {data.fullState && <FullStatusTag state={data.fullState} />}
+        </ConditionalChildren>
       </SimpleTableCell>
     );
 
@@ -129,7 +140,12 @@ const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
   width: -100
 };
 
-const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps): JSX.Element => {
+const CriteriaTree = ({
+  criterias,
+  workItemTypes,
+  workItems,
+  onApprove
+}: CriteriaTreeProps): JSX.Element => {
   const { dispatch, state: workHubState } = useWorkHubContext();
   const approvable = useMemo(
     () =>
@@ -140,19 +156,19 @@ const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps
             if (isLoggedInUser(x.requiredApprover)) {
               return true;
             }
-            console.log(workHubState.teams, x.requiredApprover);
+
             if (workHubState.teams.some(y => y.id === x.requiredApprover?.id)) {
-              console.log('Can approve from team');
               return true;
             }
           }
           return false;
         })
         .map(x => x.id),
-    [criterias]
+    [criterias, workHubState.teams]
   );
-  console.log(approvable);
+
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
+    webLogger.trace('mapping', criterias);
     const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = criterias.map(x => {
       const criteriaRows = x.criterias.map(y => {
         const it: ITreeItem<IWorkItemCriteriaCell> = {
@@ -180,9 +196,14 @@ const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps
           rowType: 'workItem',
           type: '',
           state: AcceptanceCriteriaState.New,
+          fullState: x.state,
           progress: {
             maxValue: x.criterias.length,
-            value: x.criterias.filter(x => x.state === 'approved').length,
+            value: x.criterias.filter(
+              x =>
+                x.state === AcceptanceCriteriaState.Completed ||
+                x.state === AcceptanceCriteriaState.Approved
+            ).length,
             type: 'count'
           }
         },
@@ -349,7 +370,16 @@ const CriteriaTree = ({ criterias, workItemTypes, workItems }: CriteriaTreeProps
         >
           <ConditionalChildren renderChildren={canProcess}>
             <ButtonGroup>
-              <Button text="Approve" primary iconProps={{ iconName: 'CheckMark' }} />
+              <Button
+                text="Approve"
+                primary
+                iconProps={{ iconName: 'CheckMark' }}
+                onClick={async () => {
+                  if (data.criteriaId) {
+                    await onApprove(data.criteriaId);
+                  }
+                }}
+              />
               <Button text="Reject" danger iconProps={{ iconName: 'Cancel' }} />
             </ButtonGroup>
           </ConditionalChildren>

@@ -25,10 +25,10 @@ import CriteriaView from './components/CriteriaView';
 import WorkItemListener from './WorkItemListener';
 
 const AcceptanceControl = (): React.ReactElement => {
-  const [devOpsService, criteriaService] = useMemo(() => {
-    console.log(111);
-    return [new DevOpsService(), new CriteriaService()];
-  }, []);
+  const [devOpsService, criteriaService] = useMemo(
+    () => [new DevOpsService(), new CriteriaService()],
+    []
+  );
   const [criteriaDocument, setCriteriaDocument] = useState<CriteriaDocument>();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<IAcceptanceCriteria[]>();
@@ -55,14 +55,14 @@ const AcceptanceControl = (): React.ReactElement => {
 
         const loadResult = await criteriaService.load(data => {
           if (data.length > 0) {
-            console.log('Setting data', data);
+            webLogger.trace('Setting data', data);
             setCriteriaDocument(data[0]);
           }
         }, id.toString());
 
         if (loadResult.success && loadResult.data) {
           if (loadResult.data.length > 0) {
-            console.log('setting', loadResult.data[0]);
+            webLogger.trace('setting', loadResult.data[0]);
             setCriteriaDocument(loadResult.data[0]);
           }
         }
@@ -91,10 +91,7 @@ const AcceptanceControl = (): React.ReactElement => {
           criteria
         },
         onClose: async (result: CriteriaModalResult | undefined) => {
-          console.log('Close result', result);
           if (result?.result === 'SAVE' && result.criteria) {
-            console.log(result.criteria);
-
             const id = await devOpsService.getCurrentWorkItemId();
             if (id) await criteriaService.createOrUpdate(id.toString(), result.criteria);
           }
@@ -167,9 +164,7 @@ const AcceptanceControl = (): React.ReactElement => {
       <CriteriaView
         criteria={criteriaDocument}
         onApprove={async (id: string, complete: boolean) => {
-          console.log(id, complete);
-          const ll = await criteriaService.toggleCompletion(id, complete);
-          console.log(ll);
+          await criteriaService.toggleCompletion(id, complete);
         }}
         onDelete={async (id: string) => {
           await devOpsService.showConfirmationDialog({

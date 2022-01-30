@@ -145,8 +145,6 @@ const CriteriaList = ({ rows }: CriteriaListProps): React.ReactElement => {
     }
   ];
 
-  console.log('rendering');
-
   return (
     <DetailsList
       items={rows}
