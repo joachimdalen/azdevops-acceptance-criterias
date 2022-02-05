@@ -1,6 +1,6 @@
 import './index.scss';
 
-import { createTheme, loadTheme } from '@fluentui/react';
+import { createTheme, getInitials, loadTheme, Persona, PersonaSize } from '@fluentui/react';
 import {
   appTheme,
   IdentityPicker,
@@ -15,21 +15,25 @@ import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { TagPicker } from 'azure-devops-ui/TagPicker';
+import { TextField } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
+import StatusTag from '../common/components/StatusTag';
 import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/types';
 import CustomCriteriaSection from './components/CustomCriteriaSection';
-import RuleCriteriaSection from './components/RuleCriteriaSection';
+import { InternalTagPicker } from './components/InternalTagPicker';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import { InternalTagPicker } from './components/InternalTagPicker';
+import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
+import { Icon } from 'azure-devops-ui/Icon';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [identity, setIdentity] = useState<IInternalIdentity | undefined>(undefined);
+  const [criteria, setCriteria] = useState<IAcceptanceCriteria | undefined>();
 
   const [loading, setLoading] = useState(true);
   const dropdownItems: IListBoxItem<any>[] = [
@@ -58,6 +62,7 @@ const CriteriaPanel = (): React.ReactElement => {
         if (config.criteria) {
           const criteria = config.criteria as IAcceptanceCriteria;
           setIdentity(criteria.requiredApprover);
+          setCriteria(criteria);
         }
 
         DevOps.notifyLoadSucceeded().then(() => {
@@ -89,7 +94,6 @@ const CriteriaPanel = (): React.ReactElement => {
         state: AcceptanceCriteriaState.New,
         type: panelState.type,
         custom: panelState.type === 'custom' ? panelState.custom : undefined,
-        rule: panelState.type === 'rule' ? panelState.rule : undefined,
         scenario: panelState.type === 'scenario' ? panelState.scenario : undefined
       };
 
@@ -101,18 +105,8 @@ const CriteriaPanel = (): React.ReactElement => {
     }
   };
 
-  return (
-    <PanelWrapper
-      cancelButton={{ text: 'Close', onClick: () => dismiss() }}
-      okButton={{
-        text: 'Save',
-        primary: true,
-        onClick: () => save(),
-        iconProps: { iconName: 'Save' },
-        disabled: !panelState.isValid
-      }}
-      moduleVersion={process.env.CRITERIA_PANEL_VERSION}
-    >
+  const editContent = (
+    <>
       <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
         <FormItem label="Type" className="flex-grow">
           <Dropdown
@@ -139,12 +133,70 @@ const CriteriaPanel = (): React.ReactElement => {
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
         <ScenarioCriteria />
       </ConditionalChildren>
-      <ConditionalChildren renderChildren={panelState.type === 'rule'}>
-        <RuleCriteriaSection />
-      </ConditionalChildren>
       <ConditionalChildren renderChildren={panelState.type === 'custom'}>
         <CustomCriteriaSection />
       </ConditionalChildren>
+    </>
+  );
+
+  return (
+    <PanelWrapper
+      cancelButton={{ text: 'Close', onClick: () => dismiss() }}
+      okButton={
+        isReadOnly
+          ? undefined
+          : {
+              text: 'Save',
+              primary: true,
+              onClick: () => save(),
+              iconProps: { iconName: 'Save' },
+              disabled: !panelState.isValid
+            }
+      }
+      showVersion={!isReadOnly}
+      moduleVersion={process.env.CRITERIA_PANEL_VERSION}
+    >
+      <ConditionalChildren renderChildren={isReadOnly}>
+        {criteria && (
+          <>
+            <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
+              <div className="flex-row rhythm-horizontal-8">
+                <FormItem label="Required Approver" className="flex-grow">
+                  <ConditionalChildren renderChildren={criteria.requiredApprover === undefined}>
+                    <div className="secondary-text">
+                      <Icon iconName="Contact" />
+                      <span className="margin-left-8">Unassigned</span>
+                    </div>
+                  </ConditionalChildren>
+                  <ConditionalChildren renderChildren={criteria.requiredApprover !== undefined}>
+                    {criteria.requiredApprover && (
+                      <Persona
+                        text={criteria.requiredApprover.displayName}
+                        size={PersonaSize.size24}
+                        imageInitials={getInitials(criteria.requiredApprover.displayName, false)}
+                        imageUrl={criteria.requiredApprover.image}
+                      />
+                    )}
+                  </ConditionalChildren>
+                </FormItem>
+
+                <FormItem label="State" className="flex-grow">
+                  <StatusTag state={criteria.state} />
+                </FormItem>
+              </div>
+            </div>
+            <ConditionalChildren renderChildren={criteria.type === 'scenario'}>
+              {criteria.scenario && <ScenarioCriteriaViewSection criteria={criteria} />}
+            </ConditionalChildren>
+            <ConditionalChildren renderChildren={criteria.type === 'custom'}>
+              <FormItem label="Content" className="flex-grow">
+                {criteria.custom?.text}
+              </FormItem>
+            </ConditionalChildren>
+          </>
+        )}
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={!isReadOnly}>{editContent}</ConditionalChildren>
     </PanelWrapper>
   );
 };

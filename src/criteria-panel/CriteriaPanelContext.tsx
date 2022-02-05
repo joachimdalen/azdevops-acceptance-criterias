@@ -1,13 +1,11 @@
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
-import { IRuleCriteria, IScenario } from '../common/types';
+import { IScenario } from '../common/types';
 
 export interface ICriteriaPanelContextState {
   isLoading: boolean;
   isValid: boolean;
-
-  type: 'scenario' | 'rule' | 'custom';
-  rule?: IRuleCriteria;
+  type: 'scenario' | 'custom';
   scenario?: IScenario;
   custom?: any;
 }
@@ -50,8 +48,6 @@ function panelReducer(
       switch (state.type) {
         case 'scenario':
           return { ...state, scenario: action.data };
-        case 'rule':
-          return { ...state, rule: action.data };
         case 'custom':
           return { ...state, custom: action.data };
         default:

@@ -15,9 +15,9 @@ import { Icon } from 'azure-devops-ui/Icon';
 import { useMemo } from 'react';
 
 import ActionMenu from '../../wi-control/components/ActionMenu';
-import StatusTag from '../../wi-control/components/StatusTag';
 import { capitalizeFirstLetter, getCriteriaTitle, PanelIds } from '../common';
 import { IAcceptanceCriteria } from '../types';
+import StatusTag from './StatusTag';
 
 interface CriteriaListProps {
   rows: IAcceptanceCriteria[];

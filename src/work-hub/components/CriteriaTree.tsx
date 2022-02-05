@@ -1,6 +1,5 @@
 import { getInitials, Persona, PersonaSize } from '@fluentui/react';
 import {
-  getLoggedInUser,
   getWorkItemTitle,
   getWorkItemTypeDisplayName,
   IInternalIdentity,
@@ -9,8 +8,7 @@ import {
 } from '@joachimdalen/azdevops-ext-core';
 import {
   IWorkItemFormNavigationService,
-  WorkItem,
-  WorkItemType
+  WorkItem
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { Button } from 'azure-devops-ui/Button';
@@ -18,9 +16,9 @@ import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { Icon } from 'azure-devops-ui/Icon';
+import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnMore, ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
-import { Link } from 'azure-devops-ui/Link';
 import { ExpandableTreeCell, ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
@@ -31,18 +29,18 @@ import {
 import cx from 'classnames';
 import React, { MouseEventHandler, useMemo } from 'react';
 
-import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
+import { capitalizeFirstLetter, getCriteriaTitle, getUrl } from '../../common/common';
+import FullStatusTag from '../../common/components/FullStatusTag';
 import ProgressBar, { ProgressBarLabelType } from '../../common/components/ProgressBar';
+import StatusTag from '../../common/components/StatusTag';
 import {
   AcceptanceCriteriaState,
   CriteriaDocument,
   FullCriteriaStatus,
+  IAcceptanceCriteria,
   WorkItemTypeTagProps
 } from '../../common/types';
-import FullStatusTag from '../../wi-control/components/FullStatusTag';
-import StatusTag from '../../wi-control/components/StatusTag';
 import { useWorkHubContext } from '../WorkHubContext';
-import { MenuItemType } from 'azure-devops-ui/Menu';
 
 const InternalLink = ({
   children,
@@ -95,6 +93,7 @@ interface CriteriaTreeProps {
   workItemTypes: Map<string, WorkItemTypeTagProps>;
   workItems: WorkItem[];
   onApprove: (id: string) => Promise<void>;
+  onClick: (criteria: IAcceptanceCriteria) => Promise<void>;
 }
 interface IDynamicProperties {
   [key: string]: any;
@@ -110,11 +109,12 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
   workItemId: string;
   title: string;
   rowType: 'workItem' | 'criteria';
-  type: '' | 'rule' | 'scenario' | 'custom';
+  type: '' | 'scenario' | 'custom';
   state: AcceptanceCriteriaState;
   fullState?: FullCriteriaStatus;
   requiredApprover?: IInternalIdentity;
   progress?: IProgressStatus;
+  rawCriteria?: IAcceptanceCriteria;
 }
 
 const typeItemCell: ITreeColumn<IWorkItemCriteriaCell> = {
@@ -184,7 +184,8 @@ const CriteriaTree = ({
   criterias,
   workItemTypes,
   workItems,
-  onApprove
+  onApprove,
+  onClick
 }: CriteriaTreeProps): JSX.Element => {
   const { dispatch, state: workHubState } = useWorkHubContext();
   const approvable = useMemo(
@@ -224,7 +225,8 @@ const CriteriaTree = ({
               maxValue: 1,
               value: y.state === 'approved' ? 1 : 0,
               type: 'percentage'
-            }
+            },
+            rawCriteria: y
           }
         };
         return it;
@@ -267,7 +269,18 @@ const CriteriaTree = ({
     return {
       id: 'sub-menu',
       items: [
-        { id: 'copy-link', text: 'Copy link to criteria', iconProps: { iconName: 'Link' } },
+        {
+          id: 'copy-link',
+          text: 'Copy link to criteria',
+          iconProps: { iconName: 'Link' },
+          onActivate: () => {
+            if (listItem.underlyingItem.data.criteriaId) {
+              getUrl({ criteriaId: listItem.underlyingItem.data.criteriaId.toString() }).then(url =>
+                console.log(url)
+              );
+            }
+          }
+        },
         { id: 'divider', itemType: MenuItemType.Divider }
       ]
     };
@@ -303,7 +316,15 @@ const CriteriaTree = ({
           treeColumn={treeColumn}
         >
           <ConditionalChildren renderChildren={data.rowType === 'criteria'}>
-            <InternalLink onClick={() => alert(data.title)}>{data.title}</InternalLink>
+            <InternalLink
+              onClick={async () => {
+                if (data.rawCriteria) {
+                  await onClick(data.rawCriteria);
+                }
+              }}
+            >
+              {data.title}
+            </InternalLink>
           </ConditionalChildren>
         </ExpandableTreeCell>
       );

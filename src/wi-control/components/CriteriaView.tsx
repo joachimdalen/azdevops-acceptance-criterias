@@ -4,11 +4,10 @@ import { Checkbox } from 'azure-devops-ui/Checkbox';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { Icon } from 'azure-devops-ui/Icon';
-import { IMenuItem, MenuItemType } from 'azure-devops-ui/Menu';
+import { MenuItemType } from 'azure-devops-ui/Menu';
 import {
   ColumnFill,
   ColumnMore,
-  ColumnSorting,
   ISimpleTableCell,
   SimpleTableCell
 } from 'azure-devops-ui/Table';
@@ -23,8 +22,8 @@ import React, { useMemo } from 'react';
 
 import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
 import { ProgressBarLabelType } from '../../common/components/ProgressBar';
+import StatusTag from '../../common/components/StatusTag';
 import { AcceptanceCriteriaState, CriteriaDocument, IScenario } from '../../common/types';
-import StatusTag from '../../wi-control/components/StatusTag';
 
 interface CriteriaViewProps {
   criteria?: CriteriaDocument;
@@ -44,7 +43,7 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
   id: string;
   title: string;
   rowType: 'item' | 'details';
-  type: '' | 'rule' | 'scenario' | 'custom';
+  type: '' | 'scenario' | 'custom';
   state?: AcceptanceCriteriaState;
   requiredApprover?: IInternalIdentity;
   progress?: IProgressStatus;
@@ -96,8 +95,6 @@ const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
 };
 const getIcon = (type: string) => {
   switch (type) {
-    case 'rule':
-      return 'CheckboxCompositeReversed';
     case 'custom':
       return 'Comment';
     case 'scenario':

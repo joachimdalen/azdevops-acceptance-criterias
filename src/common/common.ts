@@ -1,5 +1,12 @@
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { IAcceptanceCriteria } from './types';
+import * as DevOps from 'azure-devops-extension-sdk';
+import {
+  CommonServiceIds,
+  ILocationService,
+  IProjectPageService
+} from 'azure-devops-extension-api';
+import { CoreRestClient } from 'azure-devops-extension-api/Core';
 
 export enum PanelIds {
   CriteriaPanel = 'criteria-panel'
@@ -24,12 +31,37 @@ export const move = <T>(array: T[], index: number, delta: number): void => {
 
 export const getCriteriaTitle = (criteria: IAcceptanceCriteria): string | undefined => {
   if (criteria.type === 'custom') return criteria.custom?.text;
-  if (criteria.type === 'rule') return criteria.rule?.text;
   return criteria.scenario?.scenario;
 };
 
 export const criteriaTypeItems: IListBoxItem<any>[] = [
   { id: 'scenario', text: 'Scenario Based' },
-  { id: 'rule', text: 'Rule Based' },
   { id: 'custom', text: 'Simple' }
 ];
+
+type KeyVal = { [key: string]: string };
+export const getUrl = async ({ ...urlParams }: KeyVal): Promise<string> => {
+  // https://github.com/microsoft/azure-devops-extension-sdk/issues/28
+  const locationService = await DevOps.getService<ILocationService>(
+    'ms.vss-features.location-service'
+  );
+  const hostBaseUrl = await locationService.getResourceAreaLocation(
+    CoreRestClient.RESOURCE_AREA_ID
+  );
+
+  console.log(`hostBaseUrl: ${hostBaseUrl}`);
+
+  const projectService = await DevOps.getService<IProjectPageService>(
+    'ms.vss-tfs-web.tfs-page-data-service'
+  );
+  const project = await projectService.getProject();
+
+  if (!project) {
+    throw new Error('Cannot get project.');
+  }
+
+  const contrib = DevOps.getContributionId();
+  const params = new URLSearchParams(urlParams);
+
+  return `${hostBaseUrl}${project.name}/_apps/hub/${contrib}?${params.toString()}`;
+};

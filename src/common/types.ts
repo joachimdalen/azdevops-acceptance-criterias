@@ -11,9 +11,8 @@ export interface IAcceptanceCriteria {
   order?: number;
   requiredApprover?: IInternalIdentity;
   state: AcceptanceCriteriaState;
-  type: 'scenario' | 'rule' | 'custom';
+  type: 'scenario' | 'custom';
   scenario?: IScenario;
-  rule?: IRuleCriteria;
   custom?: ICustomCriteria;
   approval?: IAcceptanceCriteriaApproval;
 }
@@ -42,16 +41,11 @@ export enum AcceptanceCriteriaState {
 
 export interface ICriteria {
   id: string;
-  type: 'scenario' | 'rule' | 'custom';
+  type: 'scenario' | 'custom';
   scenario: IScenarioCriteria[];
-  rule: any[];
   custom: any[];
 }
 export interface ICustomCriteria {
-  id: string;
-  text: string;
-}
-export interface IRuleCriteria {
   id: string;
   text: string;
 }

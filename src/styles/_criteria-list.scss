@@ -8,27 +8,3 @@
     align-self: center;
   }
 }
-@mixin status-tag-variant($name, $color) {
-  &-#{$name} {
-    .status-tag-indicator {
-      background-color: $color;
-    }
-  }
-}
-.status-tag {
-  display: flex;
-  align-items: center;
-  text-transform: capitalize;
-  &-indicator {
-    margin-right: 4px;
-    height: 8px;
-    width: 8px;
-    border-radius: 4px;
-  }
-  @include status-tag-variant('new', #7e7e7e);
-  @include status-tag-variant('completed', #3094db);
-  @include status-tag-variant('partial', #f2d918);
-  @include status-tag-variant('awaitingapproval', #30dbb9);
-  @include status-tag-variant('approved', green);
-  @include status-tag-variant('rejected', red);
-}

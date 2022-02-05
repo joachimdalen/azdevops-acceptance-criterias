@@ -82,19 +82,13 @@ const AcceptanceControl = (): React.ReactElement => {
   }, []);
 
   const showPanel = async (criteria?: IAcceptanceCriteria) => {
-    await devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
-      PanelIds.CriteriaPanel,
-      {
-        title: 'Acceptance Criteria',
-        size: 2,
-        configuration: {
-          criteria
-        },
-        onClose: async (result: CriteriaModalResult | undefined) => {
-          if (result?.result === 'SAVE' && result.criteria) {
-            const id = await devOpsService.getCurrentWorkItemId();
-            if (id) await criteriaService.createOrUpdate(id.toString(), result.criteria);
-          }
+    await criteriaService.showPanel(
+      criteria,
+      false,
+      async (result: CriteriaModalResult | undefined) => {
+        if (result?.result === 'SAVE' && result.criteria) {
+          const id = await devOpsService.getCurrentWorkItemId();
+          if (id) await criteriaService.createOrUpdate(id.toString(), result.criteria);
         }
       }
     );

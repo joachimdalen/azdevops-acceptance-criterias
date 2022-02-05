@@ -1,19 +1,11 @@
-import {
-  CommandBar,
-  createTheme,
-  ICommandBarItemProps,
-  loadTheme,
-  Separator
-} from '@fluentui/react';
+import { createTheme, loadTheme, Separator } from '@fluentui/react';
 import {
   appTheme,
   DevOpsService,
   distrinct,
-  distrinctBy,
   getWorkItemReferenceNameFromDisplayName,
   getWorkItemTypeDisplayName,
   getWorkTypeFromReferenceName,
-  IInternalIdentity,
   isDefined,
   useBooleanToggle,
   VersionDisplay,
@@ -97,13 +89,14 @@ const WorkHub = (): JSX.Element => {
       dispatch({ type: 'SET_TEAMS', data: teams });
 
       webLogger.information('Loaded work hub...');
+      const queryParams = await devOpsService.getQueryParameters();
       const result = await criteriaService.load(data => {
         setDocuments(data);
 
         const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
         if (filter !== undefined && Object.keys(filter).length > 0) {
           console.log(filter);
-          applyFilter(filter);
+          applyFilter(filter, data);
         } else {
           setVisibleDocuments(data);
         }
@@ -165,15 +158,15 @@ const WorkHub = (): JSX.Element => {
       })
       .filter(isDefined);
   };
-  const applyFilter = (filter: IFilterState) => {
-    let items = [...documents];
-
+  const applyFilter = (filter: IFilterState, innerDocuments?: CriteriaDocument[]) => {
+    let items = innerDocuments !== undefined ? [...innerDocuments] : [...documents];
     if (Object.keys(filter).length === 0) {
       setVisibleDocuments(items);
       return;
     }
 
     const approvers = filter['approvers'];
+
     if (approvers && approvers.value.length > 0) {
       items = innerFilter(items, v => approvers.value.includes(v.requiredApprover?.entityId));
     }
@@ -187,6 +180,7 @@ const WorkHub = (): JSX.Element => {
     }
 
     const state = filter['state'];
+
     if (state) {
       items = innerFilter(items, v => v.state.indexOf(state.value) > -1);
     }
@@ -230,6 +224,9 @@ const WorkHub = (): JSX.Element => {
                 workItemTypes={wiMap}
                 onApprove={async (id: string) => {
                   await criteriaService.approveCriteria(id);
+                }}
+                onClick={async (criteria: IAcceptanceCriteria) => {
+                  await criteriaService.showPanel(criteria, true);
                 }}
               />
             </Card>

@@ -18,9 +18,9 @@ import {
 import { useEffect, useMemo } from 'react';
 
 import { capitalizeFirstLetter, criteriaTypeItems } from '../../common/common';
+import StatusTag from '../../common/components/StatusTag';
 import { getLocalItem, LocalStorageKeys, setLocalItem } from '../../common/localStorage';
 import { IAcceptanceCriteria } from '../../common/types';
-import StatusTag from '../../wi-control/components/StatusTag';
 
 interface HubFilterBarProps {
   criterias: IAcceptanceCriteria[];

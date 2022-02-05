@@ -6,7 +6,6 @@ import { v4 as uuidV4 } from 'uuid';
 import { ICustomCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
-type NullableString = string | undefined;
 const CustomCriteriaSection = (): JSX.Element => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
   const [text, setText] = useState<string | undefined>();
@@ -15,9 +14,7 @@ const CustomCriteriaSection = (): JSX.Element => {
     setText(value);
 
     if (value === undefined || value === '') {
-      if (panelState.rule !== undefined) {
-        dispatch({ type: 'SET_VALID', data: false });
-      }
+      return;
     } else {
       const item: ICustomCriteria = {
         id: uuidV4(),

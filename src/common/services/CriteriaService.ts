@@ -8,16 +8,19 @@ import {
 } from '../types';
 import { IStorageService, StorageService } from './StorageService';
 import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
-import { getLoggedInUser, IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
+import { DevOpsService, getLoggedInUser, IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
+import { CriteriaModalResult, PanelIds } from '../common';
 type CriteriaServiceOnChange = (data: CriteriaDocument[]) => void;
 class CriteriaService {
   private readonly _dataStore: IStorageService;
   private _isInitialized = false;
   private _data: CriteriaDocument[];
   private _changeHandler?: CriteriaServiceOnChange;
+  private _devOpsService: DevOpsService;
 
   constructor(dataStore?: IStorageService) {
     this._dataStore = dataStore || new StorageService();
+    this._devOpsService = new DevOpsService();
 
     this._data = [];
   }
@@ -213,6 +216,25 @@ class CriteriaService {
     }
 
     return doc;
+  }
+
+  public async showPanel(
+    criteria?: IAcceptanceCriteria,
+    readOnly = false,
+    onClose?: (result: CriteriaModalResult | undefined) => Promise<void>
+  ): Promise<void> {
+    await this._devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
+      PanelIds.CriteriaPanel,
+      {
+        title: 'Acceptance Criteria',
+        size: 2,
+        configuration: {
+          isReadOnly: readOnly,
+          criteria
+        },
+        onClose: onClose
+      }
+    );
   }
 }
 
