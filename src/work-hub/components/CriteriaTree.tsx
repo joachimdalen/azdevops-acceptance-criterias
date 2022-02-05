@@ -288,7 +288,7 @@ const CriteriaTree = ({
   const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'title',
     minWidth: 200,
-    name: 'Work Item',
+    name: 'Title',
     renderCell: (
       rowIndex: number,
       columnIndex: number,
