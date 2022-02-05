@@ -7,6 +7,7 @@ import {
 } from '@fluentui/react';
 import {
   appTheme,
+  DevOpsService,
   distrinct,
   distrinctBy,
   getWorkItemReferenceNameFromDisplayName,
@@ -14,6 +15,7 @@ import {
   getWorkTypeFromReferenceName,
   IInternalIdentity,
   isDefined,
+  useBooleanToggle,
   VersionDisplay,
   webLogger,
   WorkItemService
@@ -23,6 +25,7 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { Card } from 'azure-devops-ui/Card';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
+import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { Page } from 'azure-devops-ui/Page';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
@@ -32,21 +35,56 @@ import { getCriteriaTitle } from '../common/common';
 import { getLocalItem, LocalStorageKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../common/types';
+import ColumnsPanel from './ColumnsPanel';
 import CriteriaTree from './components/CriteriaTree';
 import HubFilterBar from './components/HubFilterBar';
 import { useWorkHubContext } from './WorkHubContext';
 
 const WorkHub = (): JSX.Element => {
-  const [criteriaService, workItemService] = useMemo(
-    () => [new CriteriaService(), new WorkItemService()],
+  const [criteriaService, workItemService, devOpsService] = useMemo(
+    () => [new CriteriaService(), new WorkItemService(), new DevOpsService()],
     []
   );
   const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
   const [visibleDocuments, setVisibleDocuments] = useState<CriteriaDocument[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter, toggleFilter] = useBooleanToggle(true);
   const { dispatch, state: workHubState } = useWorkHubContext();
+  const [showPanel, togglePanel] = useBooleanToggle(false);
+  const commandBarItems: IHeaderCommandBarItem[] = [
+    {
+      id: 'refresh',
+      text: 'Refresh',
+      iconProps: { iconName: 'Refresh' },
+
+      onActivate: () => {
+        criteriaService.load(undefined, undefined, true).then(res => {
+          if (res.success) {
+            devOpsService.showToast('Refreshed data');
+          }
+        });
+      }
+    },
+    {
+      id: 'filter',
+      iconProps: { iconName: 'Filter' },
+      subtle: true,
+      tooltipProps: {
+        text: 'Show/Hide filter'
+      },
+      onActivate: () => toggleFilter()
+    },
+    {
+      id: 'columns',
+      iconProps: { iconName: 'TripleColumnEdit' },
+      subtle: true,
+      tooltipProps: {
+        text: 'Configure columns'
+      },
+      onActivate: () => togglePanel()
+    }
+  ];
   useEffect(() => {
     async function initModule() {
       setLoading(true);
@@ -166,56 +204,18 @@ const WorkHub = (): JSX.Element => {
     load();
   }, [workItemIds]);
 
-  const _items: ICommandBarItemProps[] = useMemo(() => {
-    return [
-      {
-        key: 'newItem',
-        text: 'New Acceptance Criteria',
-        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
-        iconProps: { iconName: 'Add' },
-        onClick: () => {
-          console.log('');
-        }
-      }
-    ];
-  }, []);
-
-  const _farItems: ICommandBarItemProps[] = useMemo(() => {
-    return [
-      {
-        key: 'columnOptions',
-        text: 'Columns',
-        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
-        iconProps: { iconName: 'ColumnOptions' },
-        onClick: () => {
-          console.log('');
-        }
-      },
-      {
-        key: 'filter',
-        text: 'Filter',
-        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
-        iconProps: { iconName: 'Filter' },
-        iconOnly: true,
-        onClick: () => {
-          setShowFilter(prev => !prev);
-        }
-      }
-    ];
-  }, []);
-
   return (
     <Surface background={SurfaceBackground.neutral}>
       <Page className="flex-grow">
         <ConditionalChildren renderChildren={!loading}>
           <Header
+            commandBarItems={commandBarItems}
             title="Acceptance Criterias"
             titleSize={TitleSize.Large}
             description={<VersionDisplay moduleVersion={process.env.WORK_HUB_VERSION} />}
           />
 
           <div className="page-content flex-grow margin-top-8">
-            <CommandBar items={_items} farItems={_farItems} />
             <Separator />
             <HubFilterBar
               criterias={criterias}
@@ -234,6 +234,9 @@ const WorkHub = (): JSX.Element => {
               />
             </Card>
           </div>
+        </ConditionalChildren>
+        <ConditionalChildren renderChildren={showPanel}>
+          <ColumnsPanel onClose={() => togglePanel()} />
         </ConditionalChildren>
       </Page>
     </Surface>

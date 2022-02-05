@@ -167,18 +167,19 @@ const AcceptanceControl = (): React.ReactElement => {
           await criteriaService.toggleCompletion(id, complete);
         }}
         onDelete={async (id: string) => {
-          await devOpsService.showConfirmationDialog({
-            title: 'Delete criteria?',
-            cancelText: 'Cancel',
-            lightDismiss: false,
-            okText: 'Delete',
-            showCancel: true,
-            onClose: async (result: boolean | undefined) => {
-              if (result) {
-                await criteriaService.deleteCriteria(id);
-              }
-            }
-          });
+          // await devOpsService.showConfirmationDialog({
+          //   title: 'Delete criteria?',
+          //   cancelText: 'Cancel',
+          //   lightDismiss: false,
+          //   okText: 'Delete',
+          //   showCancel: true,
+          //   onClose: async (result: boolean | undefined) => {
+          //     if (result) {
+          //       await criteriaService.deleteCriteria(id);
+          //     }
+          //   }
+          // });
+          await criteriaService.deleteCriteria(id);
         }}
       />
     </div>

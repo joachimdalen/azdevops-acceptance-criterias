@@ -37,3 +37,9 @@
     height: 8px;
   }
 }
+.ac-link {
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}

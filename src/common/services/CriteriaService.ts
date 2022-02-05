@@ -27,7 +27,7 @@ class CriteriaService {
   }
 
   public async load(
-    onDataChanged: CriteriaServiceOnChange,
+    onDataChanged?: CriteriaServiceOnChange,
     scopedId: string | undefined = undefined,
     force = false
   ): Promise<ActionResult<CriteriaDocument[]>> {
@@ -49,7 +49,9 @@ class CriteriaService {
       }
     }
     this._isInitialized = true;
-    this._changeHandler = onDataChanged;
+    if (onDataChanged) {
+      this._changeHandler = onDataChanged;
+    }
 
     this.emitChange();
     return { success: true, data: this._data };

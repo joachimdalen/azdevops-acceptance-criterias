@@ -7,15 +7,20 @@ import {
   isLoggedInUser,
   webLogger
 } from '@joachimdalen/azdevops-ext-core';
-import { WorkItem, WorkItemType } from 'azure-devops-extension-api/WorkItemTracking';
+import {
+  IWorkItemFormNavigationService,
+  WorkItem,
+  WorkItemType
+} from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { Icon } from 'azure-devops-ui/Icon';
-import { ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
+import { ColumnMore, ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
+import { Link } from 'azure-devops-ui/Link';
 import { ExpandableTreeCell, ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
@@ -24,7 +29,7 @@ import {
   TreeItemProvider
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import cx from 'classnames';
-import { useMemo } from 'react';
+import React, { MouseEventHandler, useMemo } from 'react';
 
 import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
 import ProgressBar, { ProgressBarLabelType } from '../../common/components/ProgressBar';
@@ -37,7 +42,23 @@ import {
 import FullStatusTag from '../../wi-control/components/FullStatusTag';
 import StatusTag from '../../wi-control/components/StatusTag';
 import { useWorkHubContext } from '../WorkHubContext';
+import { MenuItemType } from 'azure-devops-ui/Menu';
+
+const InternalLink = ({
+  children,
+  onClick
+}: {
+  children: React.ReactNode;
+  onClick: MouseEventHandler<HTMLAnchorElement> | undefined;
+}) => {
+  return (
+    <a className="ac-link" href="#" onClick={onClick}>
+      {children}
+    </a>
+  );
+};
 const WorkItemTypeTag = ({
+  type,
   iconUrl,
   title,
   id,
@@ -45,15 +66,27 @@ const WorkItemTypeTag = ({
   iconSize = 16
 }: WorkItemTypeTagProps & { id: number | string; title: string }): React.ReactElement => {
   return (
-    <Tooltip text={title || 'Unknown'}>
-      <div className={cx('flex-row flex-grow flex-center', classNames)}>
+    <div className={cx('flex-row flex-grow flex-center', classNames)}>
+      <Tooltip text={type || 'Unknown'}>
         <img src={iconUrl} height={iconSize} />
-        <span className="margin-horizontal-8 flex-grow font-size">
-          <span className="margin-right-4"> {id}</span>
-          <span>{title || 'Unknown'}</span>
-        </span>
-      </div>
-    </Tooltip>
+      </Tooltip>
+      <span className="margin-horizontal-8 flex-grow font-size">
+        <InternalLink
+          onClick={async e => {
+            const service = await DevOps.getService<IWorkItemFormNavigationService>(
+              'ms.vss-work-web.work-item-form-navigation-service'
+            );
+
+            const wi = await service.openWorkItem(parseInt(id.toString()));
+            console.log(wi.id);
+          }}
+        >
+          <Tooltip text={title || 'Unknown'}>
+            <span>{title || 'Unknown'}</span>
+          </Tooltip>
+        </InternalLink>
+      </span>
+    </div>
   );
 };
 
@@ -91,13 +124,20 @@ const typeItemCell: ITreeColumn<IWorkItemCriteriaCell> = {
   renderCell: renderTreeCell,
   width: -100
 };
-const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
-  id: 'title',
-  minWidth: 200,
-  name: 'Title',
+const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
+  id: 'workItemId',
+  minWidth: 50,
+  name: 'ID',
   renderCell: renderTreeCell,
-  width: -100
+  width: 100
 };
+// const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
+//   id: 'title',
+//   minWidth: 200,
+//   name: 'Title',
+//   renderCell: renderTreeCell,
+//   width: -100
+// };
 const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
   id: 'state',
   minWidth: 200,
@@ -214,8 +254,26 @@ const CriteriaTree = ({
 
     return new TreeItemProvider<IWorkItemCriteriaCell>(rootItems);
   }, [criterias]);
-  const workItemCell: ITreeColumn<IWorkItemCriteriaCell> = {
-    id: 'workItemId',
+  const moreColumn = new ColumnMore((listItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
+    if (listItem.underlyingItem.data.rowType === 'workItem') {
+      return {
+        id: 'work-item-menu',
+        items: [
+          { id: 'open-work-item', text: 'Open work item', iconProps: { iconName: 'WorkItem' } }
+        ]
+      };
+    }
+
+    return {
+      id: 'sub-menu',
+      items: [
+        { id: 'copy-link', text: 'Copy link to criteria', iconProps: { iconName: 'Link' } },
+        { id: 'divider', itemType: MenuItemType.Divider }
+      ]
+    };
+  });
+  const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
+    id: 'title',
     minWidth: 200,
     name: 'Work Item',
     renderCell: (
@@ -245,13 +303,7 @@ const CriteriaTree = ({
           treeColumn={treeColumn}
         >
           <ConditionalChildren renderChildren={data.rowType === 'criteria'}>
-            <div className="rhythm-horizontal-8 flex-row flex-center">
-              <Icon iconName="CheckboxCompositeReversed" />
-              <span>{capitalizeFirstLetter(data.rowType)}</span>
-            </div>
-          </ConditionalChildren>
-          <ConditionalChildren renderChildren={data.rowType === 'workItem'}>
-            {treeItem.underlyingItem.data.title}
+            <InternalLink onClick={() => alert(data.title)}>{data.title}</InternalLink>
           </ConditionalChildren>
         </ExpandableTreeCell>
       );
@@ -438,8 +490,9 @@ const CriteriaTree = ({
     <Tree<IWorkItemCriteriaCell>
       ariaLabel="Basic tree"
       columns={[
-        workItemCell,
+        idCell,
         titleCell,
+        moreColumn,
         progressCell,
         criteriaState,
         approverCell,
