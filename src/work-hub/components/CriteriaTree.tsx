@@ -14,7 +14,7 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { ObservableLike } from 'azure-devops-ui/Core/Observable';
+import { ObservableLike, ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { Icon } from 'azure-devops-ui/Icon';
 import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnMore, ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
@@ -38,10 +38,11 @@ import {
   CriteriaDocument,
   FullCriteriaStatus,
   IAcceptanceCriteria,
+  IExtendedTableCell,
   WorkItemTypeTagProps
 } from '../../common/types';
 import { useWorkHubContext } from '../WorkHubContext';
-
+import { copyToClipboard } from 'azure-devops-ui/Utils/ClipboardUtils';
 const InternalLink = ({
   children,
   onClick
@@ -95,10 +96,7 @@ interface CriteriaTreeProps {
   onApprove: (id: string) => Promise<void>;
   onClick: (criteria: IAcceptanceCriteria) => Promise<void>;
 }
-interface IDynamicProperties {
-  [key: string]: any;
-}
-type IExtendedTableCell = ISimpleTableCell & IDynamicProperties;
+
 interface IProgressStatus {
   value: number;
   maxValue: number;
@@ -210,54 +208,59 @@ const CriteriaTree = ({
 
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
     webLogger.trace('mapping', criterias);
-    const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = criterias.map(x => {
-      const criteriaRows = x.criterias.map(y => {
-        const it: ITreeItem<IWorkItemCriteriaCell> = {
+    const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = criterias
+      .sort((a, b) => {
+        return parseInt(b.id) - parseInt(a.id);
+      })
+      .map(x => {
+        const criteriaRows = x.criterias.map(y => {
+          const it: ITreeItem<IWorkItemCriteriaCell> = {
+            data: {
+              workItemId: '',
+              title: getCriteriaTitle(y) || 'Noop',
+              rowType: 'criteria',
+              type: capitalizeFirstLetter(y.type) as any,
+              state: y.state,
+              requiredApprover: y.requiredApprover,
+              criteriaId: y.id,
+              progress: {
+                maxValue: 1,
+                value: y.state === 'approved' ? 1 : 0,
+                type: 'percentage'
+              },
+              rawCriteria: y
+            }
+          };
+          return it;
+        });
+        const item: ITreeItem<IWorkItemCriteriaCell> = {
           data: {
-            workItemId: '',
-            title: getCriteriaTitle(y) || 'Noop',
-            rowType: 'criteria',
-            type: capitalizeFirstLetter(y.type) as any,
-            state: y.state,
-            requiredApprover: y.requiredApprover,
-            criteriaId: y.id,
+            workItemId: x.id,
+            title: '',
+            rowType: 'workItem',
+            type: '',
+            state: AcceptanceCriteriaState.New,
+            fullState: x.state,
             progress: {
-              maxValue: 1,
-              value: y.state === 'approved' ? 1 : 0,
-              type: 'percentage'
-            },
-            rawCriteria: y
-          }
+              maxValue: x.criterias.length,
+              value: x.criterias.filter(
+                x =>
+                  x.state === AcceptanceCriteriaState.Completed ||
+                  x.state === AcceptanceCriteriaState.Approved
+              ).length,
+              type: 'count'
+            }
+          },
+          childItems: criteriaRows
         };
-        return it;
+        return item;
       });
-      const item: ITreeItem<IWorkItemCriteriaCell> = {
-        data: {
-          workItemId: x.id,
-          title: '',
-          rowType: 'workItem',
-          type: '',
-          state: AcceptanceCriteriaState.New,
-          fullState: x.state,
-          progress: {
-            maxValue: x.criterias.length,
-            value: x.criterias.filter(
-              x =>
-                x.state === AcceptanceCriteriaState.Completed ||
-                x.state === AcceptanceCriteriaState.Approved
-            ).length,
-            type: 'count'
-          }
-        },
-        childItems: criteriaRows
-      };
-      return item;
-    });
 
     return new TreeItemProvider<IWorkItemCriteriaCell>(rootItems);
   }, [criterias]);
   const moreColumn = new ColumnMore((listItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
-    if (listItem.underlyingItem.data.rowType === 'workItem') {
+    const data = listItem.underlyingItem?.data;
+    if (data.rowType === 'workItem') {
       return {
         id: 'work-item-menu',
         items: [
@@ -270,14 +273,24 @@ const CriteriaTree = ({
       id: 'sub-menu',
       items: [
         {
+          id: 'view-criteria',
+          text: 'View',
+          iconProps: { iconName: 'View' },
+          onActivate: () => {
+            if (data.rawCriteria) {
+              onClick(data.rawCriteria);
+            }
+          }
+        },
+        {
           id: 'copy-link',
           text: 'Copy link to criteria',
           iconProps: { iconName: 'Link' },
-          onActivate: () => {
-            if (listItem.underlyingItem.data.criteriaId) {
-              getUrl({ criteriaId: listItem.underlyingItem.data.criteriaId.toString() }).then(url =>
-                console.log(url)
-              );
+          onActivate: async () => {
+            if (data.criteriaId) {
+              getUrl({ criteriaId: data.criteriaId.toString() }).then(url => {
+                copyToClipboard(url);
+              });
             }
           }
         },
@@ -507,19 +520,21 @@ const CriteriaTree = ({
 
   if (workItems.length === 0) return <div>Loding..</div>;
 
+  
+  const columns = [
+    idCell,
+    titleCell,
+    moreColumn,
+    progressCell,
+    criteriaState,
+    approverCell,
+    typeItemCell,
+    actionCell
+  ];
   return (
     <Tree<IWorkItemCriteriaCell>
       ariaLabel="Basic tree"
-      columns={[
-        idCell,
-        titleCell,
-        moreColumn,
-        progressCell,
-        criteriaState,
-        approverCell,
-        typeItemCell,
-        actionCell
-      ]}
+      columns={columns}
       itemProvider={treeProvider as any}
       onToggle={(event: any, treeItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
         treeProvider.toggle(treeItem.underlyingItem);

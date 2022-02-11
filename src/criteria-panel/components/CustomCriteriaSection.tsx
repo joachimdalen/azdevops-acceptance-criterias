@@ -1,14 +1,14 @@
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
-import { ICustomCriteria } from '../../common/types';
+import { IAcceptanceCriteria, ICustomCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
 const CustomCriteriaSection = (): JSX.Element => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
-  const [text, setText] = useState<string | undefined>();
+  const [text, setText] = useState<string | undefined>(panelState.custom?.text);
 
   const setItemValue = (value: string | undefined) => {
     setText(value);
@@ -17,7 +17,7 @@ const CustomCriteriaSection = (): JSX.Element => {
       return;
     } else {
       const item: ICustomCriteria = {
-        id: uuidV4(),
+        id: panelState?.custom?.id || uuidV4(),
         text: value
       };
       dispatch({ type: 'SET_CRITERIA', data: item });

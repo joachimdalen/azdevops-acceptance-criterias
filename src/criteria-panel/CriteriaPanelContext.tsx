@@ -1,13 +1,13 @@
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
-import { IScenario } from '../common/types';
+import { ICustomCriteria, IScenario } from '../common/types';
 
 export interface ICriteriaPanelContextState {
   isLoading: boolean;
   isValid: boolean;
   type: 'scenario' | 'custom';
   scenario?: IScenario;
-  custom?: any;
+  custom?: ICustomCriteria;
 }
 
 export interface ReducerAction {

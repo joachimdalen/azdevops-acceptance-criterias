@@ -5,12 +5,7 @@ import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { Icon } from 'azure-devops-ui/Icon';
 import { MenuItemType } from 'azure-devops-ui/Menu';
-import {
-  ColumnFill,
-  ColumnMore,
-  ISimpleTableCell,
-  SimpleTableCell
-} from 'azure-devops-ui/Table';
+import { ColumnFill, ColumnMore, ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
 import { ExpandableTreeCell, ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
@@ -23,17 +18,21 @@ import React, { useMemo } from 'react';
 import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
 import { ProgressBarLabelType } from '../../common/components/ProgressBar';
 import StatusTag from '../../common/components/StatusTag';
-import { AcceptanceCriteriaState, CriteriaDocument, IScenario } from '../../common/types';
+import {
+  AcceptanceCriteriaState,
+  CriteriaDocument,
+  IAcceptanceCriteria,
+  IExtendedTableCell,
+  IScenario
+} from '../../common/types';
 
 interface CriteriaViewProps {
   criteria?: CriteriaDocument;
   onApprove: (id: string, complete: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onEdit: (criteria: IAcceptanceCriteria) => Promise<void>;
 }
-interface IDynamicProperties {
-  [key: string]: any;
-}
-type IExtendedTableCell = ISimpleTableCell & IDynamicProperties;
+
 interface IProgressStatus {
   value: number;
   maxValue: number;
@@ -48,6 +47,7 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
   requiredApprover?: IInternalIdentity;
   progress?: IProgressStatus;
   scenario?: IScenario;
+  rawCriteria?: IAcceptanceCriteria;
 }
 
 // const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
@@ -101,7 +101,12 @@ const getIcon = (type: string) => {
       return 'Add';
   }
 };
-const CriteriaView = ({ criteria, onApprove, onDelete }: CriteriaViewProps): JSX.Element => {
+const CriteriaView = ({
+  criteria,
+  onApprove,
+  onDelete,
+  onEdit
+}: CriteriaViewProps): JSX.Element => {
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
     const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = (criteria?.criterias || []).map(x => {
       const children: ITreeItem<IWorkItemCriteriaCell>[] = [];
@@ -129,7 +134,8 @@ const CriteriaView = ({ criteria, onApprove, onDelete }: CriteriaViewProps): JSX
             maxValue: 1,
             value: x.state === 'approved' ? 1 : 0,
             type: 'percentage'
-          }
+          },
+          rawCriteria: x
         },
         childItems: children
       };
@@ -142,7 +148,16 @@ const CriteriaView = ({ criteria, onApprove, onDelete }: CriteriaViewProps): JSX
     return {
       id: 'sub-menu',
       items: [
-        { id: 'edit', text: 'Edit', iconProps: { iconName: 'Edit' } },
+        {
+          id: 'edit',
+          text: 'Edit',
+          iconProps: { iconName: 'Edit' },
+          onActivate: () => {
+            if (listItem?.underlyingItem?.data?.rawCriteria) {
+              onEdit(listItem?.underlyingItem?.data?.rawCriteria);
+            }
+          }
+        },
         { id: 'divider', itemType: MenuItemType.Divider },
         {
           id: 'delete',

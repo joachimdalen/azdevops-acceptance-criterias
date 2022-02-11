@@ -13,12 +13,11 @@ import {
   DevOpsService,
   webLogger
 } from '@joachimdalen/azdevops-ext-core';
-import { IMessageDialogOptions } from 'azure-devops-extension-api';
 import { IWorkItemFormService } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { CriteriaModalResult, PanelIds } from '../common/common';
+import { CriteriaModalResult } from '../common/common';
 import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria } from '../common/types';
 import CriteriaView from './components/CriteriaView';
@@ -112,34 +111,6 @@ const AcceptanceControl = (): React.ReactElement => {
     ];
   }, []);
 
-  const [viewMode, setViewMode] = useState<'table' | 'list'>('list');
-
-  const _farItems: ICommandBarItemProps[] = useMemo(() => {
-    const items: ICommandBarItemProps[] = [
-      {
-        key: 'showTable',
-        text: 'Show Edit',
-        cacheKey: 'myCacheKey',
-        iconProps: { iconName: 'Table' },
-        checked: viewMode === 'table',
-        onClick: () => {
-          DevOps.resize();
-        }
-      },
-      {
-        key: 'showProcess',
-        text: 'Show Process View',
-        cacheKey: 'myCacheKey',
-        iconProps: { iconName: 'List' },
-        checked: viewMode === 'list',
-        onClick: () => {
-          setViewMode('list');
-        }
-      }
-    ];
-    return items;
-  }, [viewMode]);
-
   if (loading) {
     return (
       <div className="acceptance-control-loader">
@@ -151,12 +122,15 @@ const AcceptanceControl = (): React.ReactElement => {
   return (
     <div className="acceptance-control-container">
       <div>
-        <CommandBar styles={commandBarStyles} items={_items} farItems={_farItems} />
+        <CommandBar styles={commandBarStyles} items={_items} />
         <Separator />
       </div>
 
       <CriteriaView
         criteria={criteriaDocument}
+        onEdit={async (criteria: IAcceptanceCriteria) => {
+          await showPanel(criteria);
+        }}
         onApprove={async (id: string, complete: boolean) => {
           await criteriaService.toggleCompletion(id, complete);
         }}

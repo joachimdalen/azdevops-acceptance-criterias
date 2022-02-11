@@ -1,4 +1,5 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
+import { ISimpleTableCell } from 'azure-devops-ui/Table';
 
 export interface CriteriaDocument {
   // work item id
@@ -65,3 +66,8 @@ export interface WorkItemTypeTagProps {
   type?: string;
   classNames?: string;
 }
+
+export interface IDynamicProperties {
+  [key: string]: any;
+}
+export type IExtendedTableCell = ISimpleTableCell & IDynamicProperties;

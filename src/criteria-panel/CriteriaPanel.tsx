@@ -36,12 +36,6 @@ const CriteriaPanel = (): React.ReactElement => {
   const [criteria, setCriteria] = useState<IAcceptanceCriteria | undefined>();
 
   const [loading, setLoading] = useState(true);
-  const dropdownItems: IListBoxItem<any>[] = [
-    { id: AcceptanceCriteriaState.New, text: 'New' },
-    { id: AcceptanceCriteriaState.Completed, text: 'Completed' },
-    { id: AcceptanceCriteriaState.Approved, text: 'Approved' },
-    { id: AcceptanceCriteriaState.Rejected, text: 'Rejected' }
-  ];
 
   useEffect(() => {
     loadTheme(createTheme(appTheme));
@@ -60,9 +54,14 @@ const CriteriaPanel = (): React.ReactElement => {
           setIsReadOnly(true);
         }
         if (config.criteria) {
-          const criteria = config.criteria as IAcceptanceCriteria;
-          setIdentity(criteria.requiredApprover);
-          setCriteria(criteria);
+          const conCrit = config.criteria as IAcceptanceCriteria;
+          setIdentity(conCrit.requiredApprover);
+          setCriteria(conCrit);
+          dispatch({ type: 'SET_TYPE', data: conCrit.type });
+          dispatch({
+            type: 'SET_CRITERIA',
+            data: conCrit.type === 'scenario' ? conCrit.scenario : conCrit.custom
+          });
         }
 
         DevOps.notifyLoadSucceeded().then(() => {
@@ -88,21 +87,26 @@ const CriteriaPanel = (): React.ReactElement => {
   const save = () => {
     const config = DevOps.getConfiguration();
     if (config.panel) {
-      const ac: IAcceptanceCriteria = {
-        id: uuidV4(),
-        requiredApprover: identity,
-        state: AcceptanceCriteriaState.New,
-        type: panelState.type,
-        custom: panelState.type === 'custom' ? panelState.custom : undefined,
-        scenario: panelState.type === 'scenario' ? panelState.scenario : undefined
-      };
-
+      const ac = getCriteriaPayload();
       const res: CriteriaModalResult = {
         result: 'SAVE',
         criteria: ac
       };
       config.panel.close(res);
     }
+  };
+
+  const getCriteriaPayload = () => {
+    const ac: IAcceptanceCriteria = {
+      id: criteria?.id || uuidV4(),
+      requiredApprover: identity,
+      state: criteria?.state || AcceptanceCriteriaState.New,
+      type: panelState.type,
+      custom: panelState.type === 'custom' ? panelState.custom : undefined,
+      scenario: panelState.type === 'scenario' ? panelState.scenario : undefined
+    };
+
+    return ac;
   };
 
   const editContent = (
@@ -156,47 +160,49 @@ const CriteriaPanel = (): React.ReactElement => {
       showVersion={!isReadOnly}
       moduleVersion={process.env.CRITERIA_PANEL_VERSION}
     >
-      <ConditionalChildren renderChildren={isReadOnly}>
-        {criteria && (
-          <>
-            <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
-              <div className="flex-row rhythm-horizontal-8">
-                <FormItem label="Required Approver" className="flex-grow">
-                  <ConditionalChildren renderChildren={criteria.requiredApprover === undefined}>
-                    <div className="secondary-text">
-                      <Icon iconName="Contact" />
-                      <span className="margin-left-8">Unassigned</span>
-                    </div>
-                  </ConditionalChildren>
-                  <ConditionalChildren renderChildren={criteria.requiredApprover !== undefined}>
-                    {criteria.requiredApprover && (
-                      <Persona
-                        text={criteria.requiredApprover.displayName}
-                        size={PersonaSize.size24}
-                        imageInitials={getInitials(criteria.requiredApprover.displayName, false)}
-                        imageUrl={criteria.requiredApprover.image}
-                      />
-                    )}
-                  </ConditionalChildren>
-                </FormItem>
+      <ConditionalChildren renderChildren={!loading}>
+        <ConditionalChildren renderChildren={isReadOnly}>
+          {criteria && (
+            <>
+              <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
+                <div className="flex-row rhythm-horizontal-8">
+                  <FormItem label="Required Approver" className="flex-grow">
+                    <ConditionalChildren renderChildren={criteria.requiredApprover === undefined}>
+                      <div className="secondary-text">
+                        <Icon iconName="Contact" />
+                        <span className="margin-left-8">Unassigned</span>
+                      </div>
+                    </ConditionalChildren>
+                    <ConditionalChildren renderChildren={criteria.requiredApprover !== undefined}>
+                      {criteria.requiredApprover && (
+                        <Persona
+                          text={criteria.requiredApprover.displayName}
+                          size={PersonaSize.size24}
+                          imageInitials={getInitials(criteria.requiredApprover.displayName, false)}
+                          imageUrl={criteria.requiredApprover.image}
+                        />
+                      )}
+                    </ConditionalChildren>
+                  </FormItem>
 
-                <FormItem label="State" className="flex-grow">
-                  <StatusTag state={criteria.state} />
-                </FormItem>
+                  <FormItem label="State" className="flex-grow">
+                    <StatusTag state={criteria.state} />
+                  </FormItem>
+                </div>
               </div>
-            </div>
-            <ConditionalChildren renderChildren={criteria.type === 'scenario'}>
-              {criteria.scenario && <ScenarioCriteriaViewSection criteria={criteria} />}
-            </ConditionalChildren>
-            <ConditionalChildren renderChildren={criteria.type === 'custom'}>
-              <FormItem label="Content" className="flex-grow">
-                {criteria.custom?.text}
-              </FormItem>
-            </ConditionalChildren>
-          </>
-        )}
+              <ConditionalChildren renderChildren={criteria.type === 'scenario'}>
+                {criteria.scenario && <ScenarioCriteriaViewSection criteria={criteria} />}
+              </ConditionalChildren>
+              <ConditionalChildren renderChildren={criteria.type === 'custom'}>
+                <FormItem label="Content" className="flex-grow">
+                  {criteria.custom?.text}
+                </FormItem>
+              </ConditionalChildren>
+            </>
+          )}
+        </ConditionalChildren>
+        <ConditionalChildren renderChildren={!isReadOnly}>{editContent}</ConditionalChildren>
       </ConditionalChildren>
-      <ConditionalChildren renderChildren={!isReadOnly}>{editContent}</ConditionalChildren>
     </PanelWrapper>
   );
 };

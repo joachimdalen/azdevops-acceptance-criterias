@@ -163,10 +163,18 @@ class CriteriaService {
     } else {
       const document = this._data[existingDocumentIndex];
       const newDocument = { ...document };
-      const index = document.criterias.findIndex(x => x.id === criteria.id);
+      const index = document.criterias.findIndex(x => {
+        console.log([x.id, criteria.id, x.id === criteria.id]);
+        return x.id === criteria.id;
+      });
+      console.log(newDocument);
       if (index > -1) {
+        console.log('Found index 0:', index);
+        console.log(criteria);
         newDocument.criterias[index] = criteria;
       } else {
+        console.log('Found index 1:', index);
+        console.log(criteria);
         newDocument.criterias = [...newDocument.criterias, criteria];
       }
 
