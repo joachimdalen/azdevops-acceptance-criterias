@@ -66,6 +66,22 @@
       ]
     },
     {
+      "id": "confirmation-dialog",
+      "type": "ms.vss-web.external-content",
+      "targets": [],
+      "properties": {
+        "uri": "confirmation-dialog.html"
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
       "id": "admin-hub",
       "type": "ms.vss-web.hub",
       "description": "Configuration hub for Acceptance Criterias",

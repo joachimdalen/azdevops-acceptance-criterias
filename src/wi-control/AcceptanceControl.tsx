@@ -11,16 +11,15 @@ import {
   appTheme,
   commandBarStyles,
   DevOpsService,
+  useBooleanToggle,
   webLogger
 } from '@joachimdalen/azdevops-ext-core';
 import {
-  IWorkItemChangedArgs,
   IWorkItemFormService,
   IWorkItemLoadedArgs,
   IWorkItemNotificationListener
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
-import { ZeroData } from 'azure-devops-ui/ZeroData';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { CriteriaModalResult } from '../common/common';
@@ -38,6 +37,7 @@ const AcceptanceControl = (): React.ReactElement => {
   const [rows, setRows] = useState<IAcceptanceCriteria[]>();
   const [isReadOnly, setReadOnly] = useState<boolean>(false);
   const [isNew, setIsNew] = useState<boolean>(true);
+  const [showConfirmation, setShowConfirmation] = useBooleanToggle();
   const provider = useMemo(() => {
     const listener: Partial<IWorkItemNotificationListener> = {
       onLoaded: async function (workItemLoadedArgs: IWorkItemLoadedArgs): Promise<void> {
@@ -184,9 +184,11 @@ const AcceptanceControl = (): React.ReactElement => {
           //     }
           //   }
           // });
-          await criteriaService.deleteCriteria(id);
+          // await criteriaService.deleteCriteria(id);
+          setShowConfirmation();
         }}
       />
+      
     </div>
   );
 };

@@ -22,6 +22,12 @@ const modules = [
     entry: './src/wi-control/module',
     root: 'wi-control-container',
     generate: true
+  },
+  {
+    name: 'confirmation-dialog',
+    entry: './src/confirmation-dialog/module',
+    root: 'confirmation-dialog-container',
+    generate: true
   }
 ];
 
