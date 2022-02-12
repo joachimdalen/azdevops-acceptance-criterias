@@ -15,12 +15,12 @@ export interface IAcceptanceCriteria {
   type: 'scenario' | 'custom';
   scenario?: IScenario;
   custom?: ICustomCriteria;
-  approval?: IAcceptanceCriteriaApproval;
+  processed?: IAcceptanceCriteriaProcess;
 }
 
-export interface IAcceptanceCriteriaApproval {
-  approvedBy?: IInternalIdentity;
-  approvedAt?: Date;
+export interface IAcceptanceCriteriaProcess {
+  processedBy?: IInternalIdentity;
+  processedAt?: Date;
   completedAt?: Date;
 }
 

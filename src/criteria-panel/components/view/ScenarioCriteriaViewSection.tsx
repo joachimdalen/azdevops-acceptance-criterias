@@ -6,6 +6,7 @@ import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { useMemo, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
+
 import { capitalizeFirstLetter } from '../../../common/common';
 import { IAcceptanceCriteria, IScenario, IScenarioCriteria } from '../../../common/types';
 import { useCriteriaPanelContext } from '../../CriteriaPanelContext';

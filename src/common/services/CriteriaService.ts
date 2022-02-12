@@ -1,4 +1,8 @@
+import { DevOpsService, getLoggedInUser, IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
 import { getClient } from 'azure-devops-extension-api';
+import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
+
+import { CriteriaModalResult, PanelIds } from '../common';
 import { ActionResult } from '../models/ActionResult';
 import {
   AcceptanceCriteriaState,
@@ -7,9 +11,6 @@ import {
   IAcceptanceCriteria
 } from '../types';
 import { IStorageService, StorageService } from './StorageService';
-import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
-import { DevOpsService, getLoggedInUser, IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
-import { CriteriaModalResult, PanelIds } from '../common';
 type CriteriaServiceOnChange = (data: CriteriaDocument[]) => void;
 class CriteriaService {
   private readonly _dataStore: IStorageService;
@@ -83,27 +84,29 @@ class CriteriaService {
     }
   }
 
-  public async approveCriteria(id: string) {
+  public async processCriteria(id: string, approved: boolean): Promise<void> {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
     const approver = await getLoggedInUser();
     if (doc) {
       const criteria = doc.criterias.find(x => x.id === id);
       if (criteria) {
-        if (criteria.approval !== undefined) {
-          criteria.approval = {
-            ...criteria.approval,
-            approvedAt: new Date(),
-            approvedBy: approver
+        if (criteria.processed !== undefined) {
+          criteria.processed = {
+            ...criteria.processed,
+            processedAt: new Date(),
+            processedBy: approver
           };
         } else {
-          criteria.approval = {
+          criteria.processed = {
             completedAt: new Date(),
-            approvedAt: new Date(),
-            approvedBy: approver
+            processedAt: new Date(),
+            processedBy: approver
           };
         }
 
-        criteria.state = AcceptanceCriteriaState.Approved;
+        criteria.state = approved
+          ? AcceptanceCriteriaState.Approved
+          : AcceptanceCriteriaState.Rejected;
         await this.createOrUpdate(doc.id, criteria);
         this.emitChange();
       }
@@ -126,7 +129,7 @@ class CriteriaService {
           criteria.state === AcceptanceCriteriaState.Rejected
         ) {
           criteria.state = AcceptanceCriteriaState.New;
-          criteria.approval = undefined;
+          criteria.processed = undefined;
         } else {
           if (criteria.requiredApprover) {
             criteria.state = AcceptanceCriteriaState.AwaitingApproval;
@@ -134,7 +137,7 @@ class CriteriaService {
             criteria.state = AcceptanceCriteriaState.Completed;
           }
 
-          criteria.approval = {
+          criteria.processed = {
             completedAt: new Date()
           };
         }
@@ -147,7 +150,8 @@ class CriteriaService {
 
   public async createOrUpdate(
     workItemId: string,
-    criteria: IAcceptanceCriteria
+    criteria: IAcceptanceCriteria,
+    shouldEmit = false
   ): Promise<CriteriaDocument | undefined> {
     const existingDocumentIndex = this._data.findIndex(x => x.id === workItemId);
 
@@ -163,24 +167,20 @@ class CriteriaService {
     } else {
       const document = this._data[existingDocumentIndex];
       const newDocument = { ...document };
-      const index = document.criterias.findIndex(x => {
-        console.log([x.id, criteria.id, x.id === criteria.id]);
-        return x.id === criteria.id;
-      });
-      console.log(newDocument);
+      const index = document.criterias.findIndex(x => x.id === criteria.id);
+
       if (index > -1) {
-        console.log('Found index 0:', index);
-        console.log(criteria);
         newDocument.criterias[index] = criteria;
       } else {
-        console.log('Found index 1:', index);
-        console.log(criteria);
         newDocument.criterias = [...newDocument.criterias, criteria];
       }
 
       const stateDoc = this.setFullState(newDocument);
       const updated = await this._dataStore.setCriteriaDocument(stateDoc);
       this._data[existingDocumentIndex] = updated;
+      if (shouldEmit) {
+        this.emitChange();
+      }
       return updated;
     }
   }
@@ -228,7 +228,8 @@ class CriteriaService {
 
   public async showPanel(
     criteria?: IAcceptanceCriteria,
-    readOnly = false,
+    readOnly?: boolean,
+    canEdit?: boolean,
     onClose?: (result: CriteriaModalResult | undefined) => Promise<void>
   ): Promise<void> {
     await this._devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
@@ -237,7 +238,8 @@ class CriteriaService {
         title: 'Acceptance Criteria',
         size: 2,
         configuration: {
-          isReadOnly: readOnly,
+          isReadOnly: readOnly === undefined ? false : readOnly,
+          canEdit: canEdit === undefined ? false : canEdit,
           criteria
         },
         onClose: onClose

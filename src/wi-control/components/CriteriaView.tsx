@@ -6,6 +6,7 @@ import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { Icon } from 'azure-devops-ui/Icon';
 import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnFill, ColumnMore, ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
+import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { ExpandableTreeCell, ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
@@ -16,6 +17,9 @@ import {
 import React, { useMemo } from 'react';
 
 import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
+import ApproverDisplay from '../../common/components/ApproverDisplay';
+import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
+import InternalLink from '../../common/components/InternalLink';
 import { ProgressBarLabelType } from '../../common/components/ProgressBar';
 import StatusTag from '../../common/components/StatusTag';
 import {
@@ -30,7 +34,7 @@ interface CriteriaViewProps {
   criteria?: CriteriaDocument;
   onApprove: (id: string, complete: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
-  onEdit: (criteria: IAcceptanceCriteria) => Promise<void>;
+  onEdit: (criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) => Promise<void>;
 }
 
 interface IProgressStatus {
@@ -80,6 +84,7 @@ const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
 
     const defaultCell = (
       <SimpleTableCell
+        key={`${columnIndex}-${data.id}`}
         className={treeColumn.className}
         columnIndex={columnIndex}
         contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
@@ -93,14 +98,7 @@ const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
   },
   width: -100
 };
-const getIcon = (type: string) => {
-  switch (type) {
-    case 'custom':
-      return 'Comment';
-    case 'scenario':
-      return 'Add';
-  }
-};
+
 const CriteriaView = ({
   criteria,
   onApprove,
@@ -154,7 +152,7 @@ const CriteriaView = ({
           iconProps: { iconName: 'Edit' },
           onActivate: () => {
             if (listItem?.underlyingItem?.data?.rawCriteria) {
-              onEdit(listItem?.underlyingItem?.data?.rawCriteria);
+              onEdit(listItem?.underlyingItem?.data?.rawCriteria, false, true);
             }
           }
         },
@@ -193,14 +191,23 @@ const CriteriaView = ({
         treeCell.href
       );
       const content = (
-        <React.Fragment>
-          <span>{data.title}</span>
-        </React.Fragment>
+        <InternalLink
+          onClick={async () => {
+            if (data.rawCriteria) {
+              onEdit(data.rawCriteria, true, true);
+            }
+          }}
+        >
+          <Tooltip text={data.title}>
+            <span>{data.title}</span>
+          </Tooltip>
+        </InternalLink>
       );
 
       if (data.type !== 'scenario') {
         return (
           <SimpleTableCell
+            key={`${columnIndex}-${data.id}`}
             className={treeColumn.className}
             columnIndex={columnIndex}
             contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
@@ -231,7 +238,7 @@ const CriteriaView = ({
 
       return (
         <ExpandableTreeCell
-          key={rowIndex}
+          key={`${columnIndex}-${data.id}`}
           className={treeColumn.className}
           columnIndex={columnIndex}
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
@@ -267,25 +274,14 @@ const CriteriaView = ({
       // const approver = identities.get(data.requiredApprover);
       return (
         <SimpleTableCell
+          key={`${columnIndex}-${data.id}`}
           className={treeColumn.className}
           columnIndex={columnIndex}
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
           tableColumn={treeColumn}
         >
           <ConditionalChildren renderChildren={data.rowType === 'item'}>
-            <ConditionalChildren renderChildren={data.requiredApprover === undefined}>
-              <span>Unassigned</span>
-            </ConditionalChildren>
-            <ConditionalChildren renderChildren={data.requiredApprover !== undefined}>
-              {data.requiredApprover && (
-                <Persona
-                  text={data.requiredApprover.displayName}
-                  size={PersonaSize.size24}
-                  imageInitials={getInitials(data.requiredApprover.displayName, false)}
-                  imageUrl={data.requiredApprover.image}
-                />
-              )}
-            </ConditionalChildren>
+            <ApproverDisplay approver={data?.requiredApprover} />
           </ConditionalChildren>
         </SimpleTableCell>
       );
@@ -316,16 +312,14 @@ const CriteriaView = ({
       // const approver = identities.get(data.requiredApprover);
       return (
         <SimpleTableCell
+          key={`${columnIndex}-${data.id}`}
           className={treeColumn.className}
           columnIndex={columnIndex}
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
           tableColumn={treeColumn}
         >
           <ConditionalChildren renderChildren={data.rowType === 'item'}>
-            <div className="rhythm-horizontal-8 flex-row flex-center">
-              <Icon iconName={getIcon(data.type)} />
-              <span>{capitalizeFirstLetter(data.type)}</span>
-            </div>
+            {data.type !== '' && <CriteriaTypeDisplay type={data.type} />}
           </ConditionalChildren>
         </SimpleTableCell>
       );
@@ -355,6 +349,7 @@ const CriteriaView = ({
       // const approver = identities.get(data.requiredApprover);
       return (
         <SimpleTableCell
+          key={`${columnIndex}-${data.id}`}
           className={treeColumn.className}
           columnIndex={columnIndex}
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}

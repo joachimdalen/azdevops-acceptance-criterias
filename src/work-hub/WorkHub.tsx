@@ -222,11 +222,11 @@ const WorkHub = (): JSX.Element => {
                 criterias={visibleDocuments}
                 workItems={workItems}
                 workItemTypes={wiMap}
-                onApprove={async (id: string) => {
-                  await criteriaService.approveCriteria(id);
+                onProcess={async (id: string, approved: boolean) => {
+                  await criteriaService.processCriteria(id, approved);
                 }}
                 onClick={async (criteria: IAcceptanceCriteria) => {
-                  await criteriaService.showPanel(criteria, true);
+                  await criteriaService.showPanel(criteria, true, false);
                 }}
               />
             </Card>

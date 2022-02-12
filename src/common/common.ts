@@ -1,12 +1,13 @@
-import { IListBoxItem } from 'azure-devops-ui/ListBox';
-import { IAcceptanceCriteria } from './types';
-import * as DevOps from 'azure-devops-extension-sdk';
 import {
   CommonServiceIds,
   ILocationService,
   IProjectPageService
 } from 'azure-devops-extension-api';
 import { CoreRestClient } from 'azure-devops-extension-api/Core';
+import * as DevOps from 'azure-devops-extension-sdk';
+import { IListBoxItem } from 'azure-devops-ui/ListBox';
+
+import { IAcceptanceCriteria } from './types';
 
 export enum PanelIds {
   CriteriaPanel = 'criteria-panel'
@@ -48,8 +49,6 @@ export const getUrl = async ({ ...urlParams }: KeyVal): Promise<string> => {
   const hostBaseUrl = await locationService.getResourceAreaLocation(
     CoreRestClient.RESOURCE_AREA_ID
   );
-
-  console.log(`hostBaseUrl: ${hostBaseUrl}`);
 
   const projectService = await DevOps.getService<IProjectPageService>(
     'ms.vss-tfs-web.tfs-page-data-service'

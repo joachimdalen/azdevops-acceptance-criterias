@@ -13,15 +13,20 @@ import {
   DevOpsService,
   webLogger
 } from '@joachimdalen/azdevops-ext-core';
-import { IWorkItemFormService } from 'azure-devops-extension-api/WorkItemTracking';
+import {
+  IWorkItemChangedArgs,
+  IWorkItemFormService,
+  IWorkItemLoadedArgs,
+  IWorkItemNotificationListener
+} from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { ZeroData } from 'azure-devops-ui/ZeroData';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { CriteriaModalResult } from '../common/common';
 import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria } from '../common/types';
 import CriteriaView from './components/CriteriaView';
-import WorkItemListener from './WorkItemListener';
 
 const AcceptanceControl = (): React.ReactElement => {
   const [devOpsService, criteriaService] = useMemo(
@@ -31,6 +36,17 @@ const AcceptanceControl = (): React.ReactElement => {
   const [criteriaDocument, setCriteriaDocument] = useState<CriteriaDocument>();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<IAcceptanceCriteria[]>();
+  const [isReadOnly, setReadOnly] = useState<boolean>(false);
+  const [isNew, setIsNew] = useState<boolean>(true);
+  const provider = useMemo(() => {
+    const listener: Partial<IWorkItemNotificationListener> = {
+      onLoaded: async function (workItemLoadedArgs: IWorkItemLoadedArgs): Promise<void> {
+        setReadOnly(workItemLoadedArgs.isReadOnly);
+        setIsNew(workItemLoadedArgs.isNew);
+      }
+    };
+    return listener;
+  }, []);
 
   useEffect(() => {
     async function initModule() {
@@ -42,7 +58,7 @@ const AcceptanceControl = (): React.ReactElement => {
         webLogger.information('Loading rule presets panel...');
         await DevOps.ready();
 
-        DevOps.register(DevOps.getContributionId(), new WorkItemListener());
+        DevOps.register(DevOps.getContributionId(), provider);
 
         loadTheme(createTheme(appTheme));
 
@@ -52,17 +68,19 @@ const AcceptanceControl = (): React.ReactElement => {
 
         const id = await formService.getId();
 
-        const loadResult = await criteriaService.load(data => {
-          if (data.length > 0) {
-            webLogger.trace('Setting data', data);
-            setCriteriaDocument(data[0]);
-          }
-        }, id.toString());
+        if (id !== 0) {
+          const loadResult = await criteriaService.load(data => {
+            if (data.length > 0) {
+              webLogger.trace('Setting data', data);
+              setCriteriaDocument(data[0]);
+            }
+          }, id.toString());
 
-        if (loadResult.success && loadResult.data) {
-          if (loadResult.data.length > 0) {
-            webLogger.trace('setting', loadResult.data[0]);
-            setCriteriaDocument(loadResult.data[0]);
+          if (loadResult.success && loadResult.data) {
+            if (loadResult.data.length > 0) {
+              webLogger.trace('setting', loadResult.data[0]);
+              setCriteriaDocument(loadResult.data[0]);
+            }
           }
         }
 
@@ -80,14 +98,21 @@ const AcceptanceControl = (): React.ReactElement => {
     initModule();
   }, []);
 
-  const showPanel = async (criteria?: IAcceptanceCriteria) => {
+  const showPanel = async (
+    criteria?: IAcceptanceCriteria,
+    readOnly?: boolean,
+    canEdit?: boolean
+  ) => {
+    const isRead = isReadOnly || readOnly;
+
     await criteriaService.showPanel(
       criteria,
-      false,
+      isRead,
+      canEdit,
       async (result: CriteriaModalResult | undefined) => {
         if (result?.result === 'SAVE' && result.criteria) {
           const id = await devOpsService.getCurrentWorkItemId();
-          if (id) await criteriaService.createOrUpdate(id.toString(), result.criteria);
+          if (id) await criteriaService.createOrUpdate(id.toString(), result.criteria, true);
         }
       }
     );
@@ -119,6 +144,18 @@ const AcceptanceControl = (): React.ReactElement => {
     );
   }
 
+  // if (isNew) {
+  //   return (
+  //     <div className="acceptance-control-container">
+  //       <ZeroData
+  //         imageAltText={''}
+  //         iconProps={{ iconName: 'Save' }}
+  //         secondaryText="Save the work item to start adding acceptance criterias"
+  //       />
+  //     </div>
+  //   );
+  // }
+
   return (
     <div className="acceptance-control-container">
       <div>
@@ -128,8 +165,8 @@ const AcceptanceControl = (): React.ReactElement => {
 
       <CriteriaView
         criteria={criteriaDocument}
-        onEdit={async (criteria: IAcceptanceCriteria) => {
-          await showPanel(criteria);
+        onEdit={async (criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) => {
+          await showPanel(criteria, readOnly, canEdit);
         }}
         onApprove={async (id: string, complete: boolean) => {
           await criteriaService.toggleCompletion(id, complete);

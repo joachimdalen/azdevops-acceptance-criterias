@@ -26,11 +26,15 @@ import {
   ITreeItemProvider,
   TreeItemProvider
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
+import { copyToClipboard } from 'azure-devops-ui/Utils/ClipboardUtils';
 import cx from 'classnames';
 import React, { MouseEventHandler, useMemo } from 'react';
 
 import { capitalizeFirstLetter, getCriteriaTitle, getUrl } from '../../common/common';
+import ApproverDisplay from '../../common/components/ApproverDisplay';
+import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import FullStatusTag from '../../common/components/FullStatusTag';
+import InternalLink from '../../common/components/InternalLink';
 import ProgressBar, { ProgressBarLabelType } from '../../common/components/ProgressBar';
 import StatusTag from '../../common/components/StatusTag';
 import {
@@ -42,20 +46,7 @@ import {
   WorkItemTypeTagProps
 } from '../../common/types';
 import { useWorkHubContext } from '../WorkHubContext';
-import { copyToClipboard } from 'azure-devops-ui/Utils/ClipboardUtils';
-const InternalLink = ({
-  children,
-  onClick
-}: {
-  children: React.ReactNode;
-  onClick: MouseEventHandler<HTMLAnchorElement> | undefined;
-}) => {
-  return (
-    <a className="ac-link" href="#" onClick={onClick}>
-      {children}
-    </a>
-  );
-};
+
 const WorkItemTypeTag = ({
   type,
   iconUrl,
@@ -93,7 +84,7 @@ interface CriteriaTreeProps {
   criterias: CriteriaDocument[];
   workItemTypes: Map<string, WorkItemTypeTagProps>;
   workItems: WorkItem[];
-  onApprove: (id: string) => Promise<void>;
+  onProcess: (id: string, approved: boolean) => Promise<void>;
   onClick: (criteria: IAcceptanceCriteria) => Promise<void>;
 }
 
@@ -118,8 +109,38 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
 const typeItemCell: ITreeColumn<IWorkItemCriteriaCell> = {
   id: 'type',
   minWidth: 200,
-  name: 'Type',
-  renderCell: renderTreeCell,
+  name: 'Criteria Type',
+  renderCell: (
+    rowIndex: number,
+    columnIndex: number,
+    treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
+    treeItem: ITreeItemEx<IWorkItemCriteriaCell>
+  ) => {
+    const underlyingItem = treeItem.underlyingItem;
+    const data = ObservableLike.getValue(underlyingItem.data);
+    const treeCell = data && data[treeColumn.id];
+    // Do not include padding if the table cell has an href
+    const hasLink = !!(
+      treeCell &&
+      typeof treeCell !== 'string' &&
+      typeof treeCell !== 'number' &&
+      treeCell.href
+    );
+    // const approver = identities.get(data.requiredApprover);
+    return (
+      <SimpleTableCell
+        key={`${columnIndex}-${data.id}`}
+        className={treeColumn.className}
+        columnIndex={columnIndex}
+        contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
+        tableColumn={treeColumn}
+      >
+        <ConditionalChildren renderChildren={data.rowType === 'criteria'}>
+          {data.type !== '' && <CriteriaTypeDisplay type={data.type} />}
+        </ConditionalChildren>
+      </SimpleTableCell>
+    );
+  },
   width: -100
 };
 const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
@@ -182,7 +203,7 @@ const CriteriaTree = ({
   criterias,
   workItemTypes,
   workItems,
-  onApprove,
+  onProcess,
   onClick
 }: CriteriaTreeProps): JSX.Element => {
   const { dispatch, state: workHubState } = useWorkHubContext();
@@ -336,7 +357,9 @@ const CriteriaTree = ({
                 }
               }}
             >
-              {data.title}
+              <Tooltip text={data.title}>
+                <span>{data.title}</span>
+              </Tooltip>
             </InternalLink>
           </ConditionalChildren>
         </ExpandableTreeCell>
@@ -398,22 +421,7 @@ const CriteriaTree = ({
           tableColumn={treeColumn}
         >
           <ConditionalChildren renderChildren={data.rowType === 'criteria'}>
-            <ConditionalChildren renderChildren={data.requiredApprover === undefined}>
-              <div className="secondary-text">
-                <Icon iconName="Contact" />
-                <span className="margin-left-8">Unassigned</span>
-              </div>
-            </ConditionalChildren>
-            <ConditionalChildren renderChildren={data.requiredApprover !== undefined}>
-              {data.requiredApprover && (
-                <Persona
-                  text={data.requiredApprover.displayName}
-                  size={PersonaSize.size24}
-                  imageInitials={getInitials(data.requiredApprover.displayName, false)}
-                  imageUrl={data.requiredApprover.image}
-                />
-              )}
-            </ConditionalChildren>
+            <ApproverDisplay approver={data?.requiredApprover} />
           </ConditionalChildren>
         </SimpleTableCell>
       );
@@ -462,11 +470,20 @@ const CriteriaTree = ({
                 iconProps={{ iconName: 'CheckMark' }}
                 onClick={async () => {
                   if (data.criteriaId) {
-                    await onApprove(data.criteriaId);
+                    await onProcess(data.criteriaId, true);
                   }
                 }}
               />
-              <Button text="Reject" danger iconProps={{ iconName: 'Cancel' }} />
+              <Button
+                text="Reject"
+                danger
+                iconProps={{ iconName: 'Cancel' }}
+                onClick={async () => {
+                  if (data.criteriaId) {
+                    await onProcess(data.criteriaId, false);
+                  }
+                }}
+              />
             </ButtonGroup>
           </ConditionalChildren>
         </SimpleTableCell>
@@ -520,7 +537,6 @@ const CriteriaTree = ({
 
   if (workItems.length === 0) return <div>Loding..</div>;
 
-  
   const columns = [
     idCell,
     titleCell,
