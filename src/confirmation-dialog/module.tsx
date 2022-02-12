@@ -1,8 +1,8 @@
 import './index.scss';
 
-import { showRootComponent, useResizeTimeout } from '@joachimdalen/azdevops-ext-core';
+import { showRootComponent } from '@joachimdalen/azdevops-ext-core';
 
-import ConfirmationDialog from '../wi-control/ConfirmationDialog';
+import ConfirmationDialog from './ConfirmationDialog';
 const App = () => {
   return <ConfirmationDialog />;
 };

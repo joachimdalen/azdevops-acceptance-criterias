@@ -5,12 +5,17 @@ import {
 } from 'azure-devops-extension-api';
 import { CoreRestClient } from 'azure-devops-extension-api/Core';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { IButtonProps } from 'azure-devops-ui/Button';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 
 import { IAcceptanceCriteria } from './types';
 
 export enum PanelIds {
   CriteriaPanel = 'criteria-panel'
+}
+
+export enum DialogIds {
+  ConfirmationDialog = 'confirmation-dialog'
 }
 
 export interface CriteriaModalResult {
@@ -64,3 +69,9 @@ export const getUrl = async ({ ...urlParams }: KeyVal): Promise<string> => {
 
   return `${hostBaseUrl}${project.name}/_apps/hub/${contrib}?${params.toString()}`;
 };
+
+export interface IConfirmationConfig {
+  cancelButton: Omit<IButtonProps, 'onClick'>;
+  confirmButton: Omit<IButtonProps, 'onClick'>;
+  content: string;
+}

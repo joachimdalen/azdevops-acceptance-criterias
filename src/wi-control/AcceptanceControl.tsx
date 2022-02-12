@@ -22,7 +22,7 @@ import {
 import * as DevOps from 'azure-devops-extension-sdk';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { CriteriaModalResult } from '../common/common';
+import { CriteriaModalResult, DialogIds, IConfirmationConfig } from '../common/common';
 import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria } from '../common/types';
 import CriteriaView from './components/CriteriaView';
@@ -172,23 +172,31 @@ const AcceptanceControl = (): React.ReactElement => {
           await criteriaService.toggleCompletion(id, complete);
         }}
         onDelete={async (id: string) => {
-          // await devOpsService.showConfirmationDialog({
-          //   title: 'Delete criteria?',
-          //   cancelText: 'Cancel',
-          //   lightDismiss: false,
-          //   okText: 'Delete',
-          //   showCancel: true,
-          //   onClose: async (result: boolean | undefined) => {
-          //     if (result) {
-          //       await criteriaService.deleteCriteria(id);
-          //     }
-          //   }
-          // });
-          // await criteriaService.deleteCriteria(id);
+          const config: IConfirmationConfig = {
+            cancelButton: {
+              text: 'Cancel'
+            },
+            confirmButton: {
+              text: 'Delete',
+              danger: true,
+              iconProps: {
+                iconName: 'Delete'
+              }
+            },
+            content: `Are you sure you want to delete the criteria. This can not be undone.`
+          };
+          await devOpsService.showDialog<boolean, DialogIds>(DialogIds.ConfirmationDialog, {
+            title: 'Delete criteria?',
+            onClose: async result => {
+              if (result) {
+                await criteriaService.deleteCriteria(id);
+              }
+            },
+            configuration: config
+          });
           setShowConfirmation();
         }}
       />
-      
     </div>
   );
 };
