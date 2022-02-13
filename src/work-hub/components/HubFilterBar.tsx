@@ -37,7 +37,6 @@ const HubFilterBar = ({
     const f = new Filter();
     const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
     if (filter !== undefined && Object.keys(filter).length > 0) {
-      console.log(filter);
       f.setState(filter);
     } else {
       f.setFilterItemState('approvers', {
@@ -51,7 +50,6 @@ const HubFilterBar = ({
 
   useEffect(() => {
     filter.subscribe(() => {
-      console.log(JSON.stringify(filter.getState(), null, 4));
       setLocalItem(LocalStorageKeys.FilterState, filter.getState());
       onFilterChanged(filter.getState());
     }, FILTER_CHANGE_EVENT);

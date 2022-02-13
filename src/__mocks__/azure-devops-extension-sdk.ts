@@ -7,6 +7,7 @@ import {
 import { IExtensionContext } from 'azure-devops-extension-sdk';
 export const mockInit = jest.fn();
 export const mockRegister = jest.fn();
+export const mockGetContributionId = jest.fn().mockReturnValue('someContributionId');
 /**
  * This is a minimal mock version to test WorkItemFormGroup
  * for additional mocks please look here:
@@ -24,14 +25,14 @@ export function init(): Promise<void> {
  * Mocked getContributionId returns some Id
  */
 export function getContributionId() {
-  return 'someContributionId';
+  return mockGetContributionId();
 }
 
 /**
  * Type and Accessor for WorkItem events
  */
 // tslint:disable-next-line: class-name
-type workItemCallBackType = () => {
+type workItemCallBackType = {
   // tslint:disable-next-line: completed-docs
   onFieldChanged: (args: IWorkItemFieldChangedArgs) => Promise<void>;
   // tslint:disable-next-line: completed-docs
@@ -52,16 +53,11 @@ export let spyWorkItemCallBackAccessor: workItemCallBackType;
  * Mocked register returns empty data structure
  */
 export function register(instanceId: string, instance: any) {
-  spyWorkItemCallBackAccessor = instance;
+  if (instanceId.indexOf('work-item-wiki-control') > -1) {
+    spyWorkItemCallBackAccessor = instance;
+  }
 
-  // TODO: Fix
-  
-  // if (typeof instance === typeof WorkItemListener) {
-  //   console.log('wuk');
-  //   spyWorkItemCallBackAccessor = instance;
-  // }
-
-  // mockRegister(instanceId, instance);
+  mockRegister(instanceId, instance);
 }
 
 /**
@@ -71,6 +67,7 @@ export const mockSetFieldValue = jest.fn();
 export const mockGetProject = jest.fn();
 export const mockAddToast = jest.fn();
 export const mockOpenPanel = jest.fn();
+export const mockOpenNewWindow = jest.fn();
 
 /**
  * Mocked getService returns mocked methods
@@ -97,19 +94,31 @@ export function getService(contributionId: string) {
         openPanel: mockOpenPanel
       };
     }
+    case 'ms.vss-features.host-navigation-service': {
+      return {
+        openNewWindow: mockOpenNewWindow
+      };
+    }
+    case 'ms.vss-features.host-navigation-service': {
+      return {
+        getQueryParams: mockGetQueryParams
+      };
+    }
   }
 }
 
 export const mockResize = jest.fn();
 export const mockReady = jest.fn();
 export const mockGetConfiguration = jest.fn();
+export const mockGetQueryParams = jest.fn();
 export const mockNotifyLoadSucceeded = jest.fn();
 export const mockGetExtensionContext = jest.fn().mockReturnValue({
-  id: 'as-pub.aceeptance-criterias',
+  id: 'as-pub.work-item-wiki',
   publisherId: 'as-pub',
-  extensionId: 'aceeptace-criterias',
+  extensionId: 'work-item-wiki',
   version: '0.1.1'
 });
+export const mockNotifyLoadFailed = jest.fn();
 
 export function resize(width?: number, height?: number) {
   mockResize(width, height);
@@ -126,4 +135,7 @@ export function getConfiguration() {
 }
 export function getExtensionContext(): IExtensionContext {
   return mockGetExtensionContext();
+}
+export function notifyLoadFailed(e: Error | string): Promise<void> {
+  return new Promise(resolve => resolve(mockNotifyLoadFailed(e)));
 }

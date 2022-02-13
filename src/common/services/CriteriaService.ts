@@ -191,7 +191,7 @@ class CriteriaService {
     return teams;
   }
 
-  private setFullState(document: CriteriaDocument) {
+  public setFullState(document: CriteriaDocument): CriteriaDocument {
     const doc = { ...document };
     const news = doc.criterias.some(x => x.state === AcceptanceCriteriaState.New);
     const completed = doc.criterias.some(x => x.state === AcceptanceCriteriaState.Completed);

@@ -3,27 +3,31 @@ import {
   appTheme,
   DevOpsService,
   distrinct,
+  ExtendedZeroData,
   getWorkItemReferenceNameFromDisplayName,
   getWorkItemTypeDisplayName,
   getWorkTypeFromReferenceName,
   isDefined,
+  LoadingSection,
   useBooleanToggle,
   VersionDisplay,
   webLogger,
   WorkItemService
 } from '@joachimdalen/azdevops-ext-core';
-import { WorkItem } from 'azure-devops-extension-api/WorkItemTracking';
+import { WorkItem, WorkItemErrorPolicy } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { Card } from 'azure-devops-ui/Card';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
+import { IconSize } from 'azure-devops-ui/Icon';
 import { Page } from 'azure-devops-ui/Page';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
 import { useEffect, useMemo, useState } from 'react';
 
 import { getCriteriaTitle } from '../common/common';
+import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../common/types';
@@ -37,19 +41,24 @@ const WorkHub = (): JSX.Element => {
     () => [new CriteriaService(), new WorkItemService(), new DevOpsService()],
     []
   );
+  const criteriaId = useCriteriaId();
   const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
   const [visibleDocuments, setVisibleDocuments] = useState<CriteriaDocument[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingData, toggleLoadingData] = useBooleanToggle();
+  const [loadingWis, toggleLoadingWis] = useBooleanToggle();
   const [showFilter, toggleFilter] = useBooleanToggle(true);
+  const [didShowPanel, toggleDidShow] = useBooleanToggle(false);
   const { dispatch, state: workHubState } = useWorkHubContext();
   const [showPanel, togglePanel] = useBooleanToggle(false);
+  const [error, setError] = useState<string | undefined>();
+  const isActive = !loadingData && !loadingWis && error === undefined;
   const commandBarItems: IHeaderCommandBarItem[] = [
     {
       id: 'refresh',
       text: 'Refresh',
       iconProps: { iconName: 'Refresh' },
-
+      disabled: !isActive,
       onActivate: () => {
         criteriaService.load(undefined, undefined, true).then(res => {
           if (res.success) {
@@ -62,6 +71,7 @@ const WorkHub = (): JSX.Element => {
       id: 'filter',
       iconProps: { iconName: 'Filter' },
       subtle: true,
+      disabled: !isActive,
       tooltipProps: {
         text: 'Show/Hide filter'
       },
@@ -71,6 +81,7 @@ const WorkHub = (): JSX.Element => {
       id: 'columns',
       iconProps: { iconName: 'TripleColumnEdit' },
       subtle: true,
+      disabled: !isActive,
       tooltipProps: {
         text: 'Configure columns'
       },
@@ -79,7 +90,7 @@ const WorkHub = (): JSX.Element => {
   ];
   useEffect(() => {
     async function initModule() {
-      setLoading(true);
+      toggleLoadingData(true);
       loadTheme(createTheme(appTheme));
       await DevOps.init();
       const loadedTypes = await workItemService.getWorkItemTypes();
@@ -89,7 +100,6 @@ const WorkHub = (): JSX.Element => {
       dispatch({ type: 'SET_TEAMS', data: teams });
 
       webLogger.information('Loaded work hub...');
-      const queryParams = await devOpsService.getQueryParameters();
       const result = await criteriaService.load(data => {
         setDocuments(data);
 
@@ -110,11 +120,19 @@ const WorkHub = (): JSX.Element => {
       //     setVisibleDocuments(result.data);
       //   }
       // }
-      setLoading(false);
+
+      toggleLoadingData(false);
     }
 
     initModule();
   }, []);
+
+  useEffect(() => {
+    if (criteriaId && !didShowPanel && documents.length > 0) {
+      openCriteria(criteriaId);
+      toggleDidShow(true);
+    }
+  }, [criteriaId, documents]);
 
   const criterias = useMemo(() => documents.flatMap(x => x.criterias), [documents]);
   const workItemIds = useMemo(() => documents.map(x => parseInt(x.id)), [documents]);
@@ -188,29 +206,62 @@ const WorkHub = (): JSX.Element => {
     setVisibleDocuments(items);
   };
 
+  const fields: string[] = ['System.Title', 'System.WorkItemType'];
   useEffect(() => {
     async function load() {
+      toggleLoadingWis(true);
       if (workItemIds.length > 0) {
-        const wi = await workItemService.getWorkItems(workItemIds);
-        setWorkItems(wi);
+        try {
+          const wi = await workItemService.getWorkItems(
+            workItemIds,
+            undefined,
+            fields,
+            WorkItemErrorPolicy.Omit
+          );
+          setWorkItems(wi);
+        } catch (error: any) {
+          setError(error?.message || 'Failed to load related work items');
+        } finally {
+          toggleLoadingWis(false);
+        }
       }
     }
     load();
   }, [workItemIds]);
 
+  const openCriteria = async (criteriaId: string) => {
+    const document = documents.find(x => x.criterias.some(y => y.id === criteriaId));
+    const criteria = document?.criterias.find(x => x.id === criteriaId);
+
+    if (criteria === undefined) {
+      await devOpsService.showToast('Failed to find criteria');
+    } else {
+      await criteriaService.showPanel(criteria);
+    }
+  };
+
   return (
     <Surface background={SurfaceBackground.neutral}>
       <Page className="flex-grow">
-        <ConditionalChildren renderChildren={!loading}>
-          <Header
-            commandBarItems={commandBarItems}
-            title="Acceptance Criterias"
-            titleSize={TitleSize.Large}
-            description={<VersionDisplay moduleVersion={process.env.WORK_HUB_VERSION} />}
-          />
+        <Header
+          commandBarItems={commandBarItems}
+          title="Acceptance Criterias"
+          titleSize={TitleSize.Large}
+          description={<VersionDisplay moduleVersion={process.env.WORK_HUB_VERSION} />}
+        />
 
-          <div className="page-content flex-grow margin-top-8">
-            <Separator />
+        <div className="page-content flex-grow margin-top-8">
+          <Separator />
+          <LoadingSection isLoading={loadingData || loadingWis} text="Loading data..." />
+          <ConditionalChildren renderChildren={error !== undefined}>
+            <ExtendedZeroData
+              title={'Error'}
+              description={error}
+              icon={{ iconName: 'Error', size: IconSize.large }}
+              buttons={[]}
+            />
+          </ConditionalChildren>
+          <ConditionalChildren renderChildren={isActive}>
             <HubFilterBar
               criterias={criterias}
               showFilter={showFilter}
@@ -230,8 +281,9 @@ const WorkHub = (): JSX.Element => {
                 }}
               />
             </Card>
-          </div>
-        </ConditionalChildren>
+          </ConditionalChildren>
+        </div>
+
         <ConditionalChildren renderChildren={showPanel}>
           <ColumnsPanel onClose={() => togglePanel()} />
         </ConditionalChildren>

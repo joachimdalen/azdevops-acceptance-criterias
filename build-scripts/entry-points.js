@@ -28,6 +28,12 @@ const modules = [
     entry: './src/confirmation-dialog/module',
     root: 'confirmation-dialog-container',
     generate: true
+  },
+  {
+    name: 'progress-control',
+    entry: './src/progress-control/module',
+    root: 'progress-control-container',
+    generate: true
   }
 ];
 

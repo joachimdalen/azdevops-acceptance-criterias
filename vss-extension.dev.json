@@ -6,7 +6,7 @@
   "id": "acceptance-criterias-dev",
   "name": "Acceptance Criterias - DEV",
   "publisher": "JoachimDalen",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "An extension to manage acceptance criterias",
   "categories": ["Azure Boards"],
   "demands": ["api-version/5.1"],
@@ -116,6 +116,16 @@
       "properties": {
         "name": "Acceptance Criterias",
         "uri": "wi-control.html"
+      }
+    },
+    {
+      "id": "criterias-progress-control",
+      "type": "ms.vss-work-web.work-item-form-control",
+      "targets": ["ms.vss-work-web.work-item-form"],
+      "description": "Progressbar that shows the total progress of acceptance criterias",
+      "properties": {
+        "name": "Acceptance Criterias Progress",
+        "uri": "progress-control.html"
       }
     },
     {

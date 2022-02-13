@@ -151,11 +151,6 @@ const CriteriaPanel = (): React.ReactElement => {
     criteria?.state !== AcceptanceCriteriaState.Completed &&
     criteria?.state !== AcceptanceCriteriaState.Approved;
 
-  console.log(
-    isReadOnly === false,
-    criteria?.state !== AcceptanceCriteriaState.Completed,
-    criteria?.state !== AcceptanceCriteriaState.Approved
-  );
   return (
     <PanelWrapper
       cancelButton={{ text: 'Close', onClick: () => dismiss() }}

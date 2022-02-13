@@ -1,14 +1,11 @@
-import { useBooleanToggle,webLogger } from '@joachimdalen/azdevops-ext-core';
+import { LoadingSection, useBooleanToggle, webLogger } from '@joachimdalen/azdevops-ext-core';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { PanelContent, PanelFooter } from 'azure-devops-ui/Panel';
 import { useEffect, useState } from 'react';
 
 import { IConfirmationConfig } from '../common/common';
 
-interface ConfirmationDialogProps {
-  onDismiss?: () => void;
-}
-const ConfirmationDialog = ({ onDismiss }: ConfirmationDialogProps): JSX.Element => {
+const ConfirmationDialog = (): JSX.Element => {
   const [loading, toggleLoading] = useBooleanToggle();
   const [config, setConfig] = useState<IConfirmationConfig | undefined>();
   useEffect(() => {
@@ -18,11 +15,9 @@ const ConfirmationDialog = ({ onDismiss }: ConfirmationDialogProps): JSX.Element
           loaded: false,
           applyTheme: true
         });
-        webLogger.information('Loading confirmation dialog...');
         await DevOps.ready();
 
         const mConfig = DevOps.getConfiguration();
-        console.log(mConfig);
         setConfig(mConfig as IConfirmationConfig);
 
         toggleLoading();
@@ -39,7 +34,9 @@ const ConfirmationDialog = ({ onDismiss }: ConfirmationDialogProps): JSX.Element
 
     initModule();
   }, []);
-
+  if (loading) {
+    return <LoadingSection isLoading={loading} text="Loading..." />;
+  }
   if (config === undefined) return <div>Error</div>;
 
   return (

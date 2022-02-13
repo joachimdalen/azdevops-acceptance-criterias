@@ -23,13 +23,17 @@ const ProgressBar = ({ currentValue, maxValue, labelType }: IProgressBarProps): 
 
   return (
     <div className="flex-row flex-center progress-bar">
-      <span className="progress-bar-container flex-row flex-grow scroll-hidden margin-right-8">
+      <span
+        className="progress-bar-container flex-row flex-grow scroll-hidden margin-right-8"
+        style={{ height: '15px' }}
+      >
         <span
           className={cx('progress-bar-bar', progressClass)}
           style={{ transform: `scaleX(${current})` }}
         ></span>
       </span>
-      <span className="progress-bar-progress flex-self-start font-size-s secondary-text">
+      {/* flex-self-start */}
+      <span className="progress-bar-progress font-size-s secondary-text">
         {currentText}
       </span>
     </div>

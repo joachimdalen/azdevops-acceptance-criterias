@@ -1,5 +1,6 @@
 import { getInitials, Persona, PersonaSize } from '@fluentui/react';
 import {
+  DevOpsService,
   getWorkItemTitle,
   getWorkItemTypeDisplayName,
   IInternalIdentity,
@@ -43,6 +44,7 @@ import {
   FullCriteriaStatus,
   IAcceptanceCriteria,
   IExtendedTableCell,
+  IProgressStatus,
   WorkItemTypeTagProps
 } from '../../common/types';
 import { useWorkHubContext } from '../WorkHubContext';
@@ -66,9 +68,7 @@ const WorkItemTypeTag = ({
             const service = await DevOps.getService<IWorkItemFormNavigationService>(
               'ms.vss-work-web.work-item-form-navigation-service'
             );
-
-            const wi = await service.openWorkItem(parseInt(id.toString()));
-            console.log(wi.id);
+            await service.openWorkItem(parseInt(id.toString()));
           }}
         >
           <Tooltip text={title || 'Unknown'}>
@@ -88,11 +88,7 @@ interface CriteriaTreeProps {
   onClick: (criteria: IAcceptanceCriteria) => Promise<void>;
 }
 
-interface IProgressStatus {
-  value: number;
-  maxValue: number;
-  type: ProgressBarLabelType;
-}
+
 interface IWorkItemCriteriaCell extends IExtendedTableCell {
   criteriaId?: string;
   workItemId: string;
@@ -207,6 +203,7 @@ const CriteriaTree = ({
   onClick
 }: CriteriaTreeProps): JSX.Element => {
   const { dispatch, state: workHubState } = useWorkHubContext();
+  const devOpsService = useMemo(() => new DevOpsService(), []);
   const approvable = useMemo(
     () =>
       criterias
@@ -307,12 +304,14 @@ const CriteriaTree = ({
           id: 'copy-link',
           text: 'Copy link to criteria',
           iconProps: { iconName: 'Link' },
-          onActivate: async () => {
+          onActivate: () => {
             if (data.criteriaId) {
               getUrl({ criteriaId: data.criteriaId.toString() }).then(url => {
                 copyToClipboard(url);
+                devOpsService.showToast('Copied criteria link to clipboard');
               });
             }
+            return true;
           }
         },
         { id: 'divider', itemType: MenuItemType.Divider }

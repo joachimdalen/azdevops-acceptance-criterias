@@ -136,7 +136,6 @@ const ScenarioCriteriaSection = (): JSX.Element => {
                   }}
                 />
                 <Button
-                  className="color-error"
                   iconProps={{ iconName: 'Delete' }}
                   subtle
                   tooltipProps={{ text: 'Remove' }}

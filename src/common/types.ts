@@ -1,5 +1,6 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
 import { ISimpleTableCell } from 'azure-devops-ui/Table';
+import { ProgressBarLabelType } from './components/ProgressBar';
 
 export interface CriteriaDocument {
   // work item id
@@ -71,3 +72,8 @@ export interface IDynamicProperties {
   [key: string]: any;
 }
 export type IExtendedTableCell = ISimpleTableCell & IDynamicProperties;
+export interface IProgressStatus {
+  value: number;
+  maxValue: number;
+  type: ProgressBarLabelType;
+}
