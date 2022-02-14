@@ -1,5 +1,7 @@
 export enum LocalStorageKeys {
-  FilterState = 'AC_FILTER_STATE'
+  FilterState = 'AC_FILTER_STATE',
+  OpenWorkItem = 'AC_OPEN_WORK_ITEM_DIALOG',
+  UndoCompleted = 'AC_UNDO_COMPLETED'
 }
 
 export const setLocalItem = <T>(key: LocalStorageKeys, data: T): void => {

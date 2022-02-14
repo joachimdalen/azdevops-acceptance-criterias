@@ -3,7 +3,7 @@ import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
 import { Checkbox } from 'azure-devops-ui/Checkbox';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
-import { Icon } from 'azure-devops-ui/Icon';
+import { Toggle } from 'azure-devops-ui/Toggle';
 import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnFill, ColumnMore, ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
@@ -32,7 +32,7 @@ import {
 
 interface CriteriaViewProps {
   criteria?: CriteriaDocument;
-  onApprove: (id: string, complete: boolean) => Promise<void>;
+  onApprove: (criteria: IAcceptanceCriteria, complete: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onEdit: (criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) => Promise<void>;
 }
@@ -329,6 +329,7 @@ const CriteriaView = ({
   const toggleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'toggle',
     minWidth: 50,
+    width: 80,
     name: '',
     renderCell: (
       rowIndex: number,
@@ -356,17 +357,26 @@ const CriteriaView = ({
           tableColumn={treeColumn}
         >
           <ConditionalChildren renderChildren={data.rowType === 'item'}>
-            <Checkbox
+            <Toggle
+              checked={data?.state !== AcceptanceCriteriaState.New}
+              onChange={(e, checked: boolean) => {
+                if (data.rawCriteria) {
+                  onApprove(data.rawCriteria, checked);
+                }
+                e.preventDefault();
+              }}
+            />
+            {/* <Checkbox
               checked={data?.state !== AcceptanceCriteriaState.New}
               onChange={(e, checked: boolean) => {
                 onApprove(data.id, checked);
+                e.preventDefault();
               }}
-            />
+            /> */}
           </ConditionalChildren>
         </SimpleTableCell>
       );
-    },
-    width: 50
+    }
   };
 
   return (

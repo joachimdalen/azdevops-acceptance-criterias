@@ -34,6 +34,7 @@ import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../
 import ColumnsPanel from './ColumnsPanel';
 import CriteriaTree from './components/CriteriaTree';
 import HubFilterBar from './components/HubFilterBar';
+import SettingsPanel from './SettingsPanel';
 import { useWorkHubContext } from './WorkHubContext';
 
 const WorkHub = (): JSX.Element => {
@@ -42,8 +43,6 @@ const WorkHub = (): JSX.Element => {
     []
   );
   const criteriaId = useCriteriaId();
-  const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
-  const [visibleDocuments, setVisibleDocuments] = useState<CriteriaDocument[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
   const [loadingData, toggleLoadingData] = useBooleanToggle();
   const [loadingWis, toggleLoadingWis] = useBooleanToggle();
@@ -51,6 +50,8 @@ const WorkHub = (): JSX.Element => {
   const [didShowPanel, toggleDidShow] = useBooleanToggle(false);
   const { dispatch, state: workHubState } = useWorkHubContext();
   const [showPanel, togglePanel] = useBooleanToggle(false);
+  const [showSettingsPanel, toggleSettingsPanel] = useBooleanToggle(false);
+
   const [error, setError] = useState<string | undefined>();
   const isActive = !loadingData && !loadingWis && error === undefined;
   const commandBarItems: IHeaderCommandBarItem[] = [
@@ -86,6 +87,17 @@ const WorkHub = (): JSX.Element => {
         text: 'Configure columns'
       },
       onActivate: () => togglePanel()
+    },
+    {
+      id: 'settings',
+      iconProps: { iconName: 'Settings' },
+      subtle: true,
+      important: true,
+      disabled: !isActive,
+      tooltipProps: {
+        text: 'Open settings'
+      },
+      onActivate: () => toggleSettingsPanel()
     }
   ];
   useEffect(() => {
@@ -101,14 +113,14 @@ const WorkHub = (): JSX.Element => {
 
       webLogger.information('Loaded work hub...');
       const result = await criteriaService.load(data => {
-        setDocuments(data);
+        dispatch({ type: 'SET_DOCUMENTS', data: data });
 
         const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
         if (filter !== undefined && Object.keys(filter).length > 0) {
           console.log(filter);
           applyFilter(filter, data);
         } else {
-          setVisibleDocuments(data);
+          dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: data });
         }
 
         webLogger.information('Set', data);
@@ -128,14 +140,20 @@ const WorkHub = (): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    if (criteriaId && !didShowPanel && documents.length > 0) {
+    if (criteriaId && !didShowPanel && workHubState.documents.length > 0) {
       openCriteria(criteriaId);
       toggleDidShow(true);
     }
-  }, [criteriaId, documents]);
+  }, [criteriaId, workHubState.documents]);
 
-  const criterias = useMemo(() => documents.flatMap(x => x.criterias), [documents]);
-  const workItemIds = useMemo(() => documents.map(x => parseInt(x.id)), [documents]);
+  const criterias = useMemo(
+    () => workHubState.documents.flatMap(x => x.criterias),
+    [workHubState.documents]
+  );
+  const workItemIds = useMemo(
+    () => workHubState.documents.map(x => parseInt(x.id)),
+    [workHubState.documents]
+  );
 
   const wiMap: Map<string, WorkItemTypeTagProps> = useMemo(() => {
     const mp = new Map<string, WorkItemTypeTagProps>();
@@ -177,9 +195,9 @@ const WorkHub = (): JSX.Element => {
       .filter(isDefined);
   };
   const applyFilter = (filter: IFilterState, innerDocuments?: CriteriaDocument[]) => {
-    let items = innerDocuments !== undefined ? [...innerDocuments] : [...documents];
+    let items = innerDocuments !== undefined ? [...innerDocuments] : [...workHubState.documents];
     if (Object.keys(filter).length === 0) {
-      setVisibleDocuments(items);
+      dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: items });
       return;
     }
 
@@ -202,8 +220,7 @@ const WorkHub = (): JSX.Element => {
     if (state) {
       items = innerFilter(items, v => v.state.indexOf(state.value) > -1);
     }
-
-    setVisibleDocuments(items);
+    dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: items });
   };
 
   const fields: string[] = ['System.Title', 'System.WorkItemType'];
@@ -230,7 +247,7 @@ const WorkHub = (): JSX.Element => {
   }, [workItemIds]);
 
   const openCriteria = async (criteriaId: string) => {
-    const document = documents.find(x => x.criterias.some(y => y.id === criteriaId));
+    const document = workHubState.documents.find(x => x.criterias.some(y => y.id === criteriaId));
     const criteria = document?.criterias.find(x => x.id === criteriaId);
 
     if (criteria === undefined) {
@@ -270,7 +287,6 @@ const WorkHub = (): JSX.Element => {
 
             <Card className="margin-top-16" contentProps={{ contentPadding: false }}>
               <CriteriaTree
-                criterias={visibleDocuments}
                 workItems={workItems}
                 workItemTypes={wiMap}
                 onProcess={async (id: string, approved: boolean) => {
@@ -286,6 +302,9 @@ const WorkHub = (): JSX.Element => {
 
         <ConditionalChildren renderChildren={showPanel}>
           <ColumnsPanel onClose={() => togglePanel()} />
+        </ConditionalChildren>
+        <ConditionalChildren renderChildren={showSettingsPanel}>
+          <SettingsPanel onClose={() => toggleSettingsPanel()} />
         </ConditionalChildren>
       </Page>
     </Surface>

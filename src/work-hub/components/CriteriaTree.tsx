@@ -1,11 +1,10 @@
-import { getInitials, Persona, PersonaSize } from '@fluentui/react';
 import {
+  ActionResult,
   DevOpsService,
   getWorkItemTitle,
   getWorkItemTypeDisplayName,
   IInternalIdentity,
-  isLoggedInUser,
-  webLogger
+  isLoggedInUser
 } from '@joachimdalen/azdevops-ext-core';
 import {
   IWorkItemFormNavigationService,
@@ -15,10 +14,9 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { ObservableLike, ObservableValue } from 'azure-devops-ui/Core/Observable';
-import { Icon } from 'azure-devops-ui/Icon';
+import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { MenuItemType } from 'azure-devops-ui/Menu';
-import { ColumnMore, ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
+import { ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { ExpandableTreeCell, ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
 import {
@@ -29,18 +27,24 @@ import {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { copyToClipboard } from 'azure-devops-ui/Utils/ClipboardUtils';
 import cx from 'classnames';
-import React, { MouseEventHandler, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
-import { capitalizeFirstLetter, getCriteriaTitle, getUrl } from '../../common/common';
+import {
+  capitalizeFirstLetter,
+  DialogIds,
+  getCriteriaTitle,
+  getUrl,
+  IConfirmationConfig
+} from '../../common/common';
 import ApproverDisplay from '../../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import FullStatusTag from '../../common/components/FullStatusTag';
 import InternalLink from '../../common/components/InternalLink';
-import ProgressBar, { ProgressBarLabelType } from '../../common/components/ProgressBar';
+import ProgressBar from '../../common/components/ProgressBar';
 import StatusTag from '../../common/components/StatusTag';
+import { getLocalItem, LocalStorageKeys, setLocalItem } from '../../common/localStorage';
 import {
   AcceptanceCriteriaState,
-  CriteriaDocument,
   FullCriteriaStatus,
   IAcceptanceCriteria,
   IExtendedTableCell,
@@ -55,22 +59,20 @@ const WorkItemTypeTag = ({
   title,
   id,
   classNames,
-  iconSize = 16
-}: WorkItemTypeTagProps & { id: number | string; title: string }): React.ReactElement => {
+  iconSize = 16,
+  onClick
+}: WorkItemTypeTagProps & {
+  id: number | string;
+  title: string;
+  onClick: (id: number) => Promise<void>;
+}): React.ReactElement => {
   return (
     <div className={cx('flex-row flex-grow flex-center', classNames)}>
       <Tooltip text={type || 'Unknown'}>
         <img src={iconUrl} height={iconSize} />
       </Tooltip>
       <span className="margin-horizontal-8 flex-grow font-size">
-        <InternalLink
-          onClick={async e => {
-            const service = await DevOps.getService<IWorkItemFormNavigationService>(
-              'ms.vss-work-web.work-item-form-navigation-service'
-            );
-            await service.openWorkItem(parseInt(id.toString()));
-          }}
-        >
+        <InternalLink onClick={async () => await onClick(parseInt(id.toString()))}>
           <Tooltip text={title || 'Unknown'}>
             <span>{title || 'Unknown'}</span>
           </Tooltip>
@@ -81,13 +83,11 @@ const WorkItemTypeTag = ({
 };
 
 interface CriteriaTreeProps {
-  criterias: CriteriaDocument[];
   workItemTypes: Map<string, WorkItemTypeTagProps>;
   workItems: WorkItem[];
   onProcess: (id: string, approved: boolean) => Promise<void>;
   onClick: (criteria: IAcceptanceCriteria) => Promise<void>;
 }
-
 
 interface IWorkItemCriteriaCell extends IExtendedTableCell {
   criteriaId?: string;
@@ -196,7 +196,6 @@ const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
 };
 
 const CriteriaTree = ({
-  criterias,
   workItemTypes,
   workItems,
   onProcess,
@@ -206,7 +205,7 @@ const CriteriaTree = ({
   const devOpsService = useMemo(() => new DevOpsService(), []);
   const approvable = useMemo(
     () =>
-      criterias
+      workHubState.visibleDocuments
         .flatMap(x => x.criterias)
         .filter(x => {
           if (x.requiredApprover) {
@@ -221,12 +220,24 @@ const CriteriaTree = ({
           return false;
         })
         .map(x => x.id),
-    [criterias, workHubState.teams]
+    [workHubState.visibleDocuments, workHubState.teams]
   );
+  const getProgress = (workItemId: string): IProgressStatus | undefined => {
+    const doc = workHubState.documents.find(x => x.id === workItemId);
+    if (doc === undefined) return undefined;
 
+    return {
+      maxValue: doc.criterias.length,
+      value: doc.criterias.filter(
+        x =>
+          x.state === AcceptanceCriteriaState.Completed ||
+          x.state === AcceptanceCriteriaState.Approved
+      ).length,
+      type: 'count'
+    };
+  };
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
-    webLogger.trace('mapping', criterias);
-    const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = criterias
+    const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = workHubState.visibleDocuments
       .sort((a, b) => {
         return parseInt(b.id) - parseInt(a.id);
       })
@@ -259,15 +270,7 @@ const CriteriaTree = ({
             type: '',
             state: AcceptanceCriteriaState.New,
             fullState: x.state,
-            progress: {
-              maxValue: x.criterias.length,
-              value: x.criterias.filter(
-                x =>
-                  x.state === AcceptanceCriteriaState.Completed ||
-                  x.state === AcceptanceCriteriaState.Approved
-              ).length,
-              type: 'count'
-            }
+            progress: getProgress(x.id)
           },
           childItems: criteriaRows
         };
@@ -275,14 +278,22 @@ const CriteriaTree = ({
       });
 
     return new TreeItemProvider<IWorkItemCriteriaCell>(rootItems);
-  }, [criterias]);
+  }, [workHubState.visibleDocuments]);
+
   const moreColumn = new ColumnMore((listItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
     const data = listItem.underlyingItem?.data;
     if (data.rowType === 'workItem') {
       return {
         id: 'work-item-menu',
         items: [
-          { id: 'open-work-item', text: 'Open work item', iconProps: { iconName: 'WorkItem' } }
+          {
+            id: 'open-work-item',
+            text: 'Open work item',
+            iconProps: { iconName: 'WorkItem' },
+            onActivate: async () => {
+              await checkOpenWorkItem(parseInt(data.workItemId));
+            }
+          }
         ]
       };
     }
@@ -318,6 +329,48 @@ const CriteriaTree = ({
       ]
     };
   });
+
+  const openWorkItem = async (id: number) => {
+    const service = await DevOps.getService<IWorkItemFormNavigationService>(
+      'ms.vss-work-web.work-item-form-navigation-service'
+    );
+    const wi = await service.openWorkItem(id);
+    console.log(wi);
+  };
+  const checkOpenWorkItem = async (id: number) => {
+    if (getLocalItem<boolean>(LocalStorageKeys.OpenWorkItem)) {
+      await openWorkItem(id);
+    } else {
+      const config: IConfirmationConfig = {
+        cancelButton: {
+          text: 'Cancel'
+        },
+        doNotShowAgain: true,
+        confirmButton: {
+          text: 'OK',
+          primary: true
+        },
+        content: `When adding or updating acceptance criterias from this view you will need to press "Refresh"
+        in the top for changes to appear.`
+      };
+      await devOpsService.showDialog<ActionResult<boolean>, DialogIds>(
+        DialogIds.ConfirmationDialog,
+        {
+          title: 'Open work item',
+          onClose: async result => {
+            if (result?.success) {
+              if (result.message === 'DO_NOT_SHOW_AGAIN') {
+                setLocalItem(LocalStorageKeys.OpenWorkItem, true);
+              }
+              openWorkItem(id);
+            }
+          },
+          configuration: config
+        }
+      );
+    }
+  };
+
   const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'title',
     minWidth: 200,
@@ -381,7 +434,14 @@ const CriteriaTree = ({
             <ConditionalChildren
               renderChildren={treeItem.underlyingItem.data.rowType === 'workItem'}
             >
-              <WorkItemTypeTag {...dta} id={wi.id} title={getWorkItemTitle(wi)} />
+              <WorkItemTypeTag
+                {...dta}
+                id={wi.id}
+                title={getWorkItemTitle(wi)}
+                onClick={async (id: number) => {
+                  await checkOpenWorkItem(id);
+                }}
+              />
             </ConditionalChildren>
           </ExpandableTreeCell>
         );

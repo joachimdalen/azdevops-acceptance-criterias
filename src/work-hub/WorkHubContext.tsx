@@ -2,11 +2,15 @@ import { WebApiTeam } from 'azure-devops-extension-api/Core';
 import { WorkItemType } from 'azure-devops-extension-api/WorkItemTracking';
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
+import { CriteriaDocument } from '../common/types';
+
 export interface IWorkHubContextState {
   isLoading: boolean;
   isValid: boolean;
   teams: WebApiTeam[];
   workItemTypes: WorkItemType[];
+  documents: CriteriaDocument[];
+  visibleDocuments: CriteriaDocument[];
 }
 
 export interface ReducerAction {
@@ -18,7 +22,9 @@ const defaultState: IWorkHubContextState = {
   isLoading: true,
   isValid: false,
   teams: [],
-  workItemTypes: []
+  workItemTypes: [],
+  documents: [],
+  visibleDocuments: []
 };
 
 export interface IWorkHubContext {
@@ -28,7 +34,12 @@ export interface IWorkHubContext {
 
 const WorkHubContext = createContext<IWorkHubContext>({} as any);
 
-export type ContextAction = 'INIT' | 'SET_TEAMS' | 'SET_WI_TYPES';
+export type ContextAction =
+  | 'INIT'
+  | 'SET_TEAMS'
+  | 'SET_WI_TYPES'
+  | 'SET_DOCUMENTS'
+  | 'SET_VISIBLE_DOCUMENTS';
 type WorkHubProviderProps = { children: React.ReactNode };
 function hubReducer(state: IWorkHubContextState, action: ReducerAction): IWorkHubContextState {
   switch (action.type) {
@@ -40,6 +51,12 @@ function hubReducer(state: IWorkHubContextState, action: ReducerAction): IWorkHu
     }
     case 'SET_WI_TYPES': {
       return { ...state, workItemTypes: action.data };
+    }
+    case 'SET_DOCUMENTS': {
+      return { ...state, documents: action.data };
+    }
+    case 'SET_VISIBLE_DOCUMENTS': {
+      return { ...state, visibleDocuments: action.data };
     }
 
     default: {

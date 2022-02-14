@@ -72,6 +72,7 @@ export const getUrl = async ({ ...urlParams }: KeyVal): Promise<string> => {
 
 export interface IConfirmationConfig {
   cancelButton: Omit<IButtonProps, 'onClick'>;
+  doNotShowAgain?: boolean;
   confirmButton: Omit<IButtonProps, 'onClick'>;
   content: string;
 }

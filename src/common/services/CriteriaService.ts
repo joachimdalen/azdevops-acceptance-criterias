@@ -199,6 +199,11 @@ class CriteriaService {
     const rejected = doc.criterias.some(x => x.state === AcceptanceCriteriaState.Rejected);
     const awaiting = doc.criterias.some(x => x.state === AcceptanceCriteriaState.AwaitingApproval);
 
+    if (rejected) {
+      doc.state = FullCriteriaStatus.Rejected;
+      return doc;
+    }
+
     if (news && !completed && !approved && !rejected) {
       doc.state = FullCriteriaStatus.New;
       return doc;
@@ -216,10 +221,6 @@ class CriteriaService {
 
     if (approved && !rejected) {
       doc.state = FullCriteriaStatus.Approved;
-      return doc;
-    }
-    if (rejected) {
-      doc.state = FullCriteriaStatus.Rejected;
       return doc;
     }
 
