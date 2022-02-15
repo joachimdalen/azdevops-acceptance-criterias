@@ -107,8 +107,7 @@ class CriteriaService {
         criteria.state = approved
           ? AcceptanceCriteriaState.Approved
           : AcceptanceCriteriaState.Rejected;
-        await this.createOrUpdate(doc.id, criteria);
-        this.emitChange();
+        await this.createOrUpdate(doc.id, criteria, true);
       }
     }
   }
@@ -141,8 +140,7 @@ class CriteriaService {
             completedAt: new Date()
           };
         }
-        const updated = await this.createOrUpdate(doc.id, criteria);
-        this.emitChange();
+        const updated = await this.createOrUpdate(doc.id, criteria, true);
         return updated;
       }
     }

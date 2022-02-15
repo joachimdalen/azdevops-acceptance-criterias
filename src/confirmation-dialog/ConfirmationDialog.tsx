@@ -28,6 +28,7 @@ const ConfirmationDialog = (): JSX.Element => {
 
         const mConfig = DevOps.getConfiguration();
         setConfig(mConfig as IConfirmationConfig);
+        console.log(mConfig);
 
         toggleLoading();
 
@@ -43,6 +44,7 @@ const ConfirmationDialog = (): JSX.Element => {
 
     initModule();
   }, []);
+
   if (loading) {
     return <LoadingSection isLoading={loading} text="Loading..." />;
   }
@@ -74,9 +76,9 @@ const ConfirmationDialog = (): JSX.Element => {
 
   return (
     <div className="flex-column">
-      <div className="flex-column">
+      <div className="flex-column flex-grow">
         <div className="padding-4">{config.content}</div>
-        <ConditionalChildren renderChildren={config.doNotShowAgain}>
+        <ConditionalChildren renderChildren={config.doNotShowAgain === true}>
           <Checkbox
             className="margin-top-16"
             checked={doNotShowAgain}

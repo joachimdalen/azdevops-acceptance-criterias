@@ -9,7 +9,11 @@ const modules = [
     name: 'work-hub',
     entry: './src/work-hub/module',
     root: 'work-hub-container',
-    generate: true
+    generate: true,
+    assets: [
+      { source: './src/work-hub/assets/hub-icon-dark.png', dest: 'assets/hub-icon-dark.png' },
+      { source: './src/work-hub/assets/hub-icon-light.png', dest: 'assets/hub-icon-light.png' }
+    ]
   },
   {
     name: 'criteria-panel',

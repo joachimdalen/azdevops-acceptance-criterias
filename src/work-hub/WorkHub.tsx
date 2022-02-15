@@ -139,6 +139,14 @@ const WorkHub = (): JSX.Element => {
     initModule();
   }, []);
 
+  // useEffect(() => {
+  //   console.log('Visible documents changed');
+  // }, [workHubState.visibleDocuments]);
+  
+  // useEffect(() => {
+  //   console.log('Visible documents changed 2');
+  // }, [workHubState]);
+
   useEffect(() => {
     if (criteriaId && !didShowPanel && workHubState.documents.length > 0) {
       openCriteria(criteriaId);

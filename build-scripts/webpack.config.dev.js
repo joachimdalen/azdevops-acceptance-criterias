@@ -21,7 +21,7 @@ module.exports = merge(common, {
     https: true,
     port: 3000,
     hot: true,
-    static: [path.resolve(__dirname, 'dist')],
+    static: [path.resolve(__dirname, '..', 'dist')],
     historyApiFallback: {
       disableDotRule: true,
       rewrites: [{ from: /\/static\/.+/, to: '/' }]

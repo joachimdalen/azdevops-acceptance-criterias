@@ -366,13 +366,6 @@ const CriteriaView = ({
                 e.preventDefault();
               }}
             />
-            {/* <Checkbox
-              checked={data?.state !== AcceptanceCriteriaState.New}
-              onChange={(e, checked: boolean) => {
-                onApprove(data.id, checked);
-                e.preventDefault();
-              }}
-            /> */}
           </ConditionalChildren>
         </SimpleTableCell>
       );
