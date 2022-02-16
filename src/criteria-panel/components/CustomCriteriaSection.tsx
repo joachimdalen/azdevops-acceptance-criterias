@@ -1,9 +1,9 @@
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
-import { IAcceptanceCriteria, ICustomCriteria } from '../../common/types';
+import { ICustomCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
 const CustomCriteriaSection = (): JSX.Element => {

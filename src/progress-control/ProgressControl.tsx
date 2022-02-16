@@ -1,20 +1,14 @@
-import { Spinner, SpinnerSize } from '@fluentui/react';
-import { DevOpsService, useBooleanToggle, webLogger } from '@joachimdalen/azdevops-ext-core';
-import {
-  IWorkItemLoadedArgs,
-  IWorkItemNotificationListener
-} from 'azure-devops-extension-api/WorkItemTracking';
-import * as DevOps from 'azure-devops-extension-sdk';
-import React, { useEffect, useMemo, useState } from 'react';
-import ProgressBar from '../common/components/ProgressBar';
+import { Spinner, SpinnerSize } from "@fluentui/react";
+import { DevOpsService } from "@joachimdalen/azdevops-ext-core/DevOpsService";
+import { WebLogger } from "@joachimdalen/azdevops-ext-core/WebLogger";
+import { IWorkItemLoadedArgs, IWorkItemNotificationListener } from "azure-devops-extension-api/WorkItemTracking";
+import * as DevOps from "azure-devops-extension-sdk";
+import React, { useEffect, useMemo, useState } from "react";
 
-import CriteriaService from '../common/services/CriteriaService';
-import {
-  AcceptanceCriteriaState,
-  CriteriaDocument,
-  IAcceptanceCriteria,
-  IProgressStatus
-} from '../common/types';
+import ProgressBar from "../common/components/ProgressBar";
+import CriteriaService from "../common/services/CriteriaService";
+import { AcceptanceCriteriaState, IProgressStatus } from "../common/types";
+
 
 const ProgressControl = (): React.ReactElement => {
   const [devOpsService, criteriaService] = useMemo(
@@ -60,7 +54,7 @@ const ProgressControl = (): React.ReactElement => {
           loaded: false,
           applyTheme: true
         });
-        webLogger.information('Loading rule presets panel...');
+        WebLogger.information('Loading rule presets panel...');
         await DevOps.ready();
 
         DevOps.register(DevOps.getContributionId(), provider);
@@ -70,7 +64,7 @@ const ProgressControl = (): React.ReactElement => {
         await DevOps.notifyLoadSucceeded();
         DevOps.resize();
       } catch (error) {
-        webLogger.error('Failed to get project configuration', error);
+        WebLogger.error('Failed to get project configuration', error);
       } finally {
         setLoading(false);
         DevOps.resize(undefined, 40);

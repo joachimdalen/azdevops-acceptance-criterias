@@ -1,11 +1,12 @@
+import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import {
-  ActionResult,
-  DevOpsService,
   getWorkItemTitle,
-  getWorkItemTypeDisplayName,
-  IInternalIdentity,
-  isLoggedInUser
-} from '@joachimdalen/azdevops-ext-core';
+  getWorkItemTypeDisplayName
+} from '@joachimdalen/azdevops-ext-core/WorkItemUtils';
+import { WebApiTeam } from 'azure-devops-extension-api/Core';
 import {
   IWorkItemFormNavigationService,
   WorkItem
@@ -14,7 +15,11 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { ObservableLike } from 'azure-devops-ui/Core/Observable';
+import {
+  IObservableArrayEventArgs,
+  ObservableArrayAction,
+  ObservableLike
+} from 'azure-devops-ui/Core/Observable';
 import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
@@ -27,7 +32,7 @@ import {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { copyToClipboard } from 'azure-devops-ui/Utils/ClipboardUtils';
 import cx from 'classnames';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import {
   capitalizeFirstLetter,
@@ -45,13 +50,13 @@ import StatusTag from '../../common/components/StatusTag';
 import { getLocalItem, LocalStorageKeys, setLocalItem } from '../../common/localStorage';
 import {
   AcceptanceCriteriaState,
+  CriteriaDocument,
   FullCriteriaStatus,
   IAcceptanceCriteria,
   IExtendedTableCell,
   IProgressStatus,
   WorkItemTypeTagProps
 } from '../../common/types';
-import { useWorkHubContext } from '../WorkHubContext';
 
 const WorkItemTypeTag = ({
   type,
@@ -85,6 +90,9 @@ const WorkItemTypeTag = ({
 interface CriteriaTreeProps {
   workItemTypes: Map<string, WorkItemTypeTagProps>;
   workItems: WorkItem[];
+  visibleDocuments: CriteriaDocument[];
+  documents: CriteriaDocument[];
+  teams: WebApiTeam[];
   onProcess: (id: string, approved: boolean) => Promise<void>;
   onClick: (criteria: IAcceptanceCriteria) => Promise<void>;
 }
@@ -199,13 +207,16 @@ const CriteriaTree = ({
   workItemTypes,
   workItems,
   onProcess,
-  onClick
+  onClick,
+  visibleDocuments,
+  documents,
+  teams
 }: CriteriaTreeProps): JSX.Element => {
-  const { dispatch, state: workHubState } = useWorkHubContext();
+  //const { dispatch, state: workHubState } = useWorkHubContext();
   const devOpsService = useMemo(() => new DevOpsService(), []);
   const approvable = useMemo(
     () =>
-      workHubState.visibleDocuments
+      visibleDocuments
         .flatMap(x => x.criterias)
         .filter(x => {
           if (x.requiredApprover) {
@@ -213,17 +224,17 @@ const CriteriaTree = ({
               return true;
             }
 
-            if (workHubState.teams.some(y => y.id === x.requiredApprover?.id)) {
+            if (teams.some(y => y.id === x.requiredApprover?.id)) {
               return true;
             }
           }
           return false;
         })
         .map(x => x.id),
-    [workHubState.visibleDocuments, workHubState.teams]
+    [visibleDocuments, teams]
   );
   const getProgress = (workItemId: string): IProgressStatus | undefined => {
-    const doc = workHubState.documents.find(x => x.id === workItemId);
+    const doc = documents.find(x => x.id === workItemId);
     if (doc === undefined) return undefined;
 
     return {
@@ -236,8 +247,9 @@ const CriteriaTree = ({
       type: 'count'
     };
   };
+  // TODO: When we update items, it recreates the whole provider and we loose the toggled state
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
-    const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = workHubState.visibleDocuments
+    const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = visibleDocuments
       .sort((a, b) => {
         return parseInt(b.id) - parseInt(a.id);
       })
@@ -278,7 +290,12 @@ const CriteriaTree = ({
       });
 
     return new TreeItemProvider<IWorkItemCriteriaCell>(rootItems);
-  }, [workHubState.visibleDocuments]);
+  }, [visibleDocuments]);
+
+  useEffect(() => {
+    
+    console.log(treeProvider?.value);
+  }, [treeProvider]);
 
   const moreColumn = new ColumnMore((listItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
     const data = listItem.underlyingItem?.data;

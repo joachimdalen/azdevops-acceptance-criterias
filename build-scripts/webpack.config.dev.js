@@ -18,7 +18,9 @@ module.exports = merge(common, {
         errors: true
       }
     },
-    https: true,
+    server: {
+      type: "https"
+    },
     port: 3000,
     hot: true,
     static: [path.resolve(__dirname, '..', 'dist')],

@@ -1,4 +1,4 @@
-import { showRootComponent } from '@joachimdalen/azdevops-ext-core';
+import { showRootComponent } from '@joachimdalen/azdevops-ext-core/showRootComponent';
 
 import CriteriaPanel from './CriteriaPanel';
 import { CriteriaPanelProvider } from './CriteriaPanelContext';

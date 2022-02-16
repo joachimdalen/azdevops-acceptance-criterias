@@ -14,6 +14,7 @@
     background: rgba(var(--palette-neutral-10, 218, 218, 218), 1);
     position: relative;
     height: 8px;
+    display: flex;
   }
   &-bar {
     background-color: var(--communication-background, rgba(0, 120, 212, 1));
@@ -34,7 +35,7 @@
   &-container {
     background: rgba(var(--palette-neutral-10, 218, 218, 218), 1);
     position: relative;
-    height: 8px;
+    height: 15px;
   }
 }
 .ac-link {

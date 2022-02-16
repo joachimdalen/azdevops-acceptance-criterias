@@ -1,15 +1,9 @@
 import './index.scss';
 
 import { initializeIcons } from '@fluentui/react';
-import { showRootComponent } from '@joachimdalen/azdevops-ext-core';
+import { showRootComponent } from '@joachimdalen/azdevops-ext-core/showRootComponent';
 
 import WorkHub from './WorkHub';
-import { WorkHubProvider } from './WorkHubContext';
 
 initializeIcons();
-showRootComponent(
-  <WorkHubProvider>
-    <WorkHub />
-  </WorkHubProvider>,
-  'work-hub-container'
-);
+showRootComponent(<WorkHub />, 'work-hub-container');

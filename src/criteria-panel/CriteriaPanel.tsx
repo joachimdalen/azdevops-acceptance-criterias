@@ -1,14 +1,12 @@
 import './index.scss';
 
 import { createTheme, loadTheme } from '@fluentui/react';
-import {
-  appTheme,
-  IdentityPicker,
-  IInternalIdentity,
-  PanelWrapper,
-  useDropdownSelection,
-  webLogger
-} from '@joachimdalen/azdevops-ext-core';
+import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { IdentityPicker } from '@joachimdalen/azdevops-ext-core/IdentityPicker';
+import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
+import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
+import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
@@ -26,7 +24,6 @@ import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
   const [isReadOnly, setIsReadOnly] = useState(false);
@@ -42,7 +39,7 @@ const CriteriaPanel = (): React.ReactElement => {
       loaded: false,
       applyTheme: true
     }).then(async () => {
-      webLogger.information('Loaded criteria panel...');
+      WebLogger.information('Loaded criteria panel...');
       DevOps.resize();
     });
     DevOps.ready().then(() => {

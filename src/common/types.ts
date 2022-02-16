@@ -1,5 +1,6 @@
-import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { ISimpleTableCell } from 'azure-devops-ui/Table';
+
 import { ProgressBarLabelType } from './components/ProgressBar';
 
 export interface CriteriaDocument {

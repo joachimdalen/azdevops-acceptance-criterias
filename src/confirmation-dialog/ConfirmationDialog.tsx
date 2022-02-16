@@ -1,14 +1,11 @@
-import {
-  ActionResult,
-  isDefined,
-  LoadingSection,
-  useBooleanToggle,
-  webLogger
-} from '@joachimdalen/azdevops-ext-core';
+import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
+import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
+import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { Checkbox } from 'azure-devops-ui/Checkbox';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { PanelContent, PanelFooter } from 'azure-devops-ui/Panel';
+import { PanelFooter } from 'azure-devops-ui/Panel';
 import { useEffect, useState } from 'react';
 
 import { IConfirmationConfig } from '../common/common';
@@ -35,7 +32,7 @@ const ConfirmationDialog = (): JSX.Element => {
         await DevOps.notifyLoadSucceeded();
         DevOps.resize();
       } catch (error) {
-        webLogger.error('Failed to load confirmation dialog', error);
+        WebLogger.error('Failed to load confirmation dialog', error);
       } finally {
         toggleLoading();
         DevOps.resize();

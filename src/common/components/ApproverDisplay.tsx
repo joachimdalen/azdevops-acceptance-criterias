@@ -1,5 +1,5 @@
 import { getInitials, Persona, PersonaSize } from '@fluentui/react';
-import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { Icon } from 'azure-devops-ui/Icon';
 
 const ApproverDisplay = ({ approver }: { approver?: IInternalIdentity }): JSX.Element => {

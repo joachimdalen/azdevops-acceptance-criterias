@@ -1,11 +1,9 @@
-import { getInitials, Persona, PersonaSize } from '@fluentui/react';
-import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
-import { Checkbox } from 'azure-devops-ui/Checkbox';
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
-import { Toggle } from 'azure-devops-ui/Toggle';
 import { MenuItemType } from 'azure-devops-ui/Menu';
-import { ColumnFill, ColumnMore, ISimpleTableCell, SimpleTableCell } from 'azure-devops-ui/Table';
+import { ColumnFill, ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
+import { Toggle } from 'azure-devops-ui/Toggle';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { ExpandableTreeCell, ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
 import {
@@ -14,7 +12,7 @@ import {
   ITreeItemProvider,
   TreeItemProvider
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
 import ApproverDisplay from '../../common/components/ApproverDisplay';

@@ -1,4 +1,5 @@
-import { DevOpsService, getLoggedInUser, IInternalIdentity } from '@joachimdalen/azdevops-ext-core';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { getClient } from 'azure-devops-extension-api';
 import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
 
@@ -175,7 +176,11 @@ class CriteriaService {
 
       const stateDoc = this.setFullState(newDocument);
       const updated = await this._dataStore.setCriteriaDocument(stateDoc);
-      this._data[existingDocumentIndex] = updated;
+
+      const newDocuments = [...this._data];
+      newDocuments[existingDocumentIndex] = updated;
+      this._data = newDocuments;
+
       if (shouldEmit) {
         this.emitChange();
       }

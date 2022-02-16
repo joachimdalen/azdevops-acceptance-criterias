@@ -1,5 +1,5 @@
 import { getInitials, Persona, PersonaSize } from '@fluentui/react';
-import { distrinct, distrinctBy, isDefined } from '@joachimdalen/azdevops-ext-core';
+import { distinct, distinctBy, isDefined } from '@joachimdalen/azdevops-ext-core/CoreUtils';
 import { DropdownFilterBarItem } from 'azure-devops-ui/Dropdown';
 import { FilterBar } from 'azure-devops-ui/FilterBar';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
@@ -63,7 +63,7 @@ const HubFilterBar = ({
   const stateSelection = useMemo(() => new DropdownSelection(), []);
   const approvers = useMemo(() => {
     const approvers = criterias.map(x => x.requiredApprover).filter(isDefined);
-    const distApprovers = distrinctBy(approvers, 'entityId');
+    const distApprovers = distinctBy(approvers, 'entityId');
     return distApprovers;
   }, [criterias]);
 
@@ -92,7 +92,7 @@ const HubFilterBar = ({
   const stateItems: IListBoxItem[] = useMemo(() => {
     return criterias
       .map(x => x.state)
-      .filter(distrinct)
+      .filter(distinct)
       .map(c => {
         const item: IListBoxItem = {
           id: c,

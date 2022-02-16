@@ -2,11 +2,11 @@ import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { capitalizeFirstLetter, move } from '../../common/common';
-import { IAcceptanceCriteria, IScenario, IScenarioCriteria } from '../../common/types';
+import { IScenario, IScenarioCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
 const ScenarioCriteriaSection = (): JSX.Element => {

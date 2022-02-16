@@ -1,20 +1,24 @@
 import { createTheme, loadTheme, Separator } from '@fluentui/react';
+import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
+import { distinct, isDefined } from '@joachimdalen/azdevops-ext-core/CoreUtils';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroData';
+import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
+import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
+import { VersionDisplay } from '@joachimdalen/azdevops-ext-core/VersionDisplay';
+import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
+import { WorkItemService } from '@joachimdalen/azdevops-ext-core/WorkItemService';
 import {
-  appTheme,
-  DevOpsService,
-  distrinct,
-  ExtendedZeroData,
   getWorkItemReferenceNameFromDisplayName,
   getWorkItemTypeDisplayName,
-  getWorkTypeFromReferenceName,
-  isDefined,
-  LoadingSection,
-  useBooleanToggle,
-  VersionDisplay,
-  webLogger,
-  WorkItemService
-} from '@joachimdalen/azdevops-ext-core';
-import { WorkItem, WorkItemErrorPolicy } from 'azure-devops-extension-api/WorkItemTracking';
+  getWorkTypeFromReferenceName
+} from '@joachimdalen/azdevops-ext-core/WorkItemUtils';
+import { WebApiTeam } from 'azure-devops-extension-api/Core';
+import {
+  WorkItem,
+  WorkItemErrorPolicy,
+  WorkItemType
+} from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { Card } from 'azure-devops-ui/Card';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
@@ -35,7 +39,6 @@ import ColumnsPanel from './ColumnsPanel';
 import CriteriaTree from './components/CriteriaTree';
 import HubFilterBar from './components/HubFilterBar';
 import SettingsPanel from './SettingsPanel';
-import { useWorkHubContext } from './WorkHubContext';
 
 const WorkHub = (): JSX.Element => {
   const [criteriaService, workItemService, devOpsService] = useMemo(
@@ -48,7 +51,7 @@ const WorkHub = (): JSX.Element => {
   const [loadingWis, toggleLoadingWis] = useBooleanToggle();
   const [showFilter, toggleFilter] = useBooleanToggle(true);
   const [didShowPanel, toggleDidShow] = useBooleanToggle(false);
-  const { dispatch, state: workHubState } = useWorkHubContext();
+  //  const { dispatch, state: workHubState } = useWorkHubContext();
   const [showPanel, togglePanel] = useBooleanToggle(false);
   const [showSettingsPanel, toggleSettingsPanel] = useBooleanToggle(false);
 
@@ -100,38 +103,40 @@ const WorkHub = (): JSX.Element => {
       onActivate: () => toggleSettingsPanel()
     }
   ];
+
+  const [visibleDocuments, setVisibleDocuments] = useState<CriteriaDocument[]>([]);
+  const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
+  const [teams, setTeams] = useState<WebApiTeam[]>([]);
+  const [workItemTypes, setWorkItemTypes] = useState<WorkItemType[]>([]);
+
   useEffect(() => {
     async function initModule() {
+      console.log('Loading data..');
       toggleLoadingData(true);
       loadTheme(createTheme(appTheme));
       await DevOps.init();
       const loadedTypes = await workItemService.getWorkItemTypes();
       const teams = await criteriaService.getUserTeams();
 
-      dispatch({ type: 'SET_WI_TYPES', data: loadedTypes });
-      dispatch({ type: 'SET_TEAMS', data: teams });
+      setWorkItemTypes(loadedTypes);
+      setTeams(teams);
 
-      webLogger.information('Loaded work hub...');
+      WebLogger.information('Loaded work hub...');
       const result = await criteriaService.load(data => {
-        dispatch({ type: 'SET_DOCUMENTS', data: data });
+        setDocuments(data);
+        //dispatch({ type: 'SET_DOCUMENTS', data: data });
 
         const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
         if (filter !== undefined && Object.keys(filter).length > 0) {
           console.log(filter);
           applyFilter(filter, data);
         } else {
-          dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: data });
+          setVisibleDocuments(data);
+          //dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: data });
         }
 
-        webLogger.information('Set', data);
+        WebLogger.information('Set', data);
       });
-
-      // if (result.success && result.data) {
-      //   if (result.data.length > 0) {
-      //     setDocuments(result.data);
-      //     setVisibleDocuments(result.data);
-      //   }
-      // }
 
       toggleLoadingData(false);
     }
@@ -139,41 +144,28 @@ const WorkHub = (): JSX.Element => {
     initModule();
   }, []);
 
-  // useEffect(() => {
-  //   console.log('Visible documents changed');
-  // }, [workHubState.visibleDocuments]);
-  
-  // useEffect(() => {
-  //   console.log('Visible documents changed 2');
-  // }, [workHubState]);
-
   useEffect(() => {
-    if (criteriaId && !didShowPanel && workHubState.documents.length > 0) {
+    if (criteriaId && !didShowPanel && documents.length > 0) {
       openCriteria(criteriaId);
       toggleDidShow(true);
     }
-  }, [criteriaId, workHubState.documents]);
+  }, [criteriaId, documents]);
 
-  const criterias = useMemo(
-    () => workHubState.documents.flatMap(x => x.criterias),
-    [workHubState.documents]
-  );
-  const workItemIds = useMemo(
-    () => workHubState.documents.map(x => parseInt(x.id)),
-    [workHubState.documents]
-  );
+  const criterias = useMemo(() => documents.flatMap(x => x.criterias), [documents]);
+  const workItemIds = useMemo(() => documents.map(x => parseInt(x.id)), [documents]);
 
   const wiMap: Map<string, WorkItemTypeTagProps> = useMemo(() => {
+    console.log('WiMap');
     const mp = new Map<string, WorkItemTypeTagProps>();
     workItems
       .map(x => getWorkItemTypeDisplayName(x))
       .filter(isDefined)
-      .filter(distrinct)
+      .filter(distinct)
       .map(y => {
         if (mp.has(y)) return;
-        const refName = getWorkItemReferenceNameFromDisplayName(y, workHubState.workItemTypes);
+        const refName = getWorkItemReferenceNameFromDisplayName(y, workItemTypes);
         if (refName === undefined) return;
-        const t = getWorkTypeFromReferenceName(refName, workHubState.workItemTypes);
+        const t = getWorkTypeFromReferenceName(refName, workItemTypes);
         const pro: WorkItemTypeTagProps = {
           iconSize: 16,
           iconUrl: t?.icon.url,
@@ -203,9 +195,10 @@ const WorkHub = (): JSX.Element => {
       .filter(isDefined);
   };
   const applyFilter = (filter: IFilterState, innerDocuments?: CriteriaDocument[]) => {
-    let items = innerDocuments !== undefined ? [...innerDocuments] : [...workHubState.documents];
+    let items = innerDocuments !== undefined ? [...innerDocuments] : [...documents];
     if (Object.keys(filter).length === 0) {
-      dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: items });
+      //  dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: items });
+      setVisibleDocuments(items);
       return;
     }
 
@@ -228,14 +221,17 @@ const WorkHub = (): JSX.Element => {
     if (state) {
       items = innerFilter(items, v => v.state.indexOf(state.value) > -1);
     }
-    dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: items });
+    //dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: items });
+    setVisibleDocuments(items);
   };
 
   const fields: string[] = ['System.Title', 'System.WorkItemType'];
   useEffect(() => {
     async function load() {
-      toggleLoadingWis(true);
-      if (workItemIds.length > 0) {
+      console.log('Loading work item ids');
+      //TODO: This triggers on every change of the document array, we should check if it is different
+      if (workItemIds.length > 0 && workItemIds.length !== workItems.length) {
+        toggleLoadingWis(true);
         try {
           const wi = await workItemService.getWorkItems(
             workItemIds,
@@ -255,7 +251,7 @@ const WorkHub = (): JSX.Element => {
   }, [workItemIds]);
 
   const openCriteria = async (criteriaId: string) => {
-    const document = workHubState.documents.find(x => x.criterias.some(y => y.id === criteriaId));
+    const document = documents.find(x => x.criterias.some(y => y.id === criteriaId));
     const criteria = document?.criterias.find(x => x.id === criteriaId);
 
     if (criteria === undefined) {
@@ -296,6 +292,9 @@ const WorkHub = (): JSX.Element => {
             <Card className="margin-top-16" contentProps={{ contentPadding: false }}>
               <CriteriaTree
                 workItems={workItems}
+                visibleDocuments={visibleDocuments}
+                documents={documents}
+                teams={teams}
                 workItemTypes={wiMap}
                 onProcess={async (id: string, approved: boolean) => {
                   await criteriaService.processCriteria(id, approved);

@@ -1,8 +1,4 @@
-import {
-  CommonServiceIds,
-  ILocationService,
-  IProjectPageService
-} from 'azure-devops-extension-api';
+import { ILocationService, IProjectPageService } from 'azure-devops-extension-api';
 import { CoreRestClient } from 'azure-devops-extension-api/Core';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { IButtonProps } from 'azure-devops-ui/Button';

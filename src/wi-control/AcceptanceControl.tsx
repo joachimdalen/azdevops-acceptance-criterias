@@ -7,14 +7,11 @@ import {
   Spinner,
   SpinnerSize
 } from '@fluentui/react';
-import {
-  ActionResult,
-  appTheme,
-  commandBarStyles,
-  DevOpsService,
-  useBooleanToggle,
-  webLogger
-} from '@joachimdalen/azdevops-ext-core';
+import { appTheme, commandBarStyles } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
+import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
+import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import {
   IWorkItemFormService,
   IWorkItemLoadedArgs,
@@ -57,7 +54,7 @@ const AcceptanceControl = (): React.ReactElement => {
           loaded: false,
           applyTheme: true
         });
-        webLogger.information('Loading rule presets panel...');
+        WebLogger.information('Loading rule presets panel...');
         await DevOps.ready();
 
         DevOps.register(DevOps.getContributionId(), provider);
@@ -73,14 +70,14 @@ const AcceptanceControl = (): React.ReactElement => {
         if (id !== 0) {
           const loadResult = await criteriaService.load(data => {
             if (data.length > 0) {
-              webLogger.trace('Setting data', data);
+              WebLogger.trace('Setting data', data);
               setCriteriaDocument(data[0]);
             }
           }, id.toString());
 
           if (loadResult.success && loadResult.data) {
             if (loadResult.data.length > 0) {
-              webLogger.trace('setting', loadResult.data[0]);
+              WebLogger.trace('setting', loadResult.data[0]);
               setCriteriaDocument(loadResult.data[0]);
             }
           }
@@ -91,7 +88,7 @@ const AcceptanceControl = (): React.ReactElement => {
         await DevOps.notifyLoadSucceeded();
         DevOps.resize();
       } catch (error) {
-        webLogger.error('Failed to get project configuration', error);
+        WebLogger.error('Failed to get project configuration', error);
       } finally {
         setLoading(false);
       }

@@ -1,4 +1,4 @@
-import { DevOpsService } from '@joachimdalen/azdevops-ext-core';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
