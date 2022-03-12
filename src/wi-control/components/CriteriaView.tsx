@@ -43,7 +43,6 @@ interface IProgressStatus {
 interface IWorkItemCriteriaCell extends IExtendedTableCell {
   id: string;
   title: string;
-  rowType: 'item' | 'details';
   type: '' | 'scenario' | 'custom';
   state?: AcceptanceCriteriaState;
   requiredApprover?: IInternalIdentity;
@@ -109,7 +108,6 @@ const CriteriaView = ({
         data: {
           id: x.id,
           title: x.title,
-          rowType: 'item',
           type: x.type,
           state: x.state,
           requiredApprover: x.requiredApprover,
@@ -119,8 +117,7 @@ const CriteriaView = ({
             type: 'percentage'
           },
           rawCriteria: x
-        },
-        childItems: []
+        }
       };
       return it;
     });
@@ -189,49 +186,16 @@ const CriteriaView = ({
         </InternalLink>
       );
 
-      if (data.type !== 'scenario') {
-        return (
-          <SimpleTableCell
-            key={`${columnIndex}-${data.id}`}
-            className={treeColumn.className}
-            columnIndex={columnIndex}
-            contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
-            tableColumn={treeColumn}
-            colspan={data.rowType === 'details' ? 4 : 0}
-          >
-            <ConditionalChildren renderChildren={data.rowType === 'item'}>
-              <div className="margin-left-16">{content}</div>
-            </ConditionalChildren>
-            <ConditionalChildren renderChildren={data.rowType === 'details'}>
-              <div className="flex-column">
-                <div className="font-weight-semibold"> {data.scenario?.scenario}</div>
-                <div className="margin-top-8">
-                  {data.scenario?.criterias.map(g => {
-                    return (
-                      <span key={g.id}>
-                        <span className="font-weight-heavy">{capitalizeFirstLetter(g.type)}</span>{' '}
-                        {g.text}{' '}
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            </ConditionalChildren>
-          </SimpleTableCell>
-        );
-      }
-
       return (
-        <ExpandableTreeCell
+        <SimpleTableCell
           key={`${columnIndex}-${data.id}`}
           className={treeColumn.className}
           columnIndex={columnIndex}
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
-          treeItem={treeItem}
-          treeColumn={treeColumn}
+          tableColumn={treeColumn}
         >
           {content}
-        </ExpandableTreeCell>
+        </SimpleTableCell>
       );
     },
     width: -100
@@ -265,9 +229,7 @@ const CriteriaView = ({
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
           tableColumn={treeColumn}
         >
-          <ConditionalChildren renderChildren={data.rowType === 'item'}>
-            <ApproverDisplay approver={data?.requiredApprover} />
-          </ConditionalChildren>
+          <ApproverDisplay approver={data?.requiredApprover} />
         </SimpleTableCell>
       );
     },
@@ -303,9 +265,7 @@ const CriteriaView = ({
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
           tableColumn={treeColumn}
         >
-          <ConditionalChildren renderChildren={data.rowType === 'item'}>
-            {data.type !== '' && <CriteriaTypeDisplay type={data.type} />}
-          </ConditionalChildren>
+          {data.type !== '' && <CriteriaTypeDisplay type={data.type} />}
         </SimpleTableCell>
       );
     },
@@ -341,17 +301,15 @@ const CriteriaView = ({
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
           tableColumn={treeColumn}
         >
-          <ConditionalChildren renderChildren={data.rowType === 'item'}>
-            <Toggle
-              checked={data?.state !== AcceptanceCriteriaState.New}
-              onChange={(e, checked: boolean) => {
-                if (data.rawCriteria) {
-                  onApprove(data.rawCriteria, checked);
-                }
-                e.preventDefault();
-              }}
-            />
-          </ConditionalChildren>
+          <Toggle
+            checked={data?.state !== AcceptanceCriteriaState.New}
+            onChange={(e, checked: boolean) => {
+              if (data.rawCriteria) {
+                onApprove(data.rawCriteria, checked);
+              }
+              e.preventDefault();
+            }}
+          />
         </SimpleTableCell>
       );
     }

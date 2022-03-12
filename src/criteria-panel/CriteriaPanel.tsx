@@ -11,12 +11,14 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
+import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import StatusTag from '../common/components/StatusTag';
+import CriteriaService from '../common/services/CriteriaService';
 import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
@@ -28,8 +30,8 @@ import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
-import CriteriaService from '../common/services/CriteriaService';
+import { Button } from 'azure-devops-ui/Button';
+import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
   const criteriaService = useMemo(() => new CriteriaService(), []);
@@ -43,47 +45,57 @@ const CriteriaPanel = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadTheme(createTheme(appTheme));
-    DevOps.init({
-      loaded: false,
-      applyTheme: true
-    }).then(async () => {
-      WebLogger.information('Loaded criteria panel...');
-      DevOps.resize();
-    });
-    DevOps.ready().then(() => {
-      const config = DevOps.getConfiguration();
+    async function initModule() {
+      try {
+        await DevOps.init({
+          loaded: false,
+          applyTheme: true
+        });
+        WebLogger.information('Loaded criteria panel...');
+        await DevOps.ready();
 
-      if (config.panel) {
-        if (config.isReadOnly) {
-          setIsReadOnly(true);
-        }
-        if (config.canEdit !== undefined) {
-          setCanEdit(config.canEdit);
-        }
-        if (config.criteria) {
-          const conCrit = config.criteria as IAcceptanceCriteria;
+        loadTheme(createTheme(appTheme));
+        const config = DevOps.getConfiguration();
+        if (config.panel) {
+          if (config.isReadOnly) {
+            setIsReadOnly(true);
+          }
+          if (config.canEdit !== undefined) {
+            setCanEdit(config.canEdit);
+          }
+          if (config.criteria) {
+            const conCrit = config.criteria as IAcceptanceCriteria;
 
-          setIdentity(conCrit.requiredApprover);
-          setCriteria(conCrit);
+            setIdentity(conCrit.requiredApprover);
+            setCriteria(conCrit);
 
-          criteriaService.getCriteriaDetails(conCrit.id).then(details => {
+            const details = await criteriaService.getCriteriaDetails(conCrit.id);
+
             dispatch({
               type: 'SET_CRITERIA',
               data: conCrit.type === 'scenario' ? details.scenario : details.custom
             });
+            setDetails(details);
             dispatch({ type: 'SET_TYPE', data: conCrit.type });
-            console.log(details);
-          });
+            setLoading(false);
+          }
+
+          await DevOps.notifyLoadSucceeded();
+          DevOps.resize();
         }
 
-        DevOps.notifyLoadSucceeded().then(() => {
-          // we are visible in this callback.
-          setLoading(false);
-          DevOps.resize();
-        });
+        setLoading(false);
+
+        await DevOps.notifyLoadSucceeded();
+        DevOps.resize();
+      } catch (error) {
+        WebLogger.error('Failed to get project configuration', error);
+      } finally {
+        setLoading(false);
       }
-    });
+    }
+
+    initModule();
   }, []);
 
   const typeSelection = useDropdownSelection(criteriaTypeItems, panelState.type);
@@ -246,11 +258,19 @@ const CriteriaPanel = (): React.ReactElement => {
                     </ConditionalChildren>
                   </div>
                 </ConditionalChildren>
+                <ButtonGroup>
+                  <Button text="Approve" primary iconProps={{ iconName: 'CheckMark' }} />
+                  <Button text="Reject" danger iconProps={{ iconName: 'Cancel' }} />
+                </ButtonGroup>
               </div>
-              <ConditionalChildren renderChildren={criteria.type === 'scenario'}>
+              <ConditionalChildren
+                renderChildren={criteria.type === 'scenario' && details !== undefined}
+              >
                 {details?.scenario && <ScenarioCriteriaViewSection details={details} />}
               </ConditionalChildren>
-              <ConditionalChildren renderChildren={criteria.type === 'custom'}>
+              <ConditionalChildren
+                renderChildren={criteria.type === 'custom' && details !== undefined}
+              >
                 {details?.custom && <CustomCriteriaViewSection details={details} />}
               </ConditionalChildren>
             </>
