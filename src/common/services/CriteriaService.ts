@@ -7,6 +7,7 @@ import { CriteriaModalResult, PanelIds } from '../common';
 import { ActionResult } from '../models/ActionResult';
 import {
   AcceptanceCriteriaState,
+  CriteriaDetailDocument,
   CriteriaDocument,
   FullCriteriaStatus,
   IAcceptanceCriteria
@@ -67,6 +68,15 @@ class CriteriaService {
       this._changeHandler(this._data);
     }
   }
+  public async getCriteriaDetails(id: string): Promise<CriteriaDetailDocument> {
+    const details = await this._dataStore.getCriteriaDetail(id);
+
+    if (details === undefined) {
+      return { id: id };
+    }
+
+    return details;
+  }
 
   public async deleteCriteria(id: string): Promise<CriteriaDocument | undefined> {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
@@ -87,18 +97,19 @@ class CriteriaService {
 
   public async processCriteria(id: string, approved: boolean): Promise<void> {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
+    const details: CriteriaDetailDocument = await this.getCriteriaDetails(id);
     const approver = await getLoggedInUser();
     if (doc) {
       const criteria = doc.criterias.find(x => x.id === id);
       if (criteria) {
-        if (criteria.processed !== undefined) {
-          criteria.processed = {
-            ...criteria.processed,
+        if (details.processed !== undefined) {
+          details.processed = {
+            ...details.processed,
             processedAt: new Date(),
             processedBy: approver
           };
         } else {
-          criteria.processed = {
+          details.processed = {
             completedAt: new Date(),
             processedAt: new Date(),
             processedBy: approver
@@ -109,6 +120,7 @@ class CriteriaService {
           ? AcceptanceCriteriaState.Approved
           : AcceptanceCriteriaState.Rejected;
         await this.createOrUpdate(doc.id, criteria, true);
+        await this._dataStore.setCriteriaDetailsDocument(details);
       }
     }
   }
@@ -120,6 +132,7 @@ class CriteriaService {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
 
     if (doc) {
+      const details = await this.getCriteriaDetails(id);
       const criteria = doc.criterias.find(x => x.id === id);
       if (criteria) {
         if (
@@ -129,7 +142,7 @@ class CriteriaService {
           criteria.state === AcceptanceCriteriaState.Rejected
         ) {
           criteria.state = AcceptanceCriteriaState.New;
-          criteria.processed = undefined;
+          details.processed = undefined;
         } else {
           if (criteria.requiredApprover) {
             criteria.state = AcceptanceCriteriaState.AwaitingApproval;
@@ -137,11 +150,12 @@ class CriteriaService {
             criteria.state = AcceptanceCriteriaState.Completed;
           }
 
-          criteria.processed = {
+          details.processed = {
             completedAt: new Date()
           };
         }
         const updated = await this.createOrUpdate(doc.id, criteria, true);
+        await this._dataStore.setCriteriaDetailsDocument(details);
         return updated;
       }
     }
@@ -150,7 +164,8 @@ class CriteriaService {
   public async createOrUpdate(
     workItemId: string,
     criteria: IAcceptanceCriteria,
-    shouldEmit = false
+    shouldEmit = false,
+    details?: CriteriaDetailDocument
   ): Promise<CriteriaDocument | undefined> {
     const existingDocumentIndex = this._data.findIndex(x => x.id === workItemId);
 
@@ -176,6 +191,10 @@ class CriteriaService {
 
       const stateDoc = this.setFullState(newDocument);
       const updated = await this._dataStore.setCriteriaDocument(stateDoc);
+
+      if (details !== undefined) {
+        await this._dataStore.setCriteriaDetailsDocument(details);
+      }
 
       const newDocuments = [...this._data];
       newDocuments[existingDocumentIndex] = updated;

@@ -15,9 +15,14 @@ export interface IAcceptanceCriteria {
   requiredApprover?: IInternalIdentity;
   state: AcceptanceCriteriaState;
   type: 'scenario' | 'custom';
+  title: string;
+}
+
+export interface CriteriaDetailDocument {
+  id: string;
+  processed?: IAcceptanceCriteriaProcess;
   scenario?: IScenario;
   custom?: ICustomCriteria;
-  processed?: IAcceptanceCriteriaProcess;
 }
 
 export interface IAcceptanceCriteriaProcess {

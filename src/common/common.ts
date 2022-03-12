@@ -4,7 +4,7 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { IButtonProps } from 'azure-devops-ui/Button';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 
-import { IAcceptanceCriteria } from './types';
+import { CriteriaDetailDocument, IAcceptanceCriteria } from './types';
 
 export enum PanelIds {
   CriteriaPanel = 'criteria-panel'
@@ -16,7 +16,10 @@ export enum DialogIds {
 
 export interface CriteriaModalResult {
   result: 'CANCEL' | 'SAVE';
-  criteria?: IAcceptanceCriteria;
+  data?: {
+    criteria: IAcceptanceCriteria;
+    details?: CriteriaDetailDocument;
+  };
 }
 
 export const capitalizeFirstLetter = (text: string): string => {
@@ -29,11 +32,6 @@ export const move = <T>(array: T[], index: number, delta: number): void => {
   if (newIndex < 0 || newIndex == array.length) return;
   const indexes = [index, newIndex].sort((a, b) => a - b);
   array.splice(indexes[0], 2, array[indexes[1]], array[indexes[0]]);
-};
-
-export const getCriteriaTitle = (criteria: IAcceptanceCriteria): string | undefined => {
-  if (criteria.type === 'custom') return criteria.custom?.text;
-  return criteria.scenario?.scenario;
 };
 
 export const criteriaTypeItems: IListBoxItem<any>[] = [

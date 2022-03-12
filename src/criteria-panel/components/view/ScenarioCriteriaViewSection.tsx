@@ -3,24 +3,24 @@ import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { useMemo } from 'react';
 
 import { capitalizeFirstLetter } from '../../../common/common';
-import { IAcceptanceCriteria, IScenarioCriteria } from '../../../common/types';
+import { CriteriaDetailDocument, IScenarioCriteria } from '../../../common/types';
 import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
 
 interface ScenarioCriteriaViewSectionProps {
-  criteria: IAcceptanceCriteria;
+  details: CriteriaDetailDocument;
 }
 
 const ScenarioCriteriaViewSection = ({
-  criteria
+  details
 }: ScenarioCriteriaViewSectionProps): JSX.Element => {
   const { dispatch } = useCriteriaPanelContext();
 
   const provider = useMemo(() => {
-    if (criteria.scenario?.criterias) {
-      return new ArrayItemProvider(criteria.scenario.criterias);
+    if (details.scenario?.criterias) {
+      return new ArrayItemProvider(details.scenario.criterias);
     }
     return new ArrayItemProvider([]);
-  }, [criteria]);
+  }, [details]);
 
   const renderRow = (
     index: number,
@@ -44,7 +44,7 @@ const ScenarioCriteriaViewSection = ({
     <div className="rhythm-vertical-16 flex-grow margin-top-8">
       <div>
         <span className="font-weight-semibold font-size">Scenario</span>
-        <p>{criteria.scenario?.scenario}</p>
+        <p>{details.scenario?.scenario}</p>
       </div>
       <ScrollableList  itemProvider={provider} renderRow={renderRow} width="100%" />
     </div>

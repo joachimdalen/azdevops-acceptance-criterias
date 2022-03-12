@@ -2,6 +2,7 @@ import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
+import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
 import {
   getWorkItemTitle,
   getWorkItemTypeDisplayName
@@ -34,13 +35,7 @@ import { copyToClipboard } from 'azure-devops-ui/Utils/ClipboardUtils';
 import cx from 'classnames';
 import React, { useEffect, useMemo } from 'react';
 
-import {
-  capitalizeFirstLetter,
-  DialogIds,
-  getCriteriaTitle,
-  getUrl,
-  IConfirmationConfig
-} from '../../common/common';
+import { capitalizeFirstLetter, DialogIds, getUrl, IConfirmationConfig } from '../../common/common';
 import ApproverDisplay from '../../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import FullStatusTag from '../../common/components/FullStatusTag';
@@ -258,7 +253,7 @@ const CriteriaTree = ({
           const it: ITreeItem<IWorkItemCriteriaCell> = {
             data: {
               workItemId: '',
-              title: getCriteriaTitle(y) || 'Noop',
+              title: y.title,
               rowType: 'criteria',
               type: capitalizeFirstLetter(y.type) as any,
               state: y.state,
@@ -293,7 +288,6 @@ const CriteriaTree = ({
   }, [visibleDocuments]);
 
   useEffect(() => {
-    
     console.log(treeProvider?.value);
   }, [treeProvider]);
 
@@ -611,7 +605,12 @@ const CriteriaTree = ({
     width: -100
   };
 
-  if (workItems.length === 0) return <div>Loding..</div>;
+  if (workItems.length === 0)
+    return (
+      <div className="flex-grow">
+        <LoadingSection isLoading text="Loading criterias..." />
+      </div>
+    );
 
   const columns = [
     idCell,

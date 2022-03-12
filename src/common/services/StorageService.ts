@@ -3,7 +3,7 @@ import { IExtensionDataService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
 
 import SettingDocument from '../models/SettingDocument';
-import { CriteriaDocument } from '../types';
+import { CriteriaDetailDocument, CriteriaDocument } from '../types';
 
 enum ScopeType {
   Default = 'Default',
@@ -12,6 +12,7 @@ enum ScopeType {
 
 enum CollectionNames {
   Criterias = 'AcceptanceCriterias',
+  Details = 'AcceptanceCriteriaDetails',
   Settings = 'Settings'
 }
 
@@ -19,12 +20,16 @@ export interface IStorageService {
   getCriteriasForWorkItem(workItemId: string): Promise<CriteriaDocument | undefined>;
   getAllCriterias(): Promise<CriteriaDocument[]>;
   setCriteriaDocument(data: CriteriaDocument): Promise<CriteriaDocument>;
+  getCriteriaDetail(id: string): Promise<CriteriaDetailDocument | undefined>;
+  setCriteriaDetailsDocument(data: CriteriaDetailDocument): Promise<CriteriaDetailDocument>;
 }
 class StorageService implements IStorageService {
   private readonly _devOpsService: IDevOpsService;
   private scopeType: ScopeType;
   private dataService?: IExtensionDataService;
   private _criteriaCollection?: string;
+  private _criteriaDetailsCollection?: string;
+
   private _projectId?: string;
 
   public constructor() {
@@ -39,7 +44,7 @@ class StorageService implements IStorageService {
       );
     }
 
-    if (this._criteriaCollection === undefined) {
+    if (this._criteriaCollection === undefined || this._criteriaDetailsCollection === undefined) {
       const project = await this._devOpsService.getProject();
 
       if (project === undefined) {
@@ -47,6 +52,7 @@ class StorageService implements IStorageService {
       }
 
       this._criteriaCollection = `${project.id}-${CollectionNames.Criterias}`;
+      this._criteriaDetailsCollection = `${project.id}-${CollectionNames.Details}`;
       this._projectId = project.id;
     }
 
@@ -155,6 +161,46 @@ class StorageService implements IStorageService {
     return dataManager.setDocument(CollectionNames.Settings, {
       ...data,
       id: this._projectId
+    });
+  }
+
+  // Criteria details
+  public async getCriteriaDetail(id: string): Promise<CriteriaDetailDocument | undefined> {
+    const dataService = await this.getDataService();
+
+    if (this._criteriaDetailsCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    const document: CriteriaDetailDocument | undefined = await dataManager.getDocument(
+      this._criteriaDetailsCollection,
+      id,
+      {
+        scopeType: this.scopeType,
+        defaultValue: undefined
+      }
+    );
+
+    return document;
+  }
+
+  public async setCriteriaDetailsDocument(
+    data: CriteriaDetailDocument
+  ): Promise<CriteriaDetailDocument> {
+    const dataService = await this.getDataService();
+    if (this._criteriaDetailsCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    return dataManager.setDocument(this._criteriaDetailsCollection, data, {
+      scopeType: ScopeType.Default
     });
   }
 }

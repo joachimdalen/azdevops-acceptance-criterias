@@ -22,6 +22,7 @@ import {
 import * as DevOps from 'azure-devops-extension-sdk';
 import { Card } from 'azure-devops-ui/Card';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { ZeroData } from 'azure-devops-ui/ZeroData';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { IconSize } from 'azure-devops-ui/Icon';
@@ -30,7 +31,6 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
 import { useEffect, useMemo, useState } from 'react';
 
-import { getCriteriaTitle } from '../common/common';
 import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
@@ -124,7 +124,6 @@ const WorkHub = (): JSX.Element => {
       WebLogger.information('Loaded work hub...');
       const result = await criteriaService.load(data => {
         setDocuments(data);
-        //dispatch({ type: 'SET_DOCUMENTS', data: data });
 
         const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
         if (filter !== undefined && Object.keys(filter).length > 0) {
@@ -132,7 +131,6 @@ const WorkHub = (): JSX.Element => {
           applyFilter(filter, data);
         } else {
           setVisibleDocuments(data);
-          //dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: data });
         }
 
         WebLogger.information('Set', data);
@@ -197,7 +195,6 @@ const WorkHub = (): JSX.Element => {
   const applyFilter = (filter: IFilterState, innerDocuments?: CriteriaDocument[]) => {
     let items = innerDocuments !== undefined ? [...innerDocuments] : [...documents];
     if (Object.keys(filter).length === 0) {
-      //  dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: items });
       setVisibleDocuments(items);
       return;
     }
@@ -213,7 +210,7 @@ const WorkHub = (): JSX.Element => {
     }
     const title = filter['title'];
     if (title) {
-      items = innerFilter(items, v => (getCriteriaTitle(v) || '')?.indexOf(title.value) > -1);
+      items = innerFilter(items, v => v.title.indexOf(title.value) > -1);
     }
 
     const state = filter['state'];
@@ -221,7 +218,6 @@ const WorkHub = (): JSX.Element => {
     if (state) {
       items = innerFilter(items, v => v.state.indexOf(state.value) > -1);
     }
-    //dispatch({ type: 'SET_VISIBLE_DOCUMENTS', data: items });
     setVisibleDocuments(items);
   };
 
@@ -289,21 +285,29 @@ const WorkHub = (): JSX.Element => {
               onFilterChanged={filter => applyFilter(filter)}
             />
 
-            <Card className="margin-top-16" contentProps={{ contentPadding: false }}>
-              <CriteriaTree
-                workItems={workItems}
-                visibleDocuments={visibleDocuments}
-                documents={documents}
-                teams={teams}
-                workItemTypes={wiMap}
-                onProcess={async (id: string, approved: boolean) => {
-                  await criteriaService.processCriteria(id, approved);
-                }}
-                onClick={async (criteria: IAcceptanceCriteria) => {
-                  await criteriaService.showPanel(criteria, true, false);
-                }}
-              />
-            </Card>
+            <ConditionalChildren renderChildren={workItems.length > 0}>
+              <Card className="margin-top-16" contentProps={{ contentPadding: false }}>
+                <CriteriaTree
+                  workItems={workItems}
+                  visibleDocuments={visibleDocuments}
+                  documents={documents}
+                  teams={teams}
+                  workItemTypes={wiMap}
+                  onProcess={async (id: string, approved: boolean) => {
+                    await criteriaService.processCriteria(id, approved);
+                  }}
+                  onClick={async (criteria: IAcceptanceCriteria) => {
+                    await criteriaService.showPanel(criteria, true, false);
+                  }}
+                />
+              </Card>
+            </ConditionalChildren>
+
+            <ConditionalChildren renderChildren={workItems.length === 0}>
+              <div className="flex-grow">
+                <ZeroData primaryText="No criterias" imageAltText={''} />
+              </div>
+            </ConditionalChildren>
           </ConditionalChildren>
         </div>
 

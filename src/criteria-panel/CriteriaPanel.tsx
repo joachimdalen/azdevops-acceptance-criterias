@@ -11,25 +11,34 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import StatusTag from '../common/components/StatusTag';
-import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../common/types';
+import {
+  AcceptanceCriteriaState,
+  CriteriaDetailDocument,
+  IAcceptanceCriteria
+} from '../common/types';
 import CustomCriteriaSection from './components/CustomCriteriaSection';
 import { InternalTagPicker } from './components/InternalTagPicker';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
+import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
+import CriteriaService from '../common/services/CriteriaService';
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
+  const criteriaService = useMemo(() => new CriteriaService(), []);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [canEdit, setCanEdit] = useState(true);
   const [identity, setIdentity] = useState<IInternalIdentity | undefined>(undefined);
+  const [title, setTitle] = useState<string>('');
   const [criteria, setCriteria] = useState<IAcceptanceCriteria | undefined>();
+  const [details, setDetails] = useState<CriteriaDetailDocument>();
 
   const [loading, setLoading] = useState(true);
 
@@ -54,12 +63,17 @@ const CriteriaPanel = (): React.ReactElement => {
         }
         if (config.criteria) {
           const conCrit = config.criteria as IAcceptanceCriteria;
+
           setIdentity(conCrit.requiredApprover);
           setCriteria(conCrit);
-          dispatch({ type: 'SET_TYPE', data: conCrit.type });
-          dispatch({
-            type: 'SET_CRITERIA',
-            data: conCrit.type === 'scenario' ? conCrit.scenario : conCrit.custom
+
+          criteriaService.getCriteriaDetails(conCrit.id).then(details => {
+            dispatch({
+              type: 'SET_CRITERIA',
+              data: conCrit.type === 'scenario' ? details.scenario : details.custom
+            });
+            dispatch({ type: 'SET_TYPE', data: conCrit.type });
+            console.log(details);
           });
         }
 
@@ -89,23 +103,35 @@ const CriteriaPanel = (): React.ReactElement => {
       const ac = getCriteriaPayload();
       const res: CriteriaModalResult = {
         result: 'SAVE',
-        criteria: ac
+        data: ac
       };
       config.panel.close(res);
     }
   };
 
-  const getCriteriaPayload = () => {
+  const getCriteriaPayload = (): {
+    criteria: IAcceptanceCriteria;
+    details: CriteriaDetailDocument;
+  } => {
+    const id = criteria?.id || uuidV4();
     const ac: IAcceptanceCriteria = {
-      id: criteria?.id || uuidV4(),
+      id: id,
       requiredApprover: identity,
       state: criteria?.state || AcceptanceCriteriaState.New,
       type: panelState.type,
+      title: title
+    };
+
+    const acd: CriteriaDetailDocument = {
+      id: id,
       custom: panelState.type === 'custom' ? panelState.custom : undefined,
       scenario: panelState.type === 'scenario' ? panelState.scenario : undefined
     };
 
-    return ac;
+    return {
+      criteria: ac,
+      details: acd
+    };
   };
 
   const editContent = (
@@ -132,6 +158,17 @@ const CriteriaPanel = (): React.ReactElement => {
         </FormItem>
         <FormItem label="Tags" className="flex-grow">
           <InternalTagPicker />
+        </FormItem>
+        <FormItem label="Title">
+          <TextField
+            width={TextFieldWidth.auto}
+            placeholder="Short description.."
+            value={title}
+            maxLength={100}
+            onChange={e => {
+              setTitle(e.target.value);
+            }}
+          />
         </FormItem>
       </div>
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
@@ -194,7 +231,7 @@ const CriteriaPanel = (): React.ReactElement => {
                 >
                   <div className="flex-row rhythm-horizontal-8">
                     <ConditionalChildren
-                      renderChildren={criteria.processed?.processedBy !== undefined}
+                      renderChildren={details?.processed?.processedBy !== undefined}
                     >
                       <FormItem
                         label={
@@ -204,17 +241,17 @@ const CriteriaPanel = (): React.ReactElement => {
                         }
                         className="flex-grow"
                       >
-                        <ApproverDisplay approver={criteria.processed?.processedBy} />
+                        <ApproverDisplay approver={details?.processed?.processedBy} />
                       </FormItem>
                     </ConditionalChildren>
                   </div>
                 </ConditionalChildren>
               </div>
               <ConditionalChildren renderChildren={criteria.type === 'scenario'}>
-                {criteria.scenario && <ScenarioCriteriaViewSection criteria={criteria} />}
+                {details?.scenario && <ScenarioCriteriaViewSection details={details} />}
               </ConditionalChildren>
               <ConditionalChildren renderChildren={criteria.type === 'custom'}>
-                {criteria.custom && <CustomCriteriaViewSection criteria={criteria} />}
+                {details?.custom && <CustomCriteriaViewSection details={details} />}
               </ConditionalChildren>
             </>
           )}

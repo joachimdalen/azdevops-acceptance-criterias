@@ -14,7 +14,7 @@ import {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useMemo } from 'react';
 
-import { capitalizeFirstLetter, getCriteriaTitle } from '../../common/common';
+import { capitalizeFirstLetter } from '../../common/common';
 import ApproverDisplay from '../../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import InternalLink from '../../common/components/InternalLink';
@@ -105,23 +105,10 @@ const CriteriaView = ({
 }: CriteriaViewProps): JSX.Element => {
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
     const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = (criteria?.criterias || []).map(x => {
-      const children: ITreeItem<IWorkItemCriteriaCell>[] = [];
-      if (x.type === 'scenario') {
-        children.push({
-          data: {
-            id: '',
-            title: '',
-            rowType: 'details',
-            scenario: x.scenario,
-            type: 'custom'
-          }
-        });
-      }
-
       const it: ITreeItem<IWorkItemCriteriaCell> = {
         data: {
           id: x.id,
-          title: getCriteriaTitle(x) || 'Noop',
+          title: x.title,
           rowType: 'item',
           type: x.type,
           state: x.state,
@@ -133,7 +120,7 @@ const CriteriaView = ({
           },
           rawCriteria: x
         },
-        childItems: children
+        childItems: []
       };
       return it;
     });

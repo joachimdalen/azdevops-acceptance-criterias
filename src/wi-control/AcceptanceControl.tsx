@@ -109,9 +109,12 @@ const AcceptanceControl = (): React.ReactElement => {
       isRead,
       canEdit,
       async (result: CriteriaModalResult | undefined) => {
-        if (result?.result === 'SAVE' && result.criteria) {
+        if (result?.result === 'SAVE' && result.data) {
           const id = await devOpsService.getCurrentWorkItemId();
-          if (id) await criteriaService.createOrUpdate(id.toString(), result.criteria, true);
+          console.log(result);
+          if (id) {
+            await criteriaService.createOrUpdate(id.toString(), result.data.criteria, true, result.data.details);
+          }
         }
       }
     );
