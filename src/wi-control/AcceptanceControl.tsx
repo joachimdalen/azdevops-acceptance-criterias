@@ -18,6 +18,8 @@ import {
   IWorkItemNotificationListener
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { CriteriaModalResult, DialogIds, IConfirmationConfig } from '../common/common';
@@ -109,28 +111,39 @@ const AcceptanceControl = (): React.ReactElement => {
       isRead,
       canEdit,
       async (result: CriteriaModalResult | undefined) => {
+        console.log('cr', result);
         if (result?.result === 'SAVE' && result.data) {
           const id = await devOpsService.getCurrentWorkItemId();
           console.log(result);
           if (id) {
-            await criteriaService.createOrUpdate(id.toString(), result.data.criteria, true, result.data.details);
+            await criteriaService.createOrUpdate(
+              id.toString(),
+              result.data.criteria,
+              true,
+              result.data.details
+            );
           }
         }
       }
     );
   };
 
-  // useEffect(() => {
-  //   DevOps.resize();
-  // }, [ref, rows]);
-
   const _items: ICommandBarItemProps[] = useMemo(() => {
     return [
       {
         key: 'newItem',
         text: 'New Acceptance Criteria',
-        cacheKey: 'myCacheKey', // changing this key will invalidate this item's cache
+        cacheKey: 'myCacheKey',
         iconProps: { iconName: 'Add' },
+        onClick: () => {
+          showPanel();
+        }
+      },
+      {
+        key: 'refresh',
+        text: 'Refresh',
+        cacheKey: 'myCacheKey',
+        iconProps: { iconName: 'Refresh' },
         onClick: () => {
           showPanel();
         }
@@ -158,6 +171,77 @@ const AcceptanceControl = (): React.ReactElement => {
   //   );
   // }
 
+  async function onApprove(criteria: IAcceptanceCriteria, complete: boolean) {
+    if (
+      [AcceptanceCriteriaState.Approved, AcceptanceCriteriaState.Rejected].includes(
+        criteria.state
+      ) &&
+      complete === false
+    ) {
+      if (getLocalItem<boolean>(LocalStorageKeys.UndoCompleted)) {
+        await criteriaService.toggleCompletion(criteria.id, complete);
+      } else {
+        const config: IConfirmationConfig = {
+          cancelButton: {
+            text: 'No'
+          },
+          doNotShowAgain: true,
+          confirmButton: {
+            text: 'Yes',
+            primary: true
+          },
+          content: `This criteria has been fully processed. If you undo the completion state of this it will be reset and the criteria will need to be approved or rejected again. Proceed?`
+        };
+        await devOpsService.showDialog<ActionResult<boolean>, DialogIds>(
+          DialogIds.ConfirmationDialog,
+          {
+            title: 'Undo completed criteria?',
+            onClose: async result => {
+              if (result?.success) {
+                if (result.message === 'DO_NOT_SHOW_AGAIN') {
+                  setLocalItem(LocalStorageKeys.UndoCompleted, true);
+                }
+                await criteriaService.toggleCompletion(criteria.id, complete);
+              }
+            },
+            configuration: config
+          }
+        );
+      }
+    } else {
+      await criteriaService.toggleCompletion(criteria.id, complete);
+    }
+  }
+  async function onDelete(id: string) {
+    const config: IConfirmationConfig = {
+      cancelButton: {
+        text: 'Cancel'
+      },
+      confirmButton: {
+        text: 'Delete',
+        danger: true,
+        iconProps: {
+          iconName: 'Delete'
+        }
+      },
+      content: `Are you sure you want to delete the criteria. This can not be undone.`
+    };
+    await devOpsService.showDialog<boolean, DialogIds>(DialogIds.ConfirmationDialog, {
+      title: 'Delete criteria?',
+      onClose: async result => {
+        if (result) {
+          await criteriaService.deleteCriteria(id);
+        }
+      },
+      configuration: config
+    });
+    setShowConfirmation();
+  }
+
+  async function onEdit(criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) {
+    await showPanel(criteria, readOnly, canEdit);
+  }
+
   return (
     <div className="acceptance-control-container">
       <div>
@@ -165,78 +249,25 @@ const AcceptanceControl = (): React.ReactElement => {
         <Separator />
       </div>
 
-      <CriteriaView
-        criteria={criteriaDocument}
-        onEdit={async (criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) => {
-          await showPanel(criteria, readOnly, canEdit);
-        }}
-        onApprove={async (criteria: IAcceptanceCriteria, complete: boolean) => {
-          if (
-            [AcceptanceCriteriaState.Approved, AcceptanceCriteriaState.Rejected].includes(
-              criteria.state
-            ) &&
-            complete === false
-          ) {
-            if (getLocalItem<boolean>(LocalStorageKeys.UndoCompleted)) {
-              await criteriaService.toggleCompletion(criteria.id, complete);
-            } else {
-              const config: IConfirmationConfig = {
-                cancelButton: {
-                  text: 'No'
-                },
-                doNotShowAgain: true,
-                confirmButton: {
-                  text: 'Yes',
-                  primary: true
-                },
-                content: `This criteria has been fully processed. If you undo the completion state of this it will be reset and the criteria will need to be approved or rejected again. Proceed?`
-              };
-              await devOpsService.showDialog<ActionResult<boolean>, DialogIds>(
-                DialogIds.ConfirmationDialog,
-                {
-                  title: 'Undo completed criteria?',
-                  onClose: async result => {
-                    if (result?.success) {
-                      if (result.message === 'DO_NOT_SHOW_AGAIN') {
-                        setLocalItem(LocalStorageKeys.UndoCompleted, true);
-                      }
-                      await criteriaService.toggleCompletion(criteria.id, complete);
-                    }
-                  },
-                  configuration: config
-                }
-              );
-            }
-          } else {
-            await criteriaService.toggleCompletion(criteria.id, complete);
-          }
-        }}
-        onDelete={async (id: string) => {
-          const config: IConfirmationConfig = {
-            cancelButton: {
-              text: 'Cancel'
-            },
-            confirmButton: {
-              text: 'Delete',
-              danger: true,
-              iconProps: {
-                iconName: 'Delete'
-              }
-            },
-            content: `Are you sure you want to delete the criteria. This can not be undone.`
-          };
-          await devOpsService.showDialog<boolean, DialogIds>(DialogIds.ConfirmationDialog, {
-            title: 'Delete criteria?',
-            onClose: async result => {
-              if (result) {
-                await criteriaService.deleteCriteria(id);
-              }
-            },
-            configuration: config
-          });
-          setShowConfirmation();
-        }}
-      />
+      <ConditionalChildren renderChildren={criteriaDocument === undefined}>
+        <ZeroData
+          imageAltText={''}
+          secondaryText="No criterias added"
+          actionType={ZeroDataActionType.ctaButton}
+          actionText="New Acceptance Criteria"
+          onActionClick={() => {
+            showPanel();
+          }}
+        />
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={criteriaDocument !== undefined}>
+        <CriteriaView
+          criteria={criteriaDocument}
+          onEdit={onEdit}
+          onApprove={onApprove}
+          onDelete={onDelete}
+        />
+      </ConditionalChildren>
     </div>
   );
 };

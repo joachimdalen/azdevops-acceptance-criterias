@@ -69,13 +69,16 @@ class CriteriaService {
     }
   }
   public async getCriteriaDetails(id: string): Promise<CriteriaDetailDocument> {
-    const details = await this._dataStore.getCriteriaDetail(id);
-
-    if (details === undefined) {
-      return { id: id };
+    try {
+      const details = await this._dataStore.getCriteriaDetail(id);
+      if (details === undefined) return { id: id };
+      return details;
+    } catch (error: any) {
+      if (error?.status !== 404) {
+        throw new Error(error);
+      }
     }
-
-    return details;
+    return { id: id };
   }
 
   public async deleteCriteria(id: string): Promise<CriteriaDocument | undefined> {
@@ -95,13 +98,19 @@ class CriteriaService {
     }
   }
 
-  public async processCriteria(id: string, approved: boolean): Promise<void> {
+  //TODO: Pass in work item id and load document 
+  public async processCriteria(
+    id: string,
+    approved: boolean
+  ): Promise<{ criteria: IAcceptanceCriteria; details: CriteriaDetailDocument } | undefined> {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
     const details: CriteriaDetailDocument = await this.getCriteriaDetails(id);
     const approver = await getLoggedInUser();
+    console.log('gtd', doc);
     if (doc) {
       const criteria = doc.criterias.find(x => x.id === id);
       if (criteria) {
+        console.log('gtc', criteria);
         if (details.processed !== undefined) {
           details.processed = {
             ...details.processed,
@@ -120,7 +129,12 @@ class CriteriaService {
           ? AcceptanceCriteriaState.Approved
           : AcceptanceCriteriaState.Rejected;
         await this.createOrUpdate(doc.id, criteria, true);
-        await this._dataStore.setCriteriaDetailsDocument(details);
+        const updatedDetails = await this._dataStore.setCriteriaDetailsDocument(details);
+
+        return {
+          criteria: criteria,
+          details: updatedDetails
+        };
       }
     }
   }
@@ -177,6 +191,10 @@ class CriteriaService {
       };
       const created = await this._dataStore.setCriteriaDocument(document);
       this._data = [...this._data, created];
+
+      if (details !== undefined) {
+        await this._dataStore.setCriteriaDetailsDocument(details);
+      }
       return created;
     } else {
       const document = this._data[existingDocumentIndex];
@@ -258,7 +276,7 @@ class CriteriaService {
     await this._devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
       PanelIds.CriteriaPanel,
       {
-        title: 'Acceptance Criteria',
+        title: criteria?.title || 'Acceptance Criteria',
         size: 2,
         configuration: {
           isReadOnly: readOnly === undefined ? false : readOnly,

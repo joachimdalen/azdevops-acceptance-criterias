@@ -8,6 +8,8 @@ import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
 import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { Button } from 'azure-devops-ui/Button';
+import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
@@ -30,8 +32,8 @@ import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import { Button } from 'azure-devops-ui/Button';
-import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
+import { isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
+import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
   const criteriaService = useMemo(() => new CriteriaService(), []);
@@ -41,8 +43,20 @@ const CriteriaPanel = (): React.ReactElement => {
   const [title, setTitle] = useState<string>('');
   const [criteria, setCriteria] = useState<IAcceptanceCriteria | undefined>();
   const [details, setDetails] = useState<CriteriaDetailDocument>();
-
+  const [canApprove, toggleCanApprove] = useBooleanToggle();
   const [loading, setLoading] = useState(true);
+
+  function setCriteriaInfo(crit: IAcceptanceCriteria, details: CriteriaDetailDocument) {
+    setIdentity(crit.requiredApprover);
+    setTitle(crit.title);
+    setCriteria(crit);
+    dispatch({
+      type: 'SET_CRITERIA',
+      data: crit.type === 'scenario' ? details.scenario : details.custom
+    });
+    setDetails(details);
+    dispatch({ type: 'SET_TYPE', data: crit.type });
+  }
 
   useEffect(() => {
     async function initModule() {
@@ -65,27 +79,23 @@ const CriteriaPanel = (): React.ReactElement => {
           }
           if (config.criteria) {
             const conCrit = config.criteria as IAcceptanceCriteria;
-
-            setIdentity(conCrit.requiredApprover);
-            setCriteria(conCrit);
-
             const details = await criteriaService.getCriteriaDetails(conCrit.id);
+            setCriteriaInfo(conCrit, details);
 
-            dispatch({
-              type: 'SET_CRITERIA',
-              data: conCrit.type === 'scenario' ? details.scenario : details.custom
-            });
-            setDetails(details);
-            dispatch({ type: 'SET_TYPE', data: conCrit.type });
-            setLoading(false);
+            if (
+              conCrit.state === AcceptanceCriteriaState.AwaitingApproval &&
+              conCrit.requiredApprover !== undefined
+            ) {
+              const teams = await criteriaService.getUserTeams();
+              if (isLoggedInUser(conCrit.requiredApprover)) {
+                toggleCanApprove(true);
+              } else if (teams.some(y => y.id === conCrit.requiredApprover?.id)) {
+                toggleCanApprove(true);
+              }
+            }
           }
-
-          await DevOps.notifyLoadSucceeded();
-          DevOps.resize();
         }
-
         setLoading(false);
-
         await DevOps.notifyLoadSucceeded();
         DevOps.resize();
       } catch (error) {
@@ -113,6 +123,7 @@ const CriteriaPanel = (): React.ReactElement => {
     const config = DevOps.getConfiguration();
     if (config.panel) {
       const ac = getCriteriaPayload();
+      console.log('Saving...', ac);
       const res: CriteriaModalResult = {
         result: 'SAVE',
         data: ac
@@ -146,10 +157,28 @@ const CriteriaPanel = (): React.ReactElement => {
     };
   };
 
+  async function processCriteria(id: string, approve: boolean) {
+    const result = await criteriaService.processCriteria(id, approve);
+    if (result !== undefined) {
+      setCriteriaInfo(result.criteria, result.details);
+    }
+  }
+
   const editContent = (
     <>
       <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
-        <FormItem label="Type" className="flex-grow">
+        <FormItem label="Title">
+          <TextField
+            width={TextFieldWidth.auto}
+            placeholder="Short title.."
+            value={title}
+            maxLength={100}
+            onChange={e => {
+              setTitle(e.target.value);
+            }}
+          />
+        </FormItem>
+        <FormItem label="Criteira Type" className="flex-grow">
           <Dropdown
             disabled={isReadOnly}
             placeholder="Select an Option"
@@ -168,21 +197,11 @@ const CriteriaPanel = (): React.ReactElement => {
             onClear={() => setIdentity(undefined)}
           />
         </FormItem>
-        <FormItem label="Tags" className="flex-grow">
+        {/* <FormItem label="Tags" className="flex-grow">
           <InternalTagPicker />
-        </FormItem>
-        <FormItem label="Title">
-          <TextField
-            width={TextFieldWidth.auto}
-            placeholder="Short description.."
-            value={title}
-            maxLength={100}
-            onChange={e => {
-              setTitle(e.target.value);
-            }}
-          />
-        </FormItem>
+        </FormItem> */}
       </div>
+
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
         <ScenarioCriteria />
       </ConditionalChildren>
@@ -215,7 +234,7 @@ const CriteriaPanel = (): React.ReactElement => {
               primary: true,
               onClick: () => save(),
               iconProps: { iconName: 'Save' },
-              disabled: !panelState.isValid
+              disabled: !panelState.isValid || title === ''
             }
       }
       showVersion={!isReadOnly}
@@ -258,11 +277,29 @@ const CriteriaPanel = (): React.ReactElement => {
                     </ConditionalChildren>
                   </div>
                 </ConditionalChildren>
-                <ButtonGroup>
-                  <Button text="Approve" primary iconProps={{ iconName: 'CheckMark' }} />
-                  <Button text="Reject" danger iconProps={{ iconName: 'Cancel' }} />
-                </ButtonGroup>
               </div>
+              <ConditionalChildren renderChildren={canApprove}>
+                <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-vertical-8">
+                  <ButtonGroup>
+                    <Button
+                      text="Approve"
+                      primary
+                      iconProps={{ iconName: 'CheckMark' }}
+                      onClick={async () => {
+                        await processCriteria(criteria.id, true);
+                      }}
+                    />
+                    <Button
+                      text="Reject"
+                      danger
+                      iconProps={{ iconName: 'Cancel' }}
+                      onClick={async () => {
+                        await processCriteria(criteria.id, false);
+                      }}
+                    />
+                  </ButtonGroup>
+                </div>
+              </ConditionalChildren>
               <ConditionalChildren
                 renderChildren={criteria.type === 'scenario' && details !== undefined}
               >

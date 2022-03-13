@@ -19,7 +19,7 @@ const SettingContainer = ({
   children
 }: SettingContainerProps): JSX.Element => {
   return (
-    <div className="setting flex-grow flex-row">
+    <div className="setting flex-grow flex-row border-bottom-light padding-bottom-8">
       {icon && <Icon iconName={icon} size={IconSize.large} />}
       <div
         className={cx('flex-column flex-grow', {
@@ -46,6 +46,9 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps): JSX.Element => {
   const [noUndoComplete, setNoUndoComplete] = useState(
     getLocalItem(LocalStorageKeys.UndoCompleted) || false
   );
+  const [showCompletedWi, setShowCompletedWi] = useState(
+    getLocalItem(LocalStorageKeys.ShowCompletedWi) || false
+  );
 
   return (
     <Panel
@@ -56,7 +59,10 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps): JSX.Element => {
       footerButtonProps={[{ id: 'close', text: 'Close', onClick: onClose }]}
     >
       <div className="rhythm-vertical-16 flex-grow settings-list">
-        <h3>Notifications</h3>
+        <div className="flex-row">
+          <Icon iconName="Comment" className="margin-right-4" />
+          <h3 className="margin-vertical-4">Notifications</h3>
+        </div>
         <SettingContainer
           title="Do not show open work item"
           description="Do not show the 'Open work item' refresh warning"
@@ -82,6 +88,25 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps): JSX.Element => {
             onChange={(_, c) => {
               setLocalItem(LocalStorageKeys.UndoCompleted, c);
               setNoUndoComplete(c);
+            }}
+          />
+        </SettingContainer>
+
+        <div className="flex-row margin-top-16">
+          <Icon iconName="WorkItem" className="margin-right-4" />
+          <h3 className="margin-vertical-4">Work Items</h3>
+        </div>
+        <SettingContainer
+          title="Show completed Work Items"
+          description="Show critieras for work items that are in the completed group"
+        >
+          <Toggle
+            offText={'Off'}
+            onText={'On'}
+            checked={showCompletedWi}
+            onChange={(_, c) => {
+              setLocalItem(LocalStorageKeys.ShowCompletedWi, c);
+              setShowCompletedWi(c);
             }}
           />
         </SettingContainer>

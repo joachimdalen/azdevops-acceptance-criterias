@@ -22,7 +22,7 @@ const DocumentTab = (): React.ReactElement => {
     <PageWrapper>
       <div>Areas</div>
 
-      <div className="flex-row">
+      <div className="flex-column">
         {documents.map(x => {
           return (
             <div>

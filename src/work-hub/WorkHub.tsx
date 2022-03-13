@@ -13,7 +13,6 @@ import {
   getWorkItemTypeDisplayName,
   getWorkTypeFromReferenceName
 } from '@joachimdalen/azdevops-ext-core/WorkItemUtils';
-import { WebApiTeam } from 'azure-devops-extension-api/Core';
 import {
   WorkItem,
   WorkItemErrorPolicy,
@@ -22,13 +21,13 @@ import {
 import * as DevOps from 'azure-devops-extension-sdk';
 import { Card } from 'azure-devops-ui/Card';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { ZeroData } from 'azure-devops-ui/ZeroData';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { IconSize } from 'azure-devops-ui/Icon';
 import { Page } from 'azure-devops-ui/Page';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
+import { ZeroData } from 'azure-devops-ui/ZeroData';
 import { useEffect, useMemo, useState } from 'react';
 
 import useCriteriaId from '../common/hooks/useCriteriaId';
@@ -106,7 +105,6 @@ const WorkHub = (): JSX.Element => {
 
   const [visibleDocuments, setVisibleDocuments] = useState<CriteriaDocument[]>([]);
   const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
-  const [teams, setTeams] = useState<WebApiTeam[]>([]);
   const [workItemTypes, setWorkItemTypes] = useState<WorkItemType[]>([]);
 
   useEffect(() => {
@@ -116,10 +114,8 @@ const WorkHub = (): JSX.Element => {
       loadTheme(createTheme(appTheme));
       await DevOps.init();
       const loadedTypes = await workItemService.getWorkItemTypes();
-      const teams = await criteriaService.getUserTeams();
 
       setWorkItemTypes(loadedTypes);
-      setTeams(teams);
 
       WebLogger.information('Loaded work hub...');
       const result = await criteriaService.load(data => {
@@ -291,11 +287,7 @@ const WorkHub = (): JSX.Element => {
                   workItems={workItems}
                   visibleDocuments={visibleDocuments}
                   documents={documents}
-                  teams={teams}
                   workItemTypes={wiMap}
-                  onProcess={async (id: string, approved: boolean) => {
-                    await criteriaService.processCriteria(id, approved);
-                  }}
                   onClick={async (criteria: IAcceptanceCriteria) => {
                     await criteriaService.showPanel(criteria, true, false);
                   }}
