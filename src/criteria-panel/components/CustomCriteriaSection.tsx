@@ -27,7 +27,7 @@ const CustomCriteriaSection = (): JSX.Element => {
 
   return (
     <div className="rhythm-vertical-16 margin-top-8 flex-grow">
-      <FormItem label="Title">
+      <FormItem label="Description">
         <TextField
           width={TextFieldWidth.auto}
           placeholder="Short description.."

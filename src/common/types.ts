@@ -1,6 +1,7 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { ISimpleTableCell } from 'azure-devops-ui/Table';
 
+import { CriteriaModalResult } from './common';
 import { ProgressBarLabelType } from './components/ProgressBar';
 
 export interface CriteriaDocument {
@@ -8,6 +9,7 @@ export interface CriteriaDocument {
   id: string;
   criterias: IAcceptanceCriteria[];
   state: FullCriteriaStatus;
+  readonly __etag?: number;
 }
 export interface IAcceptanceCriteria {
   id: string;
@@ -23,6 +25,7 @@ export interface CriteriaDetailDocument {
   processed?: IAcceptanceCriteriaProcess;
   scenario?: IScenario;
   custom?: ICustomCriteria;
+  readonly __etag?: number;
 }
 
 export interface IAcceptanceCriteriaProcess {
@@ -82,4 +85,13 @@ export interface IProgressStatus {
   value: number;
   maxValue: number;
   type: ProgressBarLabelType;
+}
+
+export interface CriteriaPanelConfig {
+  workItemId?: string;
+  criteria?: IAcceptanceCriteria;
+  isReadOnly?: boolean;
+  isNew?: boolean;
+  canEdit?: boolean;
+  onClose?: (result: CriteriaModalResult | undefined) => Promise<void>;
 }

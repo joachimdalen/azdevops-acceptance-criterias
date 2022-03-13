@@ -131,10 +131,8 @@ export const getProgress = (
 
   return {
     maxValue: doc.criterias.length,
-    value: doc.criterias.filter(
-      x =>
-        x.state === AcceptanceCriteriaState.Completed ||
-        x.state === AcceptanceCriteriaState.Approved
+    value: doc.criterias.filter(x =>
+      [AcceptanceCriteriaState.Approved, AcceptanceCriteriaState.Completed].includes(x.state)
     ).length,
     type: 'count'
   };
@@ -152,18 +150,13 @@ export const getTreeProvider = (
       const criteriaRows = x.criterias.map(y => {
         const it: ITreeItem<IWorkItemCriteriaCell> = {
           data: {
-            workItemId: '',
+            workItemId: x.id,
             title: y.title,
             rowType: 'criteria',
             type: capitalizeFirstLetter(y.type) as any,
             state: y.state,
             requiredApprover: y.requiredApprover,
             criteriaId: y.id,
-            progress: {
-              maxValue: 1,
-              value: y.state === 'approved' ? 1 : 0,
-              type: 'percentage'
-            },
             rawCriteria: y
           }
         };

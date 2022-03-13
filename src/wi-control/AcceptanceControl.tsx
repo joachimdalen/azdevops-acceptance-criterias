@@ -25,7 +25,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CriteriaModalResult, DialogIds, IConfirmationConfig } from '../common/common';
 import { getLocalItem, LocalStorageKeys, setLocalItem } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
-import { AcceptanceCriteriaState, CriteriaDocument, IAcceptanceCriteria } from '../common/types';
+import {
+  AcceptanceCriteriaState,
+  CriteriaDocument,
+  CriteriaPanelConfig,
+  IAcceptanceCriteria
+} from '../common/types';
 import CriteriaView from './components/CriteriaView';
 
 const AcceptanceControl = (): React.ReactElement => {
@@ -35,15 +40,16 @@ const AcceptanceControl = (): React.ReactElement => {
   );
   const [criteriaDocument, setCriteriaDocument] = useState<CriteriaDocument>();
   const [loading, setLoading] = useState(true);
-  const [rows, setRows] = useState<IAcceptanceCriteria[]>();
   const [isReadOnly, setReadOnly] = useState<boolean>(false);
   const [isNew, setIsNew] = useState<boolean>(true);
-  const [showConfirmation, setShowConfirmation] = useBooleanToggle();
+  const [workItemId, setWorkItemId] = useState<number>(-1);
+
   const provider = useMemo(() => {
     const listener: Partial<IWorkItemNotificationListener> = {
       onLoaded: async function (workItemLoadedArgs: IWorkItemLoadedArgs): Promise<void> {
         setReadOnly(workItemLoadedArgs.isReadOnly);
         setIsNew(workItemLoadedArgs.isNew);
+        setWorkItemId(workItemLoadedArgs.id);
       }
     };
     return listener;
@@ -105,12 +111,12 @@ const AcceptanceControl = (): React.ReactElement => {
     canEdit?: boolean
   ) => {
     const isRead = isReadOnly || readOnly;
-
-    await criteriaService.showPanel(
-      criteria,
-      isRead,
-      canEdit,
-      async (result: CriteriaModalResult | undefined) => {
+    const config: CriteriaPanelConfig = {
+      workItemId: workItemId.toString(),
+      criteria: criteria,
+      isReadOnly: isRead,
+      canEdit: canEdit,
+      onClose: async (result: CriteriaModalResult | undefined) => {
         console.log('cr', result);
         if (result?.result === 'SAVE' && result.data) {
           const id = await devOpsService.getCurrentWorkItemId();
@@ -125,7 +131,9 @@ const AcceptanceControl = (): React.ReactElement => {
           }
         }
       }
-    );
+    };
+
+    await criteriaService.showPanel(config);
   };
 
   const _items: ICommandBarItemProps[] = useMemo(() => {
@@ -235,7 +243,6 @@ const AcceptanceControl = (): React.ReactElement => {
       },
       configuration: config
     });
-    setShowConfirmation();
   }
 
   async function onEdit(criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) {

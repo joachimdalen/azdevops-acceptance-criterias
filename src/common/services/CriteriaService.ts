@@ -9,6 +9,7 @@ import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
   CriteriaDocument,
+  CriteriaPanelConfig,
   FullCriteriaStatus,
   IAcceptanceCriteria
 } from '../types';
@@ -98,12 +99,13 @@ class CriteriaService {
     }
   }
 
-  //TODO: Pass in work item id and load document 
+  //TODO: Pass in work item id and load document
   public async processCriteria(
+    workItemId: string,
     id: string,
     approved: boolean
   ): Promise<{ criteria: IAcceptanceCriteria; details: CriteriaDetailDocument } | undefined> {
-    const doc = this._data.find(x => x.criterias.some(y => y.id === id));
+    const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
     const details: CriteriaDetailDocument = await this.getCriteriaDetails(id);
     const approver = await getLoggedInUser();
     console.log('gtd', doc);
@@ -128,13 +130,9 @@ class CriteriaService {
         criteria.state = approved
           ? AcceptanceCriteriaState.Approved
           : AcceptanceCriteriaState.Rejected;
-        await this.createOrUpdate(doc.id, criteria, true);
-        const updatedDetails = await this._dataStore.setCriteriaDetailsDocument(details);
 
-        return {
-          criteria: criteria,
-          details: updatedDetails
-        };
+        const res = await this.update(doc, criteria, details);
+        return res;
       }
     }
   }
@@ -173,6 +171,27 @@ class CriteriaService {
         return updated;
       }
     }
+  }
+
+  public async update(
+    document: CriteriaDocument,
+    criteria: IAcceptanceCriteria,
+    details: CriteriaDetailDocument
+  ): Promise<{ criteria: IAcceptanceCriteria; details: CriteriaDetailDocument }> {
+    const newDocument = { ...document };
+    const index = document.criterias.findIndex(x => x.id === criteria.id);
+
+    if (index > -1) {
+      newDocument.criterias[index] = criteria;
+    }
+
+    const stateDoc = this.setFullState(newDocument);
+    await this._dataStore.setCriteriaDocument(stateDoc);
+    const updatedDetails = await this._dataStore.setCriteriaDetailsDocument(details);
+    return {
+      criteria: criteria,
+      details: updatedDetails
+    };
   }
 
   public async createOrUpdate(
@@ -267,23 +286,21 @@ class CriteriaService {
     return doc;
   }
 
-  public async showPanel(
-    criteria?: IAcceptanceCriteria,
-    readOnly?: boolean,
-    canEdit?: boolean,
-    onClose?: (result: CriteriaModalResult | undefined) => Promise<void>
-  ): Promise<void> {
+  public async showPanel(options: CriteriaPanelConfig): Promise<void> {
+    const intConfig: Omit<CriteriaPanelConfig, 'onClose'> = {
+      criteria: options.criteria,
+      canEdit: options.canEdit === undefined ? false : options.canEdit,
+      isReadOnly: options.isReadOnly === undefined ? false : options.isReadOnly,
+      isNew: options.isNew === undefined ? false : options.isNew,
+      workItemId: options.workItemId
+    };
     await this._devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
       PanelIds.CriteriaPanel,
       {
-        title: criteria?.title || 'Acceptance Criteria',
+        title: options?.criteria?.title || 'Acceptance Criteria',
         size: 2,
-        configuration: {
-          isReadOnly: readOnly === undefined ? false : readOnly,
-          canEdit: canEdit === undefined ? false : canEdit,
-          criteria
-        },
-        onClose: onClose
+        configuration: intConfig,
+        onClose: options.onClose
       }
     );
   }

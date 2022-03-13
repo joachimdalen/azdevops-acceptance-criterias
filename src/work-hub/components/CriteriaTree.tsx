@@ -16,9 +16,7 @@ import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { ExpandableTreeCell, ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
-import {
-  ITreeItemEx,
-  ITreeItemProvider} from 'azure-devops-ui/Utilities/TreeItemProvider';
+import { ITreeItemEx, ITreeItemProvider } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { copyToClipboard } from 'azure-devops-ui/Utils/ClipboardUtils';
 import { useMemo } from 'react';
 
@@ -27,11 +25,7 @@ import ApproverDisplay from '../../common/components/ApproverDisplay';
 import InternalLink from '../../common/components/InternalLink';
 import ProgressBar from '../../common/components/ProgressBar';
 import { getLocalItem, LocalStorageKeys, setLocalItem } from '../../common/localStorage';
-import {
-  CriteriaDocument,
-  IAcceptanceCriteria,
-  WorkItemTypeTagProps
-} from '../../common/types';
+import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../../common/types';
 import {
   criteriaState,
   getTreeProvider,
@@ -46,7 +40,7 @@ interface CriteriaTreeProps {
   workItems: WorkItem[];
   visibleDocuments: CriteriaDocument[];
   documents: CriteriaDocument[];
-  onClick: (criteria: IAcceptanceCriteria) => Promise<void>;
+  onClick: (workItemId: string, criteria: IAcceptanceCriteria) => Promise<void>;
 }
 
 const CriteriaTree = ({
@@ -89,7 +83,7 @@ const CriteriaTree = ({
           iconProps: { iconName: 'View' },
           onActivate: () => {
             if (data.rawCriteria) {
-              onClick(data.rawCriteria);
+              onClick(data.workItemId, data.rawCriteria);
             }
           }
         },
@@ -187,7 +181,7 @@ const CriteriaTree = ({
             <InternalLink
               onClick={async () => {
                 if (data.rawCriteria) {
-                  await onClick(data.rawCriteria);
+                  await onClick(data.workItemId, data.rawCriteria);
                 }
               }}
             >

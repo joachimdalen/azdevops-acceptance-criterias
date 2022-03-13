@@ -4,7 +4,9 @@ import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { IdentityPicker } from '@joachimdalen/azdevops-ext-core/IdentityPicker';
+import { isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
+import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
@@ -24,16 +26,15 @@ import CriteriaService from '../common/services/CriteriaService';
 import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
+  CriteriaPanelConfig,
   IAcceptanceCriteria
 } from '../common/types';
 import CustomCriteriaSection from './components/CustomCriteriaSection';
-import { InternalTagPicker } from './components/InternalTagPicker';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import { isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
-import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
+
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
   const criteriaService = useMemo(() => new CriteriaService(), []);
@@ -45,6 +46,7 @@ const CriteriaPanel = (): React.ReactElement => {
   const [details, setDetails] = useState<CriteriaDetailDocument>();
   const [canApprove, toggleCanApprove] = useBooleanToggle();
   const [loading, setLoading] = useState(true);
+  const [workItemId, setWorkItemId] = useState<string | undefined>();
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, details: CriteriaDetailDocument) {
     setIdentity(crit.requiredApprover);
@@ -69,8 +71,10 @@ const CriteriaPanel = (): React.ReactElement => {
         await DevOps.ready();
 
         loadTheme(createTheme(appTheme));
-        const config = DevOps.getConfiguration();
-        if (config.panel) {
+        const config = DevOps.getConfiguration() as
+          | (CriteriaPanelConfig & { panel: any })
+          | undefined;
+        if (config && config.panel) {
           if (config.isReadOnly) {
             setIsReadOnly(true);
           }
@@ -94,6 +98,7 @@ const CriteriaPanel = (): React.ReactElement => {
               }
             }
           }
+          setWorkItemId(config.workItemId);
         }
         setLoading(false);
         await DevOps.notifyLoadSucceeded();
@@ -158,9 +163,11 @@ const CriteriaPanel = (): React.ReactElement => {
   };
 
   async function processCriteria(id: string, approve: boolean) {
-    const result = await criteriaService.processCriteria(id, approve);
-    if (result !== undefined) {
-      setCriteriaInfo(result.criteria, result.details);
+    if (workItemId) {
+      const result = await criteriaService.processCriteria(workItemId, id, approve);
+      if (result !== undefined) {
+        setCriteriaInfo(result.criteria, result.details);
+      }
     }
   }
 
@@ -278,7 +285,13 @@ const CriteriaPanel = (): React.ReactElement => {
                   </div>
                 </ConditionalChildren>
               </div>
-              <ConditionalChildren renderChildren={canApprove}>
+              <ConditionalChildren
+                renderChildren={
+                  canApprove &&
+                  workItemId !== undefined &&
+                  criteria.state === AcceptanceCriteriaState.AwaitingApproval
+                }
+              >
                 <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-vertical-8">
                   <ButtonGroup>
                     <Button
