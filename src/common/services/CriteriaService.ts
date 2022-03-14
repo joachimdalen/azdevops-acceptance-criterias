@@ -2,6 +2,10 @@ import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { getClient } from 'azure-devops-extension-api';
 import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
+import {
+  WorkItemQueryResult,
+  WorkItemTrackingRestClient
+} from 'azure-devops-extension-api/WorkItemTracking';
 
 import { CriteriaModalResult, PanelIds } from '../common';
 import { ActionResult } from '../models/ActionResult';
@@ -303,6 +307,17 @@ class CriteriaService {
         onClose: options.onClose
       }
     );
+  }
+
+  public async getActiveWorkItemIds(states: string[], ids: number[]): Promise<WorkItemQueryResult> {
+    const statesString = states.map(x => "'" + x + "'").join(',');
+    const idString = ids.join(',');
+
+    const query = `select [System.Id] from WorkItems where [System.TeamProject] = @project and [System.WorkItemType] <> '' and not [System.State] in (${statesString}) and [System.Id] in (${idString})`;
+    const client = getClient(WorkItemTrackingRestClient);
+    const types = await client.queryByWiql({ query: query }, 'DemoProject');
+
+    return types;
   }
 }
 

@@ -55,6 +55,15 @@ const AcceptanceControl = (): React.ReactElement => {
     return listener;
   }, []);
 
+  const reload = async () => {
+    const formService = await DevOps.getService<IWorkItemFormService>(
+      'ms.vss-work-web.work-item-form'
+    );
+    const id = await formService.getId();
+    await criteriaService.load(undefined, id.toString(), true);
+    devOpsService.showToast('Refreshed data');
+  };
+
   useEffect(() => {
     async function initModule() {
       try {
@@ -152,8 +161,8 @@ const AcceptanceControl = (): React.ReactElement => {
         text: 'Refresh',
         cacheKey: 'myCacheKey',
         iconProps: { iconName: 'Refresh' },
-        onClick: () => {
-          showPanel();
+        onClick: async () => {
+          await reload();
         }
       }
     ];

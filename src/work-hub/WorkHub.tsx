@@ -107,6 +107,8 @@ const WorkHub = (): JSX.Element => {
   const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
   const [workItemTypes, setWorkItemTypes] = useState<WorkItemType[]>([]);
 
+  const [completedStates, setCompletedStates] = useState<string[]>([]);
+
   useEffect(() => {
     async function initModule() {
       console.log('Loading data..');
@@ -116,6 +118,14 @@ const WorkHub = (): JSX.Element => {
       const loadedTypes = await workItemService.getWorkItemTypes();
 
       setWorkItemTypes(loadedTypes);
+      const categories = ['Completed', 'Removed'];
+      const completedStatesA = loadedTypes
+        .flatMap(x => x.states.filter(x => categories.includes(x.category)).map(x => x.name))
+        .filter(distinct);
+
+      setCompletedStates(completedStatesA);
+
+      console.log(completedStates);
 
       WebLogger.information('Loaded work hub...');
       const result = await criteriaService.load(data => {
@@ -225,8 +235,15 @@ const WorkHub = (): JSX.Element => {
       if (workItemIds.length > 0 && workItemIds.length !== workItems.length) {
         toggleLoadingWis(true);
         try {
+          let wids = workItemIds;
+
+          if (!getLocalItem(LocalStorageKeys.ShowCompletedWi)) {
+            const res = await criteriaService.getActiveWorkItemIds(completedStates, [397, 410]);
+            wids = res.workItems.map(x => x.id);
+          }
+
           const wi = await workItemService.getWorkItems(
-            workItemIds,
+            wids,
             undefined,
             fields,
             WorkItemErrorPolicy.Omit

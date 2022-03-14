@@ -49,6 +49,7 @@ const CriteriaPanel = (): React.ReactElement => {
   const [workItemId, setWorkItemId] = useState<string | undefined>();
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, details: CriteriaDetailDocument) {
+    dispatch({ type: 'SET_TYPE', data: crit.type });
     setIdentity(crit.requiredApprover);
     setTitle(crit.title);
     setCriteria(crit);
@@ -57,7 +58,7 @@ const CriteriaPanel = (): React.ReactElement => {
       data: crit.type === 'scenario' ? details.scenario : details.custom
     });
     setDetails(details);
-    dispatch({ type: 'SET_TYPE', data: crit.type });
+    
   }
 
   useEffect(() => {
