@@ -5,11 +5,11 @@
   "id": "acceptance-criterias-qa",
   "name": "Acceptance Criterias - QA",
   "publisher": "JoachimDalen",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An extension to manage acceptance criterias",
   "categories": ["Azure Boards"],
   "demands": ["api-version/5.1"],
-  "tags": [],
+  "tags": ["acceptance criterias", "qa"],
   "galleryFlags": ["Preview"],
   "scopes": ["vso.work_write", "vso.project"],
   "icons": {
@@ -63,13 +63,29 @@
       "type": "ms.vss-web.external-content",
       "targets": [],
       "properties": {
-        "uri": "criteria-panel.html"
+        "uri": "dist/criteria-panel.html"
       },
       "constraints": [
         {
           "name": "Feature",
           "properties": {
-            "featureId": "joachimdalen.acceptance-criterias-qa.acceptance-criterias-enabled"
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirmation-dialog",
+      "type": "ms.vss-web.external-content",
+      "targets": [],
+      "properties": {
+        "uri": "dist/confirmation-dialog.html"
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
           }
         }
       ]
@@ -80,23 +96,88 @@
       "description": "Configuration hub for Acceptance Criterias",
       "targets": ["ms.vss-web.project-admin-hub-group"],
       "properties": {
-        "name": "Acceptance Criterias (DEV)",
+        "name": "Acceptance Criterias (QA)",
         "order": 1,
-        "uri": "admin-hub.html"
+        "uri": "dist/admin-hub.html"
       },
       "constraints": [
         {
           "name": "Feature",
           "properties": {
-            "featureId": "joachimdalen.acceptance-criterias-qa.acceptance-criterias-enabled"
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
           }
         }
       ]
     },
     {
-      "id": "acceptance-criterias-enabled",
+      "id": "work-hub",
+      "type": "ms.vss-web.hub",
+      "targets": ["ms.vss-work-web.work-hub-group"],
+      "properties": {
+        "name": "Acceptance Criterias (QA)",
+        "uri": "dist/work-hub.html",
+        "icon": {
+          "light": "dist/assets/hub-icon-dark.png",
+          "dark": "dist/assets/hub-icon-light.png"
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "criterias-control-page",
+      "type": "ms.vss-work-web.work-item-form-page",
+      "targets": ["ms.vss-work-web.work-item-form"],
+      "properties": {
+        "name": "Acceptance Criterias",
+        "uri": "dist/wi-control.html"
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.enabled-on-all-workitems"
+          }
+        }
+      ]
+    },
+    {
+      "id": "criterias-progress-control",
+      "type": "ms.vss-work-web.work-item-form-control",
+      "targets": ["ms.vss-work-web.work-item-form"],
+      "description": "Progressbar that shows the total progress of acceptance criterias",
+      "properties": {
+        "name": "Acceptance Criterias Progress",
+        "uri": "dist/progress-control.html"
+      }
+    },
+    {
+      "id": "feature-enabled",
       "type": "ms.vss-web.feature",
       "description": "Enables acceptance criteria user hub and admin hub",
+      "targets": ["ms.vss-web.managed-features"],
+      "properties": {
+        "name": "Acceptance Criterias",
+        "userConfigurable": false,
+        "hostConfigurable": true,
+        "hostScopes": ["project"],
+        "links": {
+          "learn": {
+            "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias#post-install-activation"
+          }
+        }
+      }
+    },
+    {
+      "id": "enabled-on-all-workitems",
+      "type": "ms.vss-web.feature",
+      "description": "Enables acceptance criteria control on all work item types",
       "targets": ["ms.vss-web.managed-features"],
       "properties": {
         "name": "Acceptance Criterias",

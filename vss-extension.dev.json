@@ -6,7 +6,7 @@
   "id": "acceptance-criterias-dev",
   "name": "Acceptance Criterias - DEV",
   "publisher": "JoachimDalen",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "An extension to manage acceptance criterias",
   "categories": ["Azure Boards"],
   "demands": ["api-version/5.1"],
@@ -125,6 +125,24 @@
       "properties": {
         "name": "Acceptance Criterias",
         "uri": "wi-control.html"
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.enabled-on-all-workitems"
+          }
+        }
+      ]
+    },
+    {
+      "id": "criterias-wi-control",
+      "type": "ms.vss-work-web.work-item-form-control",
+      "targets": ["ms.vss-work-web.work-item-form"],
+      "description": "Control to manage acceptance criterias for a work item",
+      "properties": {
+        "name": "Acceptance Criterias",
+        "uri": "wi-control.html"
       }
     },
     {
@@ -141,6 +159,23 @@
       "id": "feature-enabled",
       "type": "ms.vss-web.feature",
       "description": "Enables acceptance criteria user hub and admin hub",
+      "targets": ["ms.vss-web.managed-features"],
+      "properties": {
+        "name": "Acceptance Criterias",
+        "userConfigurable": false,
+        "hostConfigurable": true,
+        "hostScopes": ["project"],
+        "links": {
+          "learn": {
+            "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias#post-install-activation"
+          }
+        }
+      }
+    },
+    {
+      "id": "enabled-on-all-workitems",
+      "type": "ms.vss-web.feature",
+      "description": "Enables acceptance criteria control on all work item types",
       "targets": ["ms.vss-web.managed-features"],
       "properties": {
         "name": "Acceptance Criterias",
