@@ -51,8 +51,13 @@ const CriteriaTree = ({
   documents
 }: CriteriaTreeProps): JSX.Element => {
   const devOpsService = useMemo(() => new DevOpsService(), []);
+
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(
-    () => getTreeProvider(documents, visibleDocuments),
+    () =>
+      getTreeProvider(
+        documents,
+        visibleDocuments.filter(x => workItems.some(y => y.id.toString() === x.id))
+      ),
     [visibleDocuments]
   );
 
