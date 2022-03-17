@@ -80,16 +80,16 @@ const WorkHub = (): JSX.Element => {
       },
       onActivate: () => toggleFilter()
     },
-    {
-      id: 'columns',
-      iconProps: { iconName: 'TripleColumnEdit' },
-      subtle: true,
-      disabled: !isActive,
-      tooltipProps: {
-        text: 'Configure columns'
-      },
-      onActivate: () => togglePanel()
-    },
+    // {
+    //   id: 'columns',
+    //   iconProps: { iconName: 'TripleColumnEdit' },
+    //   subtle: true,
+    //   disabled: !isActive,
+    //   tooltipProps: {
+    //     text: 'Configure columns'
+    //   },
+    //   onActivate: () => togglePanel()
+    // },
     {
       id: 'settings',
       iconProps: { iconName: 'Settings' },
