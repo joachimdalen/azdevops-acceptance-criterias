@@ -30,7 +30,8 @@ const DocumentTab = (): React.ReactElement => {
               <Button
                 text="Delete"
                 onClick={async () => {
-                  await service.delete(x.id);
+                  await service.deleteCriteriaDocument(x.id);
+                  await service.deleteCriteriaDetilsDocument(x.id);
                 }}
               ></Button>
             </div>

@@ -20,8 +20,10 @@ export interface IStorageService {
   getCriteriasForWorkItem(workItemId: string): Promise<CriteriaDocument | undefined>;
   getAllCriterias(): Promise<CriteriaDocument[]>;
   setCriteriaDocument(data: CriteriaDocument): Promise<CriteriaDocument>;
+  deleteCriteriaDocument(id: string): Promise<void>;
   getCriteriaDetail(id: string): Promise<CriteriaDetailDocument | undefined>;
   setCriteriaDetailsDocument(data: CriteriaDetailDocument): Promise<CriteriaDetailDocument>;
+  deleteCriteriaDetilsDocument(id: string): Promise<void>;
 }
 class StorageService implements IStorageService {
   private readonly _devOpsService: IDevOpsService;
@@ -94,18 +96,24 @@ class StorageService implements IStorageService {
       scopeType: this.scopeType
     });
   }
-  public async delete(id: string): Promise<void> {
-    const dataService = await this.getDataService();
-    if (this._criteriaCollection === undefined) {
-      throw new Error('Failed to initialize ');
+  public async deleteCriteriaDocument(id: string): Promise<void> {
+    try {
+      const dataService = await this.getDataService();
+      if (this._criteriaCollection === undefined) {
+        throw new Error('Failed to initialize ');
+      }
+      const dataManager = await dataService.getExtensionDataManager(
+        DevOps.getExtensionContext().id,
+        await DevOps.getAccessToken()
+      );
+      await dataManager.deleteDocument(this._criteriaCollection, id, {
+        scopeType: this.scopeType
+      });
+    } catch (error: any) {
+      if (error?.status !== 404) {
+        throw new Error(error);
+      }
     }
-    const dataManager = await dataService.getExtensionDataManager(
-      DevOps.getExtensionContext().id,
-      await DevOps.getAccessToken()
-    );
-    return dataManager.deleteDocument(this._criteriaCollection, id, {
-      scopeType: this.scopeType
-    });
   }
 
   public async setCriteriaDocument(data: CriteriaDocument): Promise<CriteriaDocument> {
@@ -202,6 +210,26 @@ class StorageService implements IStorageService {
     return dataManager.setDocument(this._criteriaDetailsCollection, data, {
       scopeType: ScopeType.Default
     });
+  }
+
+  public async deleteCriteriaDetilsDocument(id: string): Promise<void> {
+    try {
+      const dataService = await this.getDataService();
+      if (this._criteriaDetailsCollection === undefined) {
+        throw new Error('Failed to initialize ');
+      }
+      const dataManager = await dataService.getExtensionDataManager(
+        DevOps.getExtensionContext().id,
+        await DevOps.getAccessToken()
+      );
+      await dataManager.deleteDocument(this._criteriaDetailsCollection, id, {
+        scopeType: this.scopeType
+      });
+    } catch (error: any) {
+      if (error?.status !== 404) {
+        throw new Error(error);
+      }
+    }
   }
 }
 

@@ -85,19 +85,14 @@ const AcceptanceControl = (): React.ReactElement => {
         const id = await formService.getId();
 
         if (id !== 0) {
-          const loadResult = await criteriaService.load(data => {
+          await criteriaService.load(data => {
             if (data.length > 0) {
               WebLogger.trace('Setting data', data);
               setCriteriaDocument(data[0]);
+            } else {
+              setCriteriaDocument(undefined);
             }
           }, id.toString());
-
-          if (loadResult.success && loadResult.data) {
-            if (loadResult.data.length > 0) {
-              WebLogger.trace('setting', loadResult.data[0]);
-              setCriteriaDocument(loadResult.data[0]);
-            }
-          }
         }
 
         setLoading(false);

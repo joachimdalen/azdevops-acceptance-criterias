@@ -94,11 +94,22 @@ class CriteriaService {
       if (criteria) {
         const newDoc = { ...doc };
         newDoc.criterias = newDoc.criterias.filter(x => x.id !== criteria.id);
-        const existingDocumentIndex = this._data.findIndex(x => x.id === doc.id);
-        const updated = await this._dataStore.setCriteriaDocument(newDoc);
-        this._data[existingDocumentIndex] = updated;
-        this.emitChange();
-        return updated;
+
+        if (newDoc.criterias.length === 0) {
+          const newData = this._data.filter(x => x.id !== doc.id);
+          await this._dataStore.deleteCriteriaDocument(doc.id);
+          await this._dataStore.deleteCriteriaDetilsDocument(id);
+          this._data = newData;
+          this.emitChange();
+          return undefined;
+        } else {
+          const existingDocumentIndex = this._data.findIndex(x => x.id === doc.id);
+          const updated = await this._dataStore.setCriteriaDocument(newDoc);
+          await this._dataStore.deleteCriteriaDetilsDocument(id);
+          this._data[existingDocumentIndex] = updated;
+          this.emitChange();
+          return updated;
+        }
       }
     }
   }
@@ -217,6 +228,9 @@ class CriteriaService {
 
       if (details !== undefined) {
         await this._dataStore.setCriteriaDetailsDocument(details);
+      }
+      if (shouldEmit) {
+        this.emitChange();
       }
       return created;
     } else {
