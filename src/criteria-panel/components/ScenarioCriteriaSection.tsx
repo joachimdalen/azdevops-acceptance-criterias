@@ -2,7 +2,7 @@ import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { capitalizeFirstLetter, move } from '../../common/common';
@@ -34,10 +34,10 @@ const ScenarioCriteriaSection = (): JSX.Element => {
     newItems[index] = item;
 
     setItems(newItems);
-    checkSet();
   };
 
-  const checkSet = () => {
+  useEffect(() => {
+    console.log('Running check');
     let shouldUpdate = true;
     if (scenario === '') {
       shouldUpdate = false;
@@ -57,7 +57,7 @@ const ScenarioCriteriaSection = (): JSX.Element => {
       dispatch({ type: 'SET_CRITERIA', data: item });
       dispatch({ type: 'SET_VALID', data: true });
     }
-  };
+  }, [items, scenario]);
 
   return (
     <div className="rhythm-vertical-16 flex-grow margin-top-8">
@@ -70,7 +70,6 @@ const ScenarioCriteriaSection = (): JSX.Element => {
           value={scenario}
           onChange={(_, val) => {
             setScenario(val);
-            checkSet();
           }}
         />
       </FormItem>

@@ -1,6 +1,6 @@
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { ICustomCriteria } from '../../common/types';
@@ -10,20 +10,20 @@ const CustomCriteriaSection = (): JSX.Element => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
   const [text, setText] = useState<string | undefined>(panelState.custom?.text);
 
-  const setItemValue = (value: string | undefined) => {
-    setText(value);
-
-    if (value === undefined || value === '') {
-      return;
+  useEffect(() => {
+    console.log('Running check');
+    if (text === undefined || text === '') {
+      dispatch({ type: 'SET_VALID', data: false });
+      dispatch({ type: 'SET_CRITERIA', data: undefined });
     } else {
       const item: ICustomCriteria = {
         id: panelState?.custom?.id || uuidV4(),
-        text: value
+        text: text
       };
       dispatch({ type: 'SET_CRITERIA', data: item });
       dispatch({ type: 'SET_VALID', data: true });
     }
-  };
+  }, [text]);
 
   return (
     <div className="rhythm-vertical-16 margin-top-8 flex-grow">
@@ -35,7 +35,7 @@ const CustomCriteriaSection = (): JSX.Element => {
           value={text}
           rows={5}
           onChange={(_, val) => {
-            setItemValue(val);
+            setText(val);
           }}
         />
       </FormItem>
