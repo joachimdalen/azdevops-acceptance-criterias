@@ -71,6 +71,9 @@ const AcceptanceControl = (): React.ReactElement => {
           loaded: false,
           applyTheme: true
         });
+        console.log(DevOps.getExtensionContext())
+        console.log(DevOps.getHost())
+        console.log(DevOps.getUser())
         WebLogger.information('Loading rule presets panel...');
         await DevOps.ready();
 
@@ -97,11 +100,12 @@ const AcceptanceControl = (): React.ReactElement => {
 
         setLoading(false);
 
-        await DevOps.notifyLoadSucceeded();
+       
         DevOps.resize();
       } catch (error) {
         WebLogger.error('Failed to get project configuration', error);
       } finally {
+        await DevOps.notifyLoadSucceeded();
         setLoading(false);
       }
     }
@@ -166,7 +170,7 @@ const AcceptanceControl = (): React.ReactElement => {
   if (loading) {
     return (
       <div className="acceptance-control-loader">
-        <Spinner size={SpinnerSize.large} label="Loading acceptance criterias" />
+        {/* <Spinner size={SpinnerSize.large} label="Loading acceptance criterias" /> */}
       </div>
     );
   }
