@@ -125,6 +125,7 @@ const HubFilterBar = ({
         items={approverItems}
         selection={approversSelection}
         placeholder="Required Approver"
+        showFilterBox
       />
       <DropdownFilterBarItem
         filterItemKey="state"
