@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 
 import AdminConfigurationTab from './tabs/AdminConfigurationTab';
 import DocumentTab from './tabs/DocumentTab';
+import OrphanedCriteriasTab from './tabs/OrphanedCriteriasTab';
 
 const AdminPage = (): React.ReactElement => {
   const [devOpsService] = useMemo(() => [new DevOpsService()], []);
@@ -41,6 +42,7 @@ const AdminPage = (): React.ReactElement => {
         >
           <Tab name="Configuration" id="configuration" iconProps={{ iconName: 'Settings' }} />
           <Tab name="Areas" id="areas" />
+          <Tab name="Orphaned Criterias" id="orphaned" />
         </TabBar>
 
         <Surface background={SurfaceBackground.normal}>
@@ -49,6 +51,9 @@ const AdminPage = (): React.ReactElement => {
           </ConditionalChildren>
           <ConditionalChildren renderChildren={selectedTab === 'areas'}>
             <DocumentTab />
+          </ConditionalChildren>
+          <ConditionalChildren renderChildren={selectedTab === 'orphaned'}>
+            <OrphanedCriteriasTab />
           </ConditionalChildren>
         </Surface>
       </Page>
