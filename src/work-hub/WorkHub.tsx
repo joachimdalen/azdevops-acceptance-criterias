@@ -238,7 +238,7 @@ const WorkHub = (): JSX.Element => {
           let wids = workItemIds;
 
           if (!getLocalItem(LocalStorageKeys.ShowCompletedWi)) {
-            const res = await criteriaService.getActiveWorkItemIds(completedStates, [397, 410]);
+            const res = await criteriaService.getActiveWorkItemIds(completedStates, workItemIds);
             wids = res.workItems.map(x => x.id);
           }
 
@@ -266,7 +266,7 @@ const WorkHub = (): JSX.Element => {
     if (criteria === undefined) {
       await devOpsService.showToast('Failed to find criteria');
     } else {
-      await criteriaService.showPanel({ criteria });
+      await criteriaService.showPanel({ criteria, canEdit: true, isReadOnly: true });
     }
   };
 
