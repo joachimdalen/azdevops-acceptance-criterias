@@ -87,12 +87,14 @@ stages:
           pipelineEnv: acceptance-criterias-qa-env
           extensionVisibility: private
 
-  - stage: verify_changelog
+  - stage: package_prod
+    displayName: '[PROD] Package'
     dependsOn: 'run_tests'
     condition: and(succeeded(), eq(variables.isMain, true))
-    displayName: 'Check changelog'
+    variables:
+      - group: 'mp-acceptance-criterias-prod'
     jobs:
-      - job:
+      - job: verify_changelog
         steps:
           - task: GitGuardChanges@0
             displayName: '[PROD] Verify changelog'
@@ -103,14 +105,6 @@ stages:
               matchStrategy: 'single'
               changed: true
               breakOnFailure: true
-
-  - stage: package_prod
-    displayName: '[PROD] Package'
-    dependsOn: 'verify_changelog'
-    condition: and(succeeded(), eq(variables.isMain, true))
-    variables:
-      - group: 'mp-acceptance-criterias-prod'
-    jobs:
       - template: .ci/build-extension-artifact.template.yml
         parameters:
           extensionEnv: prod
