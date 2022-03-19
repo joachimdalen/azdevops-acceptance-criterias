@@ -3,6 +3,7 @@ import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { distinct, isDefined } from '@joachimdalen/azdevops-ext-core/CoreUtils';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroData';
+import { getHostUrl } from '@joachimdalen/azdevops-ext-core/HostUtils';
 import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
 import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { VersionDisplay } from '@joachimdalen/azdevops-ext-core/VersionDisplay';
@@ -31,7 +32,7 @@ import { ZeroData } from 'azure-devops-ui/ZeroData';
 import { useEffect, useMemo, useState } from 'react';
 
 import useCriteriaId from '../common/hooks/useCriteriaId';
-import { getLocalItem, LocalStorageKeys } from '../common/localStorage';
+import { getLocalItem, LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../common/types';
 import ColumnsPanel from './ColumnsPanel';
@@ -115,6 +116,7 @@ const WorkHub = (): JSX.Element => {
       toggleLoadingData(true);
       loadTheme(createTheme(appTheme));
       await DevOps.init();
+      getHostUrl(LocalStorageRawKeys.HostUrl);
       const loadedTypes = await workItemService.getWorkItemTypes();
 
       setWorkItemTypes(loadedTypes);

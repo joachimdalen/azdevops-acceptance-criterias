@@ -22,6 +22,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import StatusTag from '../common/components/StatusTag';
+import { LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import {
   AcceptanceCriteriaState,
@@ -197,6 +198,7 @@ const CriteriaPanel = (): React.ReactElement => {
         </FormItem>
         <FormItem label="Required Approver">
           <IdentityPicker
+            localStorageKey={LocalStorageRawKeys.HostUrl}
             identity={identity}
             onChange={i => {
               setIdentity(i);

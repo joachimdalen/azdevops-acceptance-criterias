@@ -19,7 +19,13 @@ import { useEffect, useMemo } from 'react';
 
 import { capitalizeFirstLetter, criteriaTypeItems } from '../../common/common';
 import StatusTag from '../../common/components/StatusTag';
-import { getLocalItem, LocalStorageKeys, setLocalItem } from '../../common/localStorage';
+import {
+  getLocalItem,
+  getRawLocalItem,
+  LocalStorageKeys,
+  LocalStorageRawKeys,
+  setLocalItem
+} from '../../common/localStorage';
 import { IAcceptanceCriteria } from '../../common/types';
 
 interface HubFilterBarProps {
@@ -68,6 +74,8 @@ const HubFilterBar = ({
   }, [criterias]);
 
   const approverItems: IListBoxItem[] = useMemo(() => {
+    const host = getRawLocalItem(LocalStorageRawKeys.HostUrl);
+    const url = host === undefined ? '' : host;
     return approvers.map(app => {
       const item: IListBoxItem = {
         id: app.entityId,
@@ -78,7 +86,7 @@ const HubFilterBar = ({
               text={app.displayName}
               size={PersonaSize.size24}
               imageInitials={getInitials(app.displayName, false)}
-              imageUrl={app.image}
+              imageUrl={`${url}${app.image}`}
               onRenderPrimaryText={p => null}
             />
           )

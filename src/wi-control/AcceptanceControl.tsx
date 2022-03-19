@@ -3,14 +3,12 @@ import {
   createTheme,
   ICommandBarItemProps,
   loadTheme,
-  Separator,
-  Spinner,
-  SpinnerSize
+  Separator
 } from '@fluentui/react';
 import { appTheme, commandBarStyles } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
-import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
+import { getHostUrl } from '@joachimdalen/azdevops-ext-core/HostUtils';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import {
   IWorkItemFormService,
@@ -23,7 +21,12 @@ import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { CriteriaModalResult, DialogIds, IConfirmationConfig } from '../common/common';
-import { getLocalItem, LocalStorageKeys, setLocalItem } from '../common/localStorage';
+import {
+  getLocalItem,
+  LocalStorageKeys,
+  LocalStorageRawKeys,
+  setLocalItem
+} from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import {
   AcceptanceCriteriaState,
@@ -71,10 +74,7 @@ const AcceptanceControl = (): React.ReactElement => {
           loaded: false,
           applyTheme: true
         });
-        console.log(DevOps.getExtensionContext())
-        console.log(DevOps.getHost())
-        console.log(DevOps.getUser())
-        WebLogger.information('Loading rule presets panel...');
+        getHostUrl(LocalStorageRawKeys.HostUrl);
         await DevOps.ready();
 
         DevOps.register(DevOps.getContributionId(), provider);
@@ -100,7 +100,6 @@ const AcceptanceControl = (): React.ReactElement => {
 
         setLoading(false);
 
-       
         DevOps.resize();
       } catch (error) {
         WebLogger.error('Failed to get project configuration', error);
