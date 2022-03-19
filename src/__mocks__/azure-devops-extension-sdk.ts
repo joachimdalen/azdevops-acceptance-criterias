@@ -68,6 +68,7 @@ export const mockGetProject = jest.fn();
 export const mockAddToast = jest.fn();
 export const mockOpenPanel = jest.fn();
 export const mockOpenNewWindow = jest.fn();
+export const mockGetQueryParams = jest.fn().mockRejectedValue(new Error('Not implemented'));
 
 /**
  * Mocked getService returns mocked methods
@@ -96,12 +97,8 @@ export function getService(contributionId: string) {
     }
     case 'ms.vss-features.host-navigation-service': {
       return {
+        getQueryParams: mockGetQueryParams,
         openNewWindow: mockOpenNewWindow
-      };
-    }
-    case 'ms.vss-features.host-navigation-service': {
-      return {
-        getQueryParams: mockGetQueryParams
       };
     }
   }
@@ -110,7 +107,7 @@ export function getService(contributionId: string) {
 export const mockResize = jest.fn();
 export const mockReady = jest.fn();
 export const mockGetConfiguration = jest.fn();
-export const mockGetQueryParams = jest.fn();
+
 export const mockNotifyLoadSucceeded = jest.fn();
 export const mockGetExtensionContext = jest.fn().mockReturnValue({
   id: 'as-pub.work-item-wiki',
