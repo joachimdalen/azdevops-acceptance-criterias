@@ -56,8 +56,6 @@
     "package:qa": "tfx extension create --root ./ --manifest-globs ./vss-extension.qa.json --rev-version",
     "changelog": "azext changelog generate --output CHANGELOG.md --format",
     "changelog:prod": "azext changelog generate --output ./marketplace/docs/CHANGELOG.md --format",
-    "changelog:dev:version": "azext changelog generate --output ./marketplace/docs/CHANGELOG-RELEASE.md --format",
-    "changelog:qa:version": "azext changelog generate --output ./marketplace/docs/CHANGELOG-RELEASE.md --format",
     "changelog:prod:version": "azext changelog generate --output ./marketplace/docs/CHANGELOG-RELEASE.md --format",
     "compile:dev": "webpack --mode development --config ./build-scripts/webpack.config.dev.js",
     "compile:qa": "webpack --config ./build-scripts/webpack.config.prod.js",
