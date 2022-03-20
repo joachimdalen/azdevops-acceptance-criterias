@@ -30,6 +30,7 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
 import { ZeroData } from 'azure-devops-ui/ZeroData';
 import { useEffect, useMemo, useState } from 'react';
+import { chunk } from '../common/chunkUtil';
 
 import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
@@ -112,7 +113,6 @@ const WorkHub = (): JSX.Element => {
 
   useEffect(() => {
     async function initModule() {
-      console.log('Loading data..');
       toggleLoadingData(true);
       loadTheme(createTheme(appTheme));
       await DevOps.init();
@@ -127,15 +127,12 @@ const WorkHub = (): JSX.Element => {
 
       setCompletedStates(completedStatesA);
 
-      console.log(completedStates);
-
       WebLogger.information('Loaded work hub...');
       const result = await criteriaService.load(data => {
         setDocuments(data);
 
         const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
         if (filter !== undefined && Object.keys(filter).length > 0) {
-          console.log(filter);
           applyFilter(filter, data);
         } else {
           setVisibleDocuments(data);
@@ -161,7 +158,6 @@ const WorkHub = (): JSX.Element => {
   const workItemIds = useMemo(() => documents.map(x => parseInt(x.id)), [documents]);
 
   const wiMap: Map<string, WorkItemTypeTagProps> = useMemo(() => {
-    console.log('WiMap');
     const mp = new Map<string, WorkItemTypeTagProps>();
     workItems
       .map(x => getWorkItemTypeDisplayName(x))
@@ -230,26 +226,35 @@ const WorkHub = (): JSX.Element => {
   };
 
   const fields: string[] = ['System.Title', 'System.WorkItemType'];
+
+  const getBatched = async (workItemIds: number[]) => {
+    const batched = chunk(workItemIds, 175);
+    const items: WorkItem[] = [];
+    for (const batch of batched) {
+      const wi = await workItemService.getWorkItems(
+        batch,
+        undefined,
+        fields,
+        WorkItemErrorPolicy.Omit
+      );
+      items.push(...wi);
+    }
+
+    return items;
+  };
   useEffect(() => {
     async function load() {
-      console.log('Loading work item ids');
       //TODO: This triggers on every change of the document array, we should check if it is different
       if (workItemIds.length > 0 && workItemIds.length !== workItems.length) {
         toggleLoadingWis(true);
         try {
           let wids = workItemIds;
-
           if (!getLocalItem(LocalStorageKeys.ShowCompletedWi)) {
             const res = await criteriaService.getActiveWorkItemIds(completedStates, workItemIds);
             wids = res.workItems.map(x => x.id);
           }
 
-          const wi = await workItemService.getWorkItems(
-            wids,
-            undefined,
-            fields,
-            WorkItemErrorPolicy.Omit
-          );
+          const wi = await getBatched(wids);
           setWorkItems(wi);
         } catch (error: any) {
           setError(error?.message || 'Failed to load related work items');

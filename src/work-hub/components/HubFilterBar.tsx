@@ -76,6 +76,7 @@ const HubFilterBar = ({
   const approverItems: IListBoxItem[] = useMemo(() => {
     const host = getRawLocalItem(LocalStorageRawKeys.HostUrl);
     const url = host === undefined ? '' : host;
+
     return approvers.map(app => {
       const item: IListBoxItem = {
         id: app.entityId,
@@ -86,7 +87,7 @@ const HubFilterBar = ({
               text={app.displayName}
               size={PersonaSize.size24}
               imageInitials={getInitials(app.displayName, false)}
-              imageUrl={`${url}${app.image}`}
+              imageUrl={app?.image?.startsWith(url) ? app?.image : `${url}${app?.image}`}
               onRenderPrimaryText={p => null}
             />
           )

@@ -52,7 +52,6 @@ const DocumentTab = (): React.ReactElement => {
             ];
             const client = getClient(WorkItemTrackingRestClient);
             const updated = await client.updateWorkItem(operation, 338, undefined, true);
-            console.log(updated);
           }}
         ></Button>
       </div>

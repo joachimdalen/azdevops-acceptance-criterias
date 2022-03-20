@@ -11,7 +11,6 @@ const CustomCriteriaSection = (): JSX.Element => {
   const [text, setText] = useState<string | undefined>(panelState.custom?.text);
 
   useEffect(() => {
-    console.log('Running check');
     if (text === undefined || text === '') {
       dispatch({ type: 'SET_VALID', data: false });
       dispatch({ type: 'SET_CRITERIA', data: undefined });

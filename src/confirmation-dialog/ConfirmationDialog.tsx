@@ -25,7 +25,6 @@ const ConfirmationDialog = (): JSX.Element => {
 
         const mConfig = DevOps.getConfiguration();
         setConfig(mConfig as IConfirmationConfig);
-        console.log(mConfig);
 
         toggleLoading();
 

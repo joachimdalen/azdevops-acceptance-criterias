@@ -1,4 +1,9 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import {
+  getWorkItemTitle,
+  getWorkItemTypeDisplayName
+} from '@joachimdalen/azdevops-ext-core/WorkItemUtils';
+import { WorkItem } from 'azure-devops-extension-api/WorkItemTracking';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike } from 'azure-devops-ui/Core/Observable';
 import { SimpleTableCell } from 'azure-devops-ui/Table';
@@ -9,6 +14,7 @@ import {
   ITreeItemProvider,
   TreeItemProvider
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
+
 import { capitalizeFirstLetter } from '../../common/common';
 import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import FullStatusTag from '../../common/components/FullStatusTag';
@@ -19,7 +25,8 @@ import {
   FullCriteriaStatus,
   IAcceptanceCriteria,
   IExtendedTableCell,
-  IProgressStatus
+  IProgressStatus,
+  WorkItemTypeTagProps
 } from '../../common/types';
 
 export interface IWorkItemCriteriaCell extends IExtendedTableCell {
@@ -33,6 +40,13 @@ export interface IWorkItemCriteriaCell extends IExtendedTableCell {
   requiredApprover?: IInternalIdentity;
   progress?: IProgressStatus;
   rawCriteria?: IAcceptanceCriteria;
+  workItemDetails?: WorkItemDetails;
+}
+
+interface WorkItemDetails {
+  type: string;
+  title: string;
+  tag?: WorkItemTypeTagProps;
 }
 
 export const typeItemCell: ITreeColumn<IWorkItemCriteriaCell> = {
@@ -103,6 +117,8 @@ export const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
 
     const defaultCell = (
       <SimpleTableCell
+        ariaRowIndex={rowIndex}
+        key={rowIndex + '-' + columnIndex}
         className={treeColumn.className}
         columnIndex={columnIndex}
         contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
@@ -140,13 +156,20 @@ export const getProgress = (
 
 export const getTreeProvider = (
   documents: CriteriaDocument[],
-  visibleDocuments: CriteriaDocument[]
+  visibleDocuments: CriteriaDocument[],
+  workItems: WorkItem[],
+  workItemTypes: Map<string, WorkItemTypeTagProps>
 ): ITreeItemProvider<IWorkItemCriteriaCell> => {
   const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = visibleDocuments
     .sort((a, b) => {
       return parseInt(b.id) - parseInt(a.id);
     })
     .map(x => {
+      const wi = workItems.find(y => y.id.toString() === x.id);
+      const type = wi === undefined ? 'Unknown' : getWorkItemTypeDisplayName(wi);
+      const title = wi === undefined ? 'Unknown' : getWorkItemTitle(wi);
+      const dta = workItemTypes.get(type);
+
       const criteriaRows = x.criterias.map(y => {
         const it: ITreeItem<IWorkItemCriteriaCell> = {
           data: {
@@ -170,7 +193,12 @@ export const getTreeProvider = (
           type: '',
           state: AcceptanceCriteriaState.New,
           fullState: x.state,
-          progress: getProgress(documents, x.id)
+          progress: getProgress(documents, x.id),
+          workItemDetails: {
+            type: type,
+            title: title,
+            tag: dta
+          }
         },
         childItems: criteriaRows
       };

@@ -123,11 +123,9 @@ class CriteriaService {
     const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
     const details: CriteriaDetailDocument = await this.getCriteriaDetails(id);
     const approver = await getLoggedInUser();
-    console.log('gtd', doc);
     if (doc) {
       const criteria = doc.criterias.find(x => x.id === id);
       if (criteria) {
-        console.log('gtc', criteria);
         if (details.processed !== undefined) {
           details.processed = {
             ...details.processed,

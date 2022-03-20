@@ -18,7 +18,7 @@ import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
-
+import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import StatusTag from '../common/components/StatusTag';
@@ -48,6 +48,8 @@ const CriteriaPanel = (): React.ReactElement => {
   const [canApprove, toggleCanApprove] = useBooleanToggle();
   const [loading, setLoading] = useState(true);
   const [workItemId, setWorkItemId] = useState<string | undefined>();
+  const [wasChanged, toggleWasChanged] = useBooleanToggle();
+  const [editAfterComplete, toggleEditAfterComplete] = useBooleanToggle();
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, details: CriteriaDetailDocument) {
     dispatch({ type: 'SET_TYPE', data: crit.type });
@@ -59,7 +61,13 @@ const CriteriaPanel = (): React.ReactElement => {
       data: crit.type === 'scenario' ? details.scenario : details.custom
     });
     setDetails(details);
-    
+
+    if (
+      crit.state === AcceptanceCriteriaState.Approved ||
+      crit.state === AcceptanceCriteriaState.Completed
+    ) {
+      setIsReadOnly(true);
+    }
   }
 
   useEffect(() => {
@@ -121,7 +129,8 @@ const CriteriaPanel = (): React.ReactElement => {
     const config = DevOps.getConfiguration();
     if (config.panel) {
       const res: CriteriaModalResult = {
-        result: 'CANCEL'
+        result: 'CANCEL',
+        wasChanged
       };
       config.panel.close(res);
     }
@@ -130,7 +139,6 @@ const CriteriaPanel = (): React.ReactElement => {
     const config = DevOps.getConfiguration();
     if (config.panel) {
       const ac = getCriteriaPayload();
-      console.log('Saving...', ac);
       const res: CriteriaModalResult = {
         result: 'SAVE',
         data: ac
@@ -168,6 +176,7 @@ const CriteriaPanel = (): React.ReactElement => {
     if (workItemId) {
       const result = await criteriaService.processCriteria(workItemId, id, approve);
       if (result !== undefined) {
+        toggleWasChanged(true);
         setCriteriaInfo(result.criteria, result.details);
       }
     }
@@ -202,7 +211,6 @@ const CriteriaPanel = (): React.ReactElement => {
             identity={identity}
             onChange={i => {
               setIdentity(i);
-              console.log(i);
             }}
             onClear={() => setIdentity(undefined)}
           />
@@ -255,6 +263,30 @@ const CriteriaPanel = (): React.ReactElement => {
           {criteria && (
             <>
               <div className="rhythm-vertical-16 flex-grow border-bottom-light padding-bottom-16">
+                <ConditionalChildren
+                  renderChildren={
+                    (criteria.state === AcceptanceCriteriaState.Approved ||
+                      criteria.state === AcceptanceCriteriaState.Rejected ||
+                      criteria.state === AcceptanceCriteriaState.Completed) &&
+                    editAfterComplete === false
+                  }
+                >
+                  <MessageCard
+                    className="flex-self-stretch"
+                    severity={MessageCardSeverity.Warning}
+                    buttonProps={[
+                      {
+                        text: 'Edit anywas',
+                        onClick: () => {
+                          toggleEditAfterComplete();
+                          setIsReadOnly(false);
+                        }
+                      }
+                    ]}
+                  >
+                    {`This criteria has already been ${criteria.state}. Do you still want to edit it?`}
+                  </MessageCard>
+                </ConditionalChildren>
                 <div className="flex-row rhythm-horizontal-8">
                   <FormItem label="Required Approver" className="flex-grow">
                     <ApproverDisplay approver={criteria?.requiredApprover} />

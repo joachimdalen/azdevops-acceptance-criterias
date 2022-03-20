@@ -52,14 +52,14 @@ const CriteriaTree = ({
 }: CriteriaTreeProps): JSX.Element => {
   const devOpsService = useMemo(() => new DevOpsService(), []);
 
-  const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(
-    () =>
-      getTreeProvider(
-        documents,
-        visibleDocuments.filter(x => workItems.some(y => y.id.toString() === x.id))
-      ),
-    [visibleDocuments]
-  );
+  const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
+    return getTreeProvider(
+      documents,
+      visibleDocuments.filter(x => workItems.some(y => y.id.toString() === x.id)),
+      workItems,
+      workItemTypes
+    );
+  }, [visibleDocuments]);
 
   const moreColumn = new ColumnMore((listItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
     const data = listItem.underlyingItem?.data;
@@ -116,7 +116,6 @@ const CriteriaTree = ({
       'ms.vss-work-web.work-item-form-navigation-service'
     );
     const wi = await service.openWorkItem(id);
-    console.log(wi);
   };
   const checkOpenWorkItem = async (id: number) => {
     if (getLocalItem<boolean>(LocalStorageKeys.OpenWorkItem)) {
@@ -199,10 +198,6 @@ const CriteriaTree = ({
       );
 
       if (data.rowType === 'workItem') {
-        const wi = workItems.find(x => x.id === parseInt(data.workItemId));
-        if (wi === undefined) return defaultCell;
-        const type = getWorkItemTypeDisplayName(wi);
-        const dta = workItemTypes.get(type);
         return (
           <ExpandableTreeCell
             key={rowIndex}
@@ -216,9 +211,9 @@ const CriteriaTree = ({
               renderChildren={treeItem.underlyingItem.data.rowType === 'workItem'}
             >
               <WorkItemTypeTag
-                {...dta}
-                id={wi.id}
-                title={getWorkItemTitle(wi)}
+                {...data.workItemDetails?.tag}
+                id={data.workItemId}
+                title={data.workItemDetails?.title || 'Unknown'}
                 onClick={async (id: number) => {
                   await checkOpenWorkItem(id);
                 }}
@@ -252,9 +247,10 @@ const CriteriaTree = ({
         typeof treeCell !== 'number' &&
         treeCell.href
       );
-      // const approver = identities.get(data.requiredApprover);
       return (
         <SimpleTableCell
+          ariaRowIndex={rowIndex}
+          key={rowIndex + '-' + columnIndex}
           className={treeColumn.className}
           columnIndex={columnIndex}
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
@@ -291,6 +287,8 @@ const CriteriaTree = ({
       );
       return (
         <SimpleTableCell
+          ariaRowIndex={rowIndex}
+          key={rowIndex + '-' + columnIndex}
           className={treeColumn.className}
           columnIndex={columnIndex}
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
@@ -337,7 +335,9 @@ const CriteriaTree = ({
       onToggle={(event: any, treeItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
         treeProvider.toggle(treeItem.underlyingItem);
       }}
-      scrollable={true}
+      virtualize={true}
+      scrollable={false}
+      pageSize={5}
     />
   );
 };

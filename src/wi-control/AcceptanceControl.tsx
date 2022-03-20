@@ -124,10 +124,8 @@ const AcceptanceControl = (): React.ReactElement => {
       isReadOnly: isRead,
       canEdit: canEdit,
       onClose: async (result: CriteriaModalResult | undefined) => {
-        console.log('cr', result);
         if (result?.result === 'SAVE' && result.data) {
           const id = await devOpsService.getCurrentWorkItemId();
-          console.log(result);
           if (id) {
             await criteriaService.createOrUpdate(
               id.toString(),
@@ -136,6 +134,9 @@ const AcceptanceControl = (): React.ReactElement => {
               result.data.details
             );
           }
+          // TODO: How to send result when X is pressed
+        } else if (result?.wasChanged || result === undefined) {
+          await reload();
         }
       }
     };

@@ -21,7 +21,6 @@ const ProgressControl = (): React.ReactElement => {
   const provider = useMemo(() => {
     const listener: Partial<IWorkItemNotificationListener> = {
       onLoaded: async function (workItemLoadedArgs: IWorkItemLoadedArgs): Promise<void> {
-        console.log('data');
         try {
           const data = await criteriaService.load(undefined, workItemLoadedArgs.id.toString());
           if (data.success) {

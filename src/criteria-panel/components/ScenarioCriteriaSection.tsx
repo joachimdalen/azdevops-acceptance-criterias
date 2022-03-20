@@ -37,7 +37,6 @@ const ScenarioCriteriaSection = (): JSX.Element => {
   };
 
   useEffect(() => {
-    console.log('Running check');
     let shouldUpdate = true;
     if (scenario === '') {
       shouldUpdate = false;

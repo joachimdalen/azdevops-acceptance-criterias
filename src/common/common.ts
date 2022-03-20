@@ -16,6 +16,7 @@ export enum DialogIds {
 
 export interface CriteriaModalResult {
   result: 'CANCEL' | 'SAVE';
+  wasChanged?: boolean;
   data?: {
     criteria: IAcceptanceCriteria;
     details?: CriteriaDetailDocument;
