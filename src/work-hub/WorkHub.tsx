@@ -1,4 +1,4 @@
-import { createTheme, loadTheme, Separator } from '@fluentui/react';
+import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { distinct, isDefined } from '@joachimdalen/azdevops-ext-core/CoreUtils';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
@@ -20,7 +20,6 @@ import {
   WorkItemType
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
-import { Card } from 'azure-devops-ui/Card';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
@@ -29,9 +28,10 @@ import { Page } from 'azure-devops-ui/Page';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
 import { ZeroData } from 'azure-devops-ui/ZeroData';
-import { useEffect, useMemo, useState } from 'react';
-import { chunk } from '../common/chunkUtil';
+import cx from 'classnames';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { chunk } from '../common/chunkUtil';
 import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
@@ -55,7 +55,7 @@ const WorkHub = (): JSX.Element => {
   //  const { dispatch, state: workHubState } = useWorkHubContext();
   const [showPanel, togglePanel] = useBooleanToggle(false);
   const [showSettingsPanel, toggleSettingsPanel] = useBooleanToggle(false);
-
+  const ref = useRef(null);
   const [error, setError] = useState<string | undefined>();
   const isActive = !loadingData && !loadingWis && error === undefined;
   const commandBarItems: IHeaderCommandBarItem[] = [
@@ -273,7 +273,7 @@ const WorkHub = (): JSX.Element => {
     if (criteria === undefined) {
       await devOpsService.showToast('Failed to find criteria');
     } else {
-      await criteriaService.showPanel({ criteria, canEdit: true, isReadOnly: true });
+      await criteriaService.showPanel({ criteria, canEdit: false, isReadOnly: true });
     }
   };
 
@@ -287,49 +287,69 @@ const WorkHub = (): JSX.Element => {
           description={<VersionDisplay moduleVersion={process.env.WORK_HUB_VERSION} />}
         />
 
-        <div className="page-content flex-grow margin-top-8">
-          <Separator />
-          <LoadingSection isLoading={loadingData || loadingWis} text="Loading data..." />
-          <ConditionalChildren renderChildren={error !== undefined}>
-            <ExtendedZeroData
-              title={'Error'}
-              description={error}
-              icon={{ iconName: 'Error', size: IconSize.large }}
-              buttons={[]}
-            />
-          </ConditionalChildren>
-          <ConditionalChildren renderChildren={isActive}>
-            <HubFilterBar
-              criterias={criterias}
-              showFilter={showFilter}
-              onFilterChanged={filter => applyFilter(filter)}
-            />
-
-            <ConditionalChildren renderChildren={workItems.length > 0}>
-              <Card className="margin-top-16" contentProps={{ contentPadding: false }}>
-                <CriteriaTree
-                  workItems={workItems}
-                  visibleDocuments={visibleDocuments}
-                  documents={documents}
-                  workItemTypes={wiMap}
-                  onClick={async (workItemId: string, criteria: IAcceptanceCriteria) => {
-                    await criteriaService.showPanel({
-                      criteria,
-                      workItemId,
-                      isReadOnly: true,
-                      canEdit: false
-                    });
-                  }}
-                />
-              </Card>
-            </ConditionalChildren>
-
-            <ConditionalChildren renderChildren={workItems.length === 0}>
-              <div className="flex-grow">
-                <ZeroData primaryText="No criterias" imageAltText={''} />
+        <div className="page-content flex-row h-scroll-hidden flex-start full-height">
+          <div className="flex-grow flex-column full-height">
+            <div className="page-content-bottom">
+              <div className="page-content-top">
+                <ConditionalChildren renderChildren={isActive}>
+                  <HubFilterBar
+                    criterias={criterias}
+                    showFilter={showFilter}
+                    onFilterChanged={filter => applyFilter(filter)}
+                  />
+                </ConditionalChildren>
               </div>
-            </ConditionalChildren>
-          </ConditionalChildren>
+            </div>
+
+            <div
+              className={cx('bolt-page-grey flex-row flex-start flex-grow v-scroll-auto', {
+                'depth-8': workItems.length > 0
+              })}
+            >
+              <ConditionalChildren renderChildren={loadingData || loadingWis}>
+                <div className="flex-grow flex-column full-height padding-vertical-20">
+                  <LoadingSection isLoading={true} text="Loading data..." />
+                </div>
+              </ConditionalChildren>
+              <ConditionalChildren renderChildren={error !== undefined}>
+                <ExtendedZeroData
+                  title={'Error'}
+                  description={error}
+                  icon={{ iconName: 'Error', size: IconSize.large }}
+                  buttons={[]}
+                />
+              </ConditionalChildren>
+              <ConditionalChildren renderChildren={isActive}>
+                <ConditionalChildren renderChildren={workItems.length > 0}>
+                  <CriteriaTree
+                    workItems={workItems}
+                    visibleDocuments={visibleDocuments}
+                    documents={documents}
+                    workItemTypes={wiMap}
+                    onClick={async (workItemId: string, criteria: IAcceptanceCriteria) => {
+                      await criteriaService.showPanel({
+                        criteria,
+                        workItemId,
+                        isReadOnly: true,
+                        canEdit: false
+                      });
+                    }}
+                  />
+                </ConditionalChildren>
+
+                <ConditionalChildren renderChildren={workItems.length === 0}>
+                  <div className="flex-grow">
+                    <ZeroData
+                      primaryText="No acceptance criterias"
+                      secondaryText="Open a work item and add your first acceptance criteria"
+                      iconProps={{ iconName: 'WorkItem' }}
+                      imageAltText={''}
+                    />
+                  </div>
+                </ConditionalChildren>
+              </ConditionalChildren>
+            </div>
+          </div>
         </div>
 
         <ConditionalChildren renderChildren={showPanel}>

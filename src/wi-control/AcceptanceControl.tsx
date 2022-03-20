@@ -17,6 +17,7 @@ import {
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -115,7 +116,8 @@ const AcceptanceControl = (): React.ReactElement => {
   const showPanel = async (
     criteria?: IAcceptanceCriteria,
     readOnly?: boolean,
-    canEdit?: boolean
+    canEdit?: boolean,
+    isCreate?: boolean
   ) => {
     const isRead = isReadOnly || readOnly;
     const config: CriteriaPanelConfig = {
@@ -141,7 +143,36 @@ const AcceptanceControl = (): React.ReactElement => {
       }
     };
 
-    await criteriaService.showPanel(config);
+    if (isCreate !== true || getLocalItem<boolean>(LocalStorageKeys.NewStateFlow)) {
+      await criteriaService.showPanel(config);
+    } else {
+      const confirmConfig: IConfirmationConfig = {
+        cancelButton: {
+          text: 'Close'
+        },
+        doNotShowAgain: true,
+        confirmButton: {
+          text: 'Ok',
+          primary: true
+        },
+        content: `Acceptance Criterias does not follow the same saving flow as work items. When adding, deleting or editing an acceptance criteria, it will be saved straight away. If you wish to revert changes to criterias, this must be done manually.`
+      };
+      await devOpsService.showDialog<ActionResult<boolean>, DialogIds>(
+        DialogIds.ConfirmationDialog,
+        {
+          title: 'Working with acceptance criterias',
+          onClose: async result => {
+            if (result?.success) {
+              if (result.message === 'DO_NOT_SHOW_AGAIN') {
+                setLocalItem(LocalStorageKeys.NewStateFlow, true);
+              }
+            }
+            await criteriaService.showPanel(config);
+          },
+          configuration: confirmConfig
+        }
+      );
+    }
   };
 
   const _items: ICommandBarItemProps[] = useMemo(() => {
@@ -152,7 +183,7 @@ const AcceptanceControl = (): React.ReactElement => {
         cacheKey: 'myCacheKey',
         iconProps: { iconName: 'Add' },
         onClick: () => {
-          showPanel();
+          showPanel(undefined, undefined, undefined, true);
         }
       },
       {
@@ -276,12 +307,14 @@ const AcceptanceControl = (): React.ReactElement => {
         />
       </ConditionalChildren>
       <ConditionalChildren renderChildren={criteriaDocument !== undefined}>
-        <CriteriaView
-          criteria={criteriaDocument}
-          onEdit={onEdit}
-          onApprove={onApprove}
-          onDelete={onDelete}
-        />
+        <Surface background={SurfaceBackground.neutral}>
+          <CriteriaView
+            criteria={criteriaDocument}
+            onEdit={onEdit}
+            onApprove={onApprove}
+            onDelete={onDelete}
+          />
+        </Surface>
       </ConditionalChildren>
     </div>
   );

@@ -269,15 +269,16 @@ const CriteriaPanel = (): React.ReactElement => {
                     (criteria.state === AcceptanceCriteriaState.Approved ||
                       criteria.state === AcceptanceCriteriaState.Rejected ||
                       criteria.state === AcceptanceCriteriaState.Completed) &&
-                    editAfterComplete === false
+                    editAfterComplete === false &&
+                    canEdit
                   }
                 >
                   <MessageCard
                     className="flex-self-stretch"
-                    severity={MessageCardSeverity.Warning}
+                    severity={MessageCardSeverity.Info}
                     buttonProps={[
                       {
-                        text: 'Edit anywas',
+                        text: 'Edit',
                         onClick: () => {
                           toggleEditAfterComplete();
                           setIsReadOnly(false);
@@ -285,7 +286,7 @@ const CriteriaPanel = (): React.ReactElement => {
                       }
                     ]}
                   >
-                    {`This criteria has already been ${criteria.state}. Do you still want to edit it?`}
+                    {`This criteria has already been ${criteria.state}. You can still edit it, but it may reset history and progress.`}
                   </MessageCard>
                 </ConditionalChildren>
                 <div className="flex-row rhythm-horizontal-8">

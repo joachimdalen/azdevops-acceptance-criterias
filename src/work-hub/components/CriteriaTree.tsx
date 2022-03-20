@@ -336,7 +336,6 @@ const CriteriaTree = ({
         treeProvider.toggle(treeItem.underlyingItem);
       }}
       virtualize={true}
-      scrollable={false}
       pageSize={5}
     />
   );
