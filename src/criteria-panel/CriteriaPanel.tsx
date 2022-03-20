@@ -15,14 +15,15 @@ import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
+import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
-import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
+
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import StatusTag from '../common/components/StatusTag';
-import { LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
+import { LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import {
   AcceptanceCriteriaState,
