@@ -322,12 +322,13 @@ class CriteriaService {
   }
 
   public async getActiveWorkItemIds(states: string[], ids: number[]): Promise<WorkItemQueryResult> {
+    const project = await this._devOpsService.getProject();
     const statesString = states.map(x => "'" + x + "'").join(',');
     const idString = ids.join(',');
 
     const query = `select [System.Id] from WorkItems where [System.TeamProject] = @project and [System.WorkItemType] <> '' and not [System.State] in (${statesString}) and [System.Id] in (${idString})`;
     const client = getClient(WorkItemTrackingRestClient);
-    const types = await client.queryByWiql({ query: query }, 'DemoProject');
+    const types = await client.queryByWiql({ query: query }, project?.name);
 
     return types;
   }
