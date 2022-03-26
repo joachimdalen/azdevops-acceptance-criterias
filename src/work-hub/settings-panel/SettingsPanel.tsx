@@ -16,6 +16,7 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps): JSX.Element => {
     {
       id: 'notifications',
       name: 'Notifications',
+      iconProps: { iconName: 'Comment', className: 'margin-right-4' },
       groupId: 'general',
       render: () => <NotificationsGeneralTab />
     },
@@ -23,12 +24,13 @@ const SettingsPanel = ({ onClose }: SettingsPanelProps): JSX.Element => {
       id: 'work-items-display',
       name: 'Work Items',
       groupId: 'display',
+      iconProps: { iconName: 'WorkItem', className: 'margin-right-4' },
       render: () => <WorkItemDisplayTab />
     }
   ];
 
-  const [groupProviders, setGroupProviders] = useObservableArray<ITabGroup>([]);
-  const [providers, setProviders] = useObservableArray<IVssContributedTab>(tabs);
+  const [groupProviders] = useObservableArray<ITabGroup>([]);
+  const [providers] = useObservableArray<IVssContributedTab>(tabs);
   const [selectedTabId, setSelectedTabId] = useState<string>('notifications');
   const groups: ITabGroup[] = [
     {

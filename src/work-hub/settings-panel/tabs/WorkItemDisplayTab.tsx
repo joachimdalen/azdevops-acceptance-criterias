@@ -13,7 +13,8 @@ const WorkItemDisplayTab = (): JSX.Element => {
     <div className="padding-16 flex-grow rhythm-vertical-16">
       <SettingContainer
         title="Show completed Work Items"
-        description="Show critieras for work items that are in the completed group"
+        description="Show critieras for work items that are in the completed group."
+        browserLocal
       >
         <Toggle
           offText={'Off'}

@@ -17,6 +17,7 @@ const NotificationsGeneralTab = (): JSX.Element => {
       <SettingContainer
         title="Do not show open work item"
         description="Do not show the 'Open work item' refresh warning"
+        browserLocal
       >
         <Toggle
           offText={'Off'}
@@ -31,6 +32,7 @@ const NotificationsGeneralTab = (): JSX.Element => {
       <SettingContainer
         title="Do not show undo completed"
         description="Do not show the 'Undo completed criteria' warning"
+        browserLocal
       >
         <Toggle
           offText={'Off'}
