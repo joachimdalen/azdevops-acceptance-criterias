@@ -4,3 +4,7 @@
 @import '../styles/criteria-list';
 @import '../styles/common';
 @include extension-container('work-hub-container');
+
+.settings-tab-list {
+  width: 200px;
+}

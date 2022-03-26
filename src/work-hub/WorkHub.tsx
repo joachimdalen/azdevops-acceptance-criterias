@@ -39,7 +39,7 @@ import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../
 import ColumnsPanel from './ColumnsPanel';
 import CriteriaTree from './components/CriteriaTree';
 import HubFilterBar from './components/HubFilterBar';
-import SettingsPanel from './SettingsPanel';
+import SettingsPanel from './settings-panel/SettingsPanel';
 
 const WorkHub = (): JSX.Element => {
   const [criteriaService, workItemService, devOpsService] = useMemo(
