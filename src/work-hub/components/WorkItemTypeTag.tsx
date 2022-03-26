@@ -21,7 +21,7 @@ const WorkItemTypeTag = ({
       <Tooltip text={type || 'Unknown'}>
         <img src={iconUrl} height={iconSize} />
       </Tooltip>
-      <span className="margin-horizontal-8 flex-grow font-size">
+      <span className="margin-horizontal-8 flex-grow body-m">
         <InternalLink onClick={async () => await onClick(parseInt(id.toString()))}>
           <Tooltip text={title || 'Unknown'}>
             <span>{title || 'Unknown'}</span>

@@ -6,7 +6,7 @@ interface InternalLinkProps {
 }
 const InternalLink = ({ children, onClick }: InternalLinkProps): JSX.Element => {
   return (
-    <a className="ac-link" href="#" onClick={onClick}>
+    <a className="ac-link body-m" href="#" onClick={onClick}>
       {children}
     </a>
   );
