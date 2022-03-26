@@ -146,8 +146,8 @@ const WorkHub = (): JSX.Element => {
       } catch (error: any) {
         WebLogger.error('Failed to load acceptance criterias', error);
         setError(
-          error?.message ||
-            'Failed to load acceptance criterias. Please check the browser console and report any issues on Github'
+          'Failed to load acceptance criterias. Please check the browser console and report any issues on GitHub. ' +
+            error?.message
         );
       } finally {
         toggleLoadingData(false);

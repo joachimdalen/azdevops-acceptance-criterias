@@ -12,16 +12,3 @@ thead {
 .settings-tab-list {
   width: 200px;
 }
-.zero-data-error {
-  .custom-zero-data-icon {
-    color: $status-error-text;
-    font-size: 75px;
-    line-height: 75px;
-    margin-bottom: 20px;
-  }
-}
-.no-criterias-loaded {
-  .vss-ZeroDataItem--icon-image {
-    color: $status-info-foreground;
-  }
-}

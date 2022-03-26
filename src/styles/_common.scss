@@ -69,3 +69,17 @@
   @include status-tag-variant('approved', green);
   @include status-tag-variant('rejected', red);
 }
+
+.zero-data-error {
+  .custom-zero-data-icon {
+    color: $status-error-text;
+    font-size: 75px;
+    line-height: 75px;
+    margin-bottom: 20px;
+  }
+}
+.no-criterias-loaded {
+  .vss-ZeroDataItem--icon-image {
+    color: $status-info-foreground;
+  }
+}

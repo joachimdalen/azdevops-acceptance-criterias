@@ -8,6 +8,7 @@ import {
 import { appTheme, commandBarStyles } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroData';
 import { getHostUrl } from '@joachimdalen/azdevops-ext-core/HostUtils';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import {
@@ -47,6 +48,7 @@ const AcceptanceControl = (): React.ReactElement => {
   const [isReadOnly, setReadOnly] = useState<boolean>(false);
   const [isNew, setIsNew] = useState<boolean>(true);
   const [workItemId, setWorkItemId] = useState<number>(-1);
+  const [error, setError] = useState<string | undefined>();
 
   const provider = useMemo(() => {
     const listener: Partial<IWorkItemNotificationListener> = {
@@ -75,12 +77,11 @@ const AcceptanceControl = (): React.ReactElement => {
           loaded: false,
           applyTheme: true
         });
+        loadTheme(createTheme(appTheme));
+
         getHostUrl(LocalStorageRawKeys.HostUrl);
         await DevOps.ready();
-
         DevOps.register(DevOps.getContributionId(), provider);
-
-        loadTheme(createTheme(appTheme));
 
         const formService = await DevOps.getService<IWorkItemFormService>(
           'ms.vss-work-web.work-item-form'
@@ -100,10 +101,12 @@ const AcceptanceControl = (): React.ReactElement => {
         }
 
         setLoading(false);
-
-        DevOps.resize();
-      } catch (error) {
-        WebLogger.error('Failed to get project configuration', error);
+      } catch (error: any) {
+        WebLogger.error('Failed to load acceptance criterias', error);
+        setError(
+          'Failed to load acceptance criterias. Please check the browser console and report any issues on GitHub. ' +
+            error?.message
+        );
       } finally {
         await DevOps.notifyLoadSucceeded();
         setLoading(false);
@@ -288,8 +291,21 @@ const AcceptanceControl = (): React.ReactElement => {
     await showPanel(criteria, readOnly, canEdit);
   }
 
+  if (error !== undefined) {
+    return (
+      <div className="padding-vertical-20 zero-data-error">
+        <ExtendedZeroData
+          title={'Error'}
+          description={error}
+          icon={{ iconName: 'Error' }}
+          buttons={[]}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="acceptance-control-container">
+    <div className="flex-grow">
       <div>
         <CommandBar styles={commandBarStyles} items={_items} />
         <Separator />
