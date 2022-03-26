@@ -5,6 +5,10 @@
 @import '../styles/common';
 @include extension-container('work-hub-container');
 
+thead {
+  background-color: var(--background-color, rgba(255, 255, 255, 1));
+}
+
 .settings-tab-list {
   width: 200px;
 }
