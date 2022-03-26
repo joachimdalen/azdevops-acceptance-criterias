@@ -302,7 +302,7 @@ const AcceptanceControl = (): React.ReactElement => {
           actionType={ZeroDataActionType.ctaButton}
           actionText="New Acceptance Criteria"
           onActionClick={() => {
-            showPanel();
+            showPanel(undefined, undefined, undefined, true);
           }}
         />
       </ConditionalChildren>
