@@ -32,10 +32,7 @@ const ProgressBar = ({ currentValue, maxValue, labelType }: IProgressBarProps): 
           style={{ transform: `scaleX(${current})` }}
         ></span>
       </span>
-      {/* flex-self-start */}
-      <span className="progress-bar-progress font-size-s secondary-text">
-        {currentText}
-      </span>
+      <span className="progress-bar-progress font-size-s secondary-text">{currentText}</span>
     </div>
   );
 };

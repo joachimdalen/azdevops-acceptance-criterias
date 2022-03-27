@@ -7,16 +7,10 @@ export interface FullStatusTagProps {
 }
 
 const FullStatusTag = ({ state }: FullStatusTagProps): React.ReactElement => {
-  const getDisplayName = (state: FullCriteriaStatus) => {
-    switch (state) {
-      default:
-        return state;
-    }
-  };
   return (
     <span className={classNames('status-tag', [`status-tag-${state}`])}>
       <div className="status-tag-indicator"></div>
-      {getDisplayName(state)}
+      {state}
     </span>
   );
 };

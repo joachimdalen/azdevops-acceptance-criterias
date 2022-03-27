@@ -69,6 +69,9 @@ export const mockAddToast = jest.fn();
 export const mockOpenPanel = jest.fn();
 export const mockOpenNewWindow = jest.fn();
 export const mockGetQueryParams = jest.fn().mockRejectedValue(new Error('Not implemented'));
+export const mockGetResourceAreaLocation = jest
+  .fn()
+  .mockRejectedValue(new Error('Not implemented'));
 
 /**
  * Mocked getService returns mocked methods
@@ -101,6 +104,11 @@ export function getService(contributionId: string) {
         openNewWindow: mockOpenNewWindow
       };
     }
+    case 'ms.vss-features.location-service': {
+      return {
+        getResourceAreaLocation: mockGetResourceAreaLocation
+      };
+    }
   }
 }
 
@@ -130,6 +138,7 @@ export function notifyLoadSucceeded() {
 export function getConfiguration() {
   return mockGetConfiguration();
 }
+
 export function getExtensionContext(): IExtensionContext {
   return mockGetExtensionContext();
 }
