@@ -239,6 +239,8 @@ const CriteriaPanel = (): React.ReactElement => {
 
   return (
     <PanelWrapper
+      rootClassName="custom-scrollbar scroll-hidden"
+      contentClassName="full-height scroll-hidden"
       cancelButton={{ text: 'Close', onClick: () => dismiss() }}
       okButton={
         isReadOnly

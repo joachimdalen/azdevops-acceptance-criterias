@@ -62,7 +62,7 @@ const ScenarioCriteriaSection = (): JSX.Element => {
   }, [items, scenario]);
 
   return (
-    <div className="rhythm-vertical-16 flex-grow margin-top-8">
+    <div className="rhythm-vertical-16 full-height v-scroll-auto flex-grow margin-top-8">
       <Surface background={SurfaceBackground.callout}>
         <TabBar
           onSelectedTabChanged={id => setSelectedTabId(id)}
@@ -115,7 +115,7 @@ const ScenarioCriteriaSection = (): JSX.Element => {
             onClick={() => add({ id: uuidV4(), type: 'then' })}
           />
         </ButtonGroup>
-        <div className="rhythm-vertical-8 ">
+        <div className="rhythm-vertical-8 full-height v-scroll-auto">
           {items.map((item, index) => {
             return (
               <FormItem key={item.id} label={capitalizeFirstLetter(item.type)}>
