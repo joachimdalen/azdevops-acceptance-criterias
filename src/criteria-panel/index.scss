@@ -3,3 +3,9 @@
 @import '@joachimdalen/azdevops-ext-core/styles/mixins.scss';
 @import '../styles/common';
 @include extension-container('criteria-panel-container');
+
+.sticky-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+}

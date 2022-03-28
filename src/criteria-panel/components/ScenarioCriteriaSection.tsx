@@ -76,7 +76,7 @@ const ScenarioCriteriaSection = (): JSX.Element => {
         />
       </FormItem>
 
-      <ButtonGroup className="separator-line-top separator-line-bottom justify-center padding-4">
+      <ButtonGroup className="separator-line-top separator-line-bottom justify-center padding-4 dark-background sticky-toolbar">
         <Button
           subtle
           text="Given"
