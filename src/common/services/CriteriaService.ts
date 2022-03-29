@@ -73,7 +73,7 @@ class CriteriaService {
       this._changeHandler(this._data);
     }
   }
-  public async getCriteriaDetails(id: string): Promise<CriteriaDetailDocument> {
+  public async getCriteriaDetails(id: string): Promise<CriteriaDetailDocument | undefined> {
     try {
       const details = await this._dataStore.getCriteriaDetail(id);
       if (details === undefined) return { id: id };
@@ -83,7 +83,7 @@ class CriteriaService {
         throw new Error(error);
       }
     }
-    return { id: id };
+    return undefined;
   }
 
   public async deleteCriteria(id: string): Promise<CriteriaDocument | undefined> {
@@ -121,7 +121,7 @@ class CriteriaService {
     approved: boolean
   ): Promise<{ criteria: IAcceptanceCriteria; details: CriteriaDetailDocument } | undefined> {
     const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
-    const details: CriteriaDetailDocument = await this.getCriteriaDetails(id);
+    const details: CriteriaDetailDocument = (await this.getCriteriaDetails(id)) || { id: id };
     const approver = await getLoggedInUser();
     if (doc) {
       const criteria = doc.criterias.find(x => x.id === id);
@@ -157,7 +157,7 @@ class CriteriaService {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
 
     if (doc) {
-      const details = await this.getCriteriaDetails(id);
+      const details = (await this.getCriteriaDetails(id)) || { id: id };
       const criteria = doc.criterias.find(x => x.id === id);
       if (criteria) {
         if (

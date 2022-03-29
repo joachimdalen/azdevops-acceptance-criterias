@@ -51,17 +51,19 @@ const CriteriaPanel = (): React.ReactElement => {
   const [workItemId, setWorkItemId] = useState<string | undefined>();
   const [wasChanged, toggleWasChanged] = useBooleanToggle();
   const [editAfterComplete, toggleEditAfterComplete] = useBooleanToggle();
+  const [detailsError, setDetailsError] = useState<boolean>(false);
 
-  function setCriteriaInfo(crit: IAcceptanceCriteria, details: CriteriaDetailDocument) {
+  function setCriteriaInfo(crit: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
     dispatch({ type: 'SET_TYPE', data: crit.type });
     setIdentity(crit.requiredApprover);
     setTitle(crit.title);
     setCriteria(crit);
     dispatch({
       type: 'SET_CRITERIA',
-      data: crit.type === 'scenario' ? details.scenario : details.custom
+      data: crit.type === 'scenario' ? details?.scenario : details?.custom
     });
     setDetails(details);
+    setDetailsError(details === undefined);
 
     if (
       crit.state === AcceptanceCriteriaState.Approved ||
@@ -260,6 +262,11 @@ const CriteriaPanel = (): React.ReactElement => {
       moduleVersion={process.env.CRITERIA_PANEL_VERSION}
     >
       <ConditionalChildren renderChildren={!loading}>
+        <ConditionalChildren renderChildren={detailsError}>
+          <MessageCard className="margin-bottom-8" severity={MessageCardSeverity.Error}>
+            Failed to load critiera details.
+          </MessageCard>
+        </ConditionalChildren>
         <ConditionalChildren renderChildren={isReadOnly}>
           {criteria && (
             <>
