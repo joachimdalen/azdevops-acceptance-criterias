@@ -232,7 +232,7 @@ class CriteriaService {
 
       if (details !== undefined) {
         await this._dataStore.setCriteriaDetailsDocument({
-          ...criteria,
+          ...details,
           id: `AC-${workItemId}-1`
         });
       }
