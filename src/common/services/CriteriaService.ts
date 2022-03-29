@@ -330,7 +330,10 @@ class CriteriaService {
     await this._devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
       PanelIds.CriteriaPanel,
       {
-        title: `${options?.criteria?.id} - ${options?.criteria?.title}` || 'Acceptance Criteria',
+        title:
+          options.criteria !== undefined
+            ? `${options?.criteria?.id} - ${options?.criteria?.title}`
+            : 'Acceptance Criteria',
         size: 2,
         configuration: intConfig,
         onClose: options.onClose
