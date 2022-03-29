@@ -2,7 +2,7 @@ import { Icon } from 'azure-devops-ui/Icon';
 
 import { capitalizeFirstLetter } from '../common';
 
-const CriteriaTypeCell = ({ type }: { type: 'custom' | 'scenario' }): JSX.Element => {
+const CriteriaTypeDisplay = ({ type }: { type: 'custom' | 'scenario' }): JSX.Element => {
   const getIcon = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'custom':
@@ -18,4 +18,4 @@ const CriteriaTypeCell = ({ type }: { type: 'custom' | 'scenario' }): JSX.Elemen
     </div>
   );
 };
-export default CriteriaTypeCell;
+export default CriteriaTypeDisplay;

@@ -1,18 +1,21 @@
-import { Spinner, SpinnerSize } from "@fluentui/react";
-import { DevOpsService } from "@joachimdalen/azdevops-ext-core/DevOpsService";
-import { WebLogger } from "@joachimdalen/azdevops-ext-core/WebLogger";
-import { IWorkItemLoadedArgs, IWorkItemNotificationListener } from "azure-devops-extension-api/WorkItemTracking";
-import * as DevOps from "azure-devops-extension-sdk";
-import React, { useEffect, useMemo, useState } from "react";
+import { Spinner, SpinnerSize } from '@fluentui/react';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
+import {
+  IWorkItemLoadedArgs,
+  IWorkItemNotificationListener
+} from 'azure-devops-extension-api/WorkItemTracking';
+import * as DevOps from 'azure-devops-extension-sdk';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import ProgressBar from "../common/components/ProgressBar";
-import CriteriaService from "../common/services/CriteriaService";
-import { AcceptanceCriteriaState, IProgressStatus } from "../common/types";
-
+import ProgressBar from '../common/components/ProgressBar';
+import CriteriaService from '../common/services/CriteriaService';
+import { AcceptanceCriteriaState, IProgressStatus } from '../common/types';
+import ProgressControlService from './common/ProgressControlService';
 
 const ProgressControl = (): React.ReactElement => {
-  const [devOpsService, criteriaService] = useMemo(
-    () => [new DevOpsService(), new CriteriaService()],
+  const [devOpsService, criteriaService, progressControlService] = useMemo(
+    () => [new DevOpsService(), new CriteriaService(), new ProgressControlService()],
     []
   );
   const [progress, setProgress] = useState<IProgressStatus | undefined>();
@@ -22,22 +25,25 @@ const ProgressControl = (): React.ReactElement => {
     const listener: Partial<IWorkItemNotificationListener> = {
       onLoaded: async function (workItemLoadedArgs: IWorkItemLoadedArgs): Promise<void> {
         try {
-          const data = await criteriaService.load(undefined, workItemLoadedArgs.id.toString());
-          if (data.success) {
-            const f = data.data && data.data[0];
-            if (f) {
-              const progress: IProgressStatus = {
-                maxValue: f.criterias.length,
-                value: f.criterias.filter(
-                  x =>
-                    x.state === AcceptanceCriteriaState.Completed ||
-                    x.state === AcceptanceCriteriaState.Approved
-                ).length,
-                type: 'count'
-              };
-              setProgress(progress);
-            }
-          }
+          // const data = await criteriaService.load(undefined, workItemLoadedArgs.id.toString());
+          // if (data.success) {
+          //   const f = data.data && data.data[0];
+          //   if (f) {
+          //     const progress: IProgressStatus = {
+          //       maxValue: f.criterias.length,
+          //       value: f.criterias.filter(
+          //         x =>
+          //           x.state === AcceptanceCriteriaState.Completed ||
+          //           x.state === AcceptanceCriteriaState.Approved
+          //       ).length,
+          //       type: 'count'
+          //     };
+          //     setProgress(progress);
+          //   }
+          // }
+          const res = await progressControlService.getWorkItemIds(workItemLoadedArgs.id);
+          const data = await progressControlService.getCriteriaData(res);
+          console.log(data);
         } catch (error) {
           console.error(error);
         }

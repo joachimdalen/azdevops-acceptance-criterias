@@ -1,6 +1,9 @@
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
+import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { FormItem } from 'azure-devops-ui/FormItem';
+import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
+import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
@@ -13,7 +16,7 @@ const ScenarioCriteriaSection = (): JSX.Element => {
   const { dispatch, state } = useCriteriaPanelContext();
   const [scenario, setScenario] = useState<string>(state.scenario?.scenario || '');
   const [items, setItems] = useState<IScenarioCriteria[]>(state.scenario?.criterias || []);
-
+  const [selectedTabId, setSelectedTabId] = useState<string>('details');
   const add = (id: IScenarioCriteria) => {
     setItems(prev => [...prev, id]);
   };
@@ -65,14 +68,15 @@ const ScenarioCriteriaSection = (): JSX.Element => {
           width={TextFieldWidth.auto}
           placeholder="Short description.."
           multiline
-          rows={5}
+          rows={8}
           value={scenario}
           onChange={(_, val) => {
             setScenario(val);
           }}
         />
       </FormItem>
-      <ButtonGroup className="separator-line-top separator-line-bottom justify-center padding-4">
+
+      <ButtonGroup className="separator-line-top separator-line-bottom justify-center padding-4 dark-background sticky-toolbar">
         <Button
           subtle
           text="Given"
@@ -98,7 +102,7 @@ const ScenarioCriteriaSection = (): JSX.Element => {
           onClick={() => add({ id: uuidV4(), type: 'then' })}
         />
       </ButtonGroup>
-      <div className="rhythm-vertical-8 v-scroll-auto">
+      <div className="rhythm-vertical-8 padding-bottom-16">
         {items.map((item, index) => {
           return (
             <FormItem key={item.id} label={capitalizeFirstLetter(item.type)}>

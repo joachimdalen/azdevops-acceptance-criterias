@@ -97,7 +97,7 @@ export const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
 export const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
   id: 'state',
   minWidth: 200,
-  name: 'State',
+  name: 'Criteria State',
   renderCell: (
     rowIndex: number,
     columnIndex: number,

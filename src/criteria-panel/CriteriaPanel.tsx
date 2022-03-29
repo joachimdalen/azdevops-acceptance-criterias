@@ -36,6 +36,7 @@ import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
+import ProcessingContainer from './components/ProcessingContainer';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -164,6 +165,7 @@ const CriteriaPanel = (): React.ReactElement => {
     };
 
     const acd: CriteriaDetailDocument = {
+      __etag: details?.__etag,
       id: id,
       custom: panelState.type === 'custom' ? panelState.custom : undefined,
       scenario: panelState.type === 'scenario' ? panelState.scenario : undefined
@@ -239,6 +241,8 @@ const CriteriaPanel = (): React.ReactElement => {
 
   return (
     <PanelWrapper
+      rootClassName="custom-scrollbar scroll-hidden"
+      contentClassName="full-height h-scroll-hidden"
       cancelButton={{ text: 'Close', onClick: () => dismiss() }}
       okButton={
         isReadOnly
@@ -336,26 +340,7 @@ const CriteriaPanel = (): React.ReactElement => {
                   criteria.state === AcceptanceCriteriaState.AwaitingApproval
                 }
               >
-                <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-vertical-8">
-                  <ButtonGroup>
-                    <Button
-                      text="Approve"
-                      primary
-                      iconProps={{ iconName: 'CheckMark' }}
-                      onClick={async () => {
-                        await processCriteria(criteria.id, true);
-                      }}
-                    />
-                    <Button
-                      text="Reject"
-                      danger
-                      iconProps={{ iconName: 'Cancel' }}
-                      onClick={async () => {
-                        await processCriteria(criteria.id, false);
-                      }}
-                    />
-                  </ButtonGroup>
-                </div>
+                <ProcessingContainer processCriteria={processCriteria} criteriaId={criteria.id} />
               </ConditionalChildren>
               <ConditionalChildren
                 renderChildren={criteria.type === 'scenario' && details !== undefined}

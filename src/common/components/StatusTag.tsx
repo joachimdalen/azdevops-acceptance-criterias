@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 
+import { capitalizeFirstLetter } from '../common';
 import { AcceptanceCriteriaState } from '../types';
 
 export interface StatusTagProps {
@@ -12,7 +13,7 @@ const StatusTag = ({ state }: StatusTagProps): React.ReactElement => {
       case AcceptanceCriteriaState.AwaitingApproval:
         return 'Awaiting Approval';
       default:
-        return state;
+        return capitalizeFirstLetter(state);
     }
   };
   return (

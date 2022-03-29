@@ -39,7 +39,7 @@ import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../
 import ColumnsPanel from './ColumnsPanel';
 import CriteriaTree from './components/CriteriaTree';
 import HubFilterBar from './components/HubFilterBar';
-import SettingsPanel from './SettingsPanel';
+import SettingsPanel from './settings-panel/SettingsPanel';
 
 const WorkHub = (): JSX.Element => {
   const [criteriaService, workItemService, devOpsService] = useMemo(
@@ -113,35 +113,45 @@ const WorkHub = (): JSX.Element => {
 
   useEffect(() => {
     async function initModule() {
-      toggleLoadingData(true);
-      loadTheme(createTheme(appTheme));
-      await DevOps.init();
-      getHostUrl(LocalStorageRawKeys.HostUrl);
-      const loadedTypes = await workItemService.getWorkItemTypes();
+      try {
+        toggleLoadingData(true);
+        loadTheme(createTheme(appTheme));
+        await DevOps.init();
+        getHostUrl(LocalStorageRawKeys.HostUrl);
+        const loadedTypes = await workItemService.getWorkItemTypes();
 
-      setWorkItemTypes(loadedTypes);
-      const categories = ['Completed', 'Removed'];
-      const completedStatesA = loadedTypes
-        .flatMap(x => x.states.filter(x => categories.includes(x.category)).map(x => x.name))
-        .filter(distinct);
+        setWorkItemTypes(loadedTypes);
+        const categories = ['Completed', 'Removed'];
+        const completedStatesA = loadedTypes
+          .flatMap(x => x.states.filter(x => categories.includes(x.category)).map(x => x.name))
+          .filter(distinct);
 
-      setCompletedStates(completedStatesA);
+        setCompletedStates(completedStatesA);
 
-      WebLogger.information('Loaded work hub...');
-      const result = await criteriaService.load(data => {
-        setDocuments(data);
+        WebLogger.information('Loaded work hub...');
+        const result = await criteriaService.load(data => {
+          setDocuments(data);
 
-        const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
-        if (filter !== undefined && Object.keys(filter).length > 0) {
-          applyFilter(filter, data);
-        } else {
-          setVisibleDocuments(data);
-        }
+          const filter = getLocalItem<IFilterState>(LocalStorageKeys.FilterState);
+          if (filter !== undefined && Object.keys(filter).length > 0) {
+            applyFilter(filter, data);
+          } else {
+            setVisibleDocuments(data);
+          }
 
-        WebLogger.information('Set', data);
-      });
+          WebLogger.information('Set', data);
+        });
 
-      toggleLoadingData(false);
+        toggleLoadingData(false);
+      } catch (error: any) {
+        WebLogger.error('Failed to load acceptance criterias', error);
+        setError(
+          'Failed to load acceptance criterias. Please check the browser console and report any issues on GitHub. ' +
+            error?.message
+        );
+      } finally {
+        toggleLoadingData(false);
+      }
     }
 
     initModule();
@@ -312,12 +322,14 @@ const WorkHub = (): JSX.Element => {
                 </div>
               </ConditionalChildren>
               <ConditionalChildren renderChildren={error !== undefined}>
-                <ExtendedZeroData
-                  title={'Error'}
-                  description={error}
-                  icon={{ iconName: 'Error', size: IconSize.large }}
-                  buttons={[]}
-                />
+                <div className="flex-grow flex-column full-height padding-vertical-20 zero-data-error">
+                  <ExtendedZeroData
+                    title={'Error'}
+                    description={error}
+                    icon={{ iconName: 'Error' }}
+                    buttons={[]}
+                  />
+                </div>
               </ConditionalChildren>
               <ConditionalChildren renderChildren={isActive}>
                 <ConditionalChildren renderChildren={workItems.length > 0}>
@@ -340,6 +352,7 @@ const WorkHub = (): JSX.Element => {
                 <ConditionalChildren renderChildren={workItems.length === 0}>
                   <div className="flex-grow">
                     <ZeroData
+                      className="no-criterias-loaded"
                       primaryText="No acceptance criterias"
                       secondaryText="Open a work item and add your first acceptance criteria"
                       iconProps={{ iconName: 'WorkItem' }}
