@@ -5,7 +5,7 @@ import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnFill, ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Toggle } from 'azure-devops-ui/Toggle';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
-import { ExpandableTreeCell, ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
+import { ExpandableTreeCell, ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
   ITreeItemEx,
@@ -51,13 +51,13 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
   rawCriteria?: IAcceptanceCriteria;
 }
 
-// const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
-//   id: 'title',
-//   minWidth: 200,
-//   name: 'Title',
-//   renderCell: renderTreeCell,
-//   width: -100
-// };
+const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
+  id: 'id',
+  minWidth: 200,
+  name: 'ID',
+  renderCell: renderTreeCell,
+  width: -100
+};
 const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
   id: 'state',
   minWidth: 200,
@@ -320,6 +320,7 @@ const CriteriaView = ({
       ariaLabel="Basic tree"
       columns={[
         toggleCell,
+        idCell,
         titleCell,
         criteriaState,
         approverCell,

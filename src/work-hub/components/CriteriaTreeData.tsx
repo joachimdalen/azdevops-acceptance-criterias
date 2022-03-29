@@ -90,7 +90,35 @@ export const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
   id: 'workItemId',
   minWidth: 50,
   name: 'ID',
-  renderCell: renderTreeCell,
+  renderCell: (
+    rowIndex: number,
+    columnIndex: number,
+    treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
+    treeItem: ITreeItemEx<IWorkItemCriteriaCell>
+  ) => {
+    const underlyingItem = treeItem.underlyingItem;
+    const data = ObservableLike.getValue(underlyingItem.data);
+    const treeCell = data && data[treeColumn.id];
+    // Do not include padding if the table cell has an href
+    const hasLink = !!(
+      treeCell &&
+      typeof treeCell !== 'string' &&
+      typeof treeCell !== 'number' &&
+      treeCell.href
+    );
+    // const approver = identities.get(data.requiredApprover);
+    return (
+      <SimpleTableCell
+        key={`${columnIndex}-${data.id}`}
+        className={treeColumn.className}
+        columnIndex={columnIndex}
+        contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
+        tableColumn={treeColumn}
+      >
+        {data.rowType === 'criteria' ? data.criteriaId : data.workItemId}
+      </SimpleTableCell>
+    );
+  },
   width: 100
 };
 

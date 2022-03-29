@@ -10,15 +10,12 @@ import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanTogg
 import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
-import { Button } from 'azure-devops-ui/Button';
-import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
-import { v4 as uuidV4 } from 'uuid';
 
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
@@ -32,11 +29,11 @@ import {
   IAcceptanceCriteria
 } from '../common/types';
 import CustomCriteriaSection from './components/CustomCriteriaSection';
+import ProcessingContainer from './components/ProcessingContainer';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import ProcessingContainer from './components/ProcessingContainer';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -155,7 +152,7 @@ const CriteriaPanel = (): React.ReactElement => {
     criteria: IAcceptanceCriteria;
     details: CriteriaDetailDocument;
   } => {
-    const id = criteria?.id || uuidV4();
+    const id = criteria?.id || "unset";
     const ac: IAcceptanceCriteria = {
       id: id,
       requiredApprover: identity,

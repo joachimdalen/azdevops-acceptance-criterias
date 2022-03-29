@@ -219,13 +219,22 @@ class CriteriaService {
       const document: CriteriaDocument = {
         id: workItemId,
         state: FullCriteriaStatus.New,
-        criterias: [criteria]
+        criterias: [
+          {
+            ...criteria,
+            id: `AC-${workItemId}-1`
+          }
+        ],
+        counter: 2
       };
       const created = await this._dataStore.setCriteriaDocument(document);
       this._data = [...this._data, created];
 
       if (details !== undefined) {
-        await this._dataStore.setCriteriaDetailsDocument(details);
+        await this._dataStore.setCriteriaDetailsDocument({
+          ...criteria,
+          id: `AC-${workItemId}-1`
+        });
       }
       if (shouldEmit) {
         this.emitChange();
@@ -234,6 +243,14 @@ class CriteriaService {
     } else {
       const document = this._data[existingDocumentIndex];
       const newDocument = { ...document };
+
+      if (criteria.id === 'unset') {
+        const id = `AC-${workItemId}-${newDocument.counter}`;
+        criteria.id = id;
+        if (details !== undefined) details.id = id;
+        newDocument.counter = newDocument.counter + 1;
+      }
+
       const index = document.criterias.findIndex(x => x.id === criteria.id);
 
       if (index > -1) {
@@ -313,7 +330,7 @@ class CriteriaService {
     await this._devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
       PanelIds.CriteriaPanel,
       {
-        title: options?.criteria?.title || 'Acceptance Criteria',
+        title: `${options?.criteria?.id} - ${options?.criteria?.title}` || 'Acceptance Criteria',
         size: 2,
         configuration: intConfig,
         onClose: options.onClose

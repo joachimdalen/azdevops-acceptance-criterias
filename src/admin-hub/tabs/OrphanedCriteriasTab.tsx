@@ -47,7 +47,7 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
       return doc.criterias.map(crit => {
         return {
           id: doc.id,
-          title: crit.title
+          title: `${crit.id} - ${crit.title}`
         };
       });
     });

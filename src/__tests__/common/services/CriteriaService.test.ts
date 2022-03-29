@@ -19,7 +19,8 @@ describe('CriteriaService', () => {
             type: 'custom',
             title: 'Test criteria'
           }
-        ]
+        ],
+        counter: 1
       };
       const result = service.setFullState(document);
       expect(result.state).toEqual(FullCriteriaStatus.New);
@@ -42,7 +43,8 @@ describe('CriteriaService', () => {
             type: 'custom',
             title: 'Test criteria'
           }
-        ]
+        ],
+        counter: 1
       };
       const result = service.setFullState(document);
       expect(result.state).toEqual(FullCriteriaStatus.Partial);
@@ -65,7 +67,8 @@ describe('CriteriaService', () => {
             type: 'custom',
             title: 'Test criteria'
           }
-        ]
+        ],
+        counter: 1
       };
       const result = service.setFullState(document);
       expect(result.state).toEqual(FullCriteriaStatus.Completed);
@@ -88,7 +91,8 @@ describe('CriteriaService', () => {
             type: 'custom',
             title: 'Test criteria'
           }
-        ]
+        ],
+        counter: 1
       };
       const result = service.setFullState(document);
       expect(result.state).toEqual(FullCriteriaStatus.Approved);
@@ -111,7 +115,8 @@ describe('CriteriaService', () => {
             type: 'custom',
             title: 'Test criteria'
           }
-        ]
+        ],
+        counter: 1
       };
       const result = service.setFullState(document);
       expect(result.state).toEqual(FullCriteriaStatus.Rejected);
@@ -134,7 +139,8 @@ describe('CriteriaService', () => {
             type: 'custom',
             title: 'Test criteria'
           }
-        ]
+        ],
+        counter: 1
       };
       const result = service.setFullState(document);
       expect(result.state).toEqual(FullCriteriaStatus.Partial);

@@ -10,6 +10,7 @@ export interface CriteriaDocument {
   criterias: IAcceptanceCriteria[];
   state: FullCriteriaStatus;
   readonly __etag?: number;
+  counter: number;
 }
 export interface IAcceptanceCriteria {
   id: string;
