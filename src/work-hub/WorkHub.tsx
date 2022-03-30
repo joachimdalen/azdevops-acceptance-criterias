@@ -332,7 +332,7 @@ const WorkHub = (): JSX.Element => {
                 </div>
               </ConditionalChildren>
               <ConditionalChildren renderChildren={isActive}>
-                <ConditionalChildren renderChildren={workItems.length > 0}>
+                <ConditionalChildren renderChildren={workItems.length > 0 && documents.length > 0}>
                   <CriteriaTree
                     workItems={workItems}
                     visibleDocuments={visibleDocuments}
@@ -349,7 +349,9 @@ const WorkHub = (): JSX.Element => {
                   />
                 </ConditionalChildren>
 
-                <ConditionalChildren renderChildren={workItems.length === 0}>
+                <ConditionalChildren
+                  renderChildren={workItems.length === 0 || documents.length === 0}
+                >
                   <div className="flex-grow">
                     <ZeroData
                       className="no-criterias-loaded"
