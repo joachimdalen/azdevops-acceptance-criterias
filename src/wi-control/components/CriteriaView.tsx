@@ -23,6 +23,7 @@ import StatusTag from '../../common/components/StatusTag';
 import {
   AcceptanceCriteriaState,
   CriteriaDocument,
+  CriteriaTypes,
   IAcceptanceCriteria,
   IExtendedTableCell,
   IScenario
@@ -43,7 +44,7 @@ interface IProgressStatus {
 interface IWorkItemCriteriaCell extends IExtendedTableCell {
   id: string;
   title: string;
-  type: '' | 'scenario' | 'custom';
+  type: '' | CriteriaTypes;
   state?: AcceptanceCriteriaState;
   requiredApprover?: IInternalIdentity;
   progress?: IProgressStatus;

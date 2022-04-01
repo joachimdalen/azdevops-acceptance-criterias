@@ -1,13 +1,14 @@
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
-import { ICustomCriteria, IScenario } from '../common/types';
+import { CriteriaTypes, ICheckList, ICustomCriteria, IScenario } from '../common/types';
 
 export interface ICriteriaPanelContextState {
   isLoading: boolean;
   isValid: boolean;
-  type: 'scenario' | 'custom';
+  type: CriteriaTypes;
   scenario?: IScenario;
   custom?: ICustomCriteria;
+  checklist?: ICheckList;
 }
 
 export interface ReducerAction {
@@ -50,6 +51,9 @@ function panelReducer(
           return { ...state, scenario: action.data };
         case 'custom':
           return { ...state, custom: action.data };
+        case 'checklist': {
+          return { ...state, checklist: action.data };
+        }
         default:
           throw new Error(`Unhandled criteria type`);
       }

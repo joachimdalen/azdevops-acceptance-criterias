@@ -34,6 +34,7 @@ import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
+import CheckListCriteriaSection from './components/CheckListCriteriaSection';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -152,7 +153,7 @@ const CriteriaPanel = (): React.ReactElement => {
     criteria: IAcceptanceCriteria;
     details: CriteriaDetailDocument;
   } => {
-    const id = criteria?.id || "unset";
+    const id = criteria?.id || 'unset';
     const ac: IAcceptanceCriteria = {
       id: id,
       requiredApprover: identity,
@@ -227,6 +228,9 @@ const CriteriaPanel = (): React.ReactElement => {
       </ConditionalChildren>
       <ConditionalChildren renderChildren={panelState.type === 'custom'}>
         <CustomCriteriaSection />
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={panelState.type === 'checklist'}>
+        <CheckListCriteriaSection />
       </ConditionalChildren>
     </>
   );

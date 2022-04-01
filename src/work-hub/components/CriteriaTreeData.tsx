@@ -22,6 +22,7 @@ import StatusTag from '../../common/components/StatusTag';
 import {
   AcceptanceCriteriaState,
   CriteriaDocument,
+  CriteriaTypes,
   FullCriteriaStatus,
   IAcceptanceCriteria,
   IExtendedTableCell,
@@ -34,7 +35,7 @@ export interface IWorkItemCriteriaCell extends IExtendedTableCell {
   workItemId: string;
   title: string;
   rowType: 'workItem' | 'criteria';
-  type: '' | 'scenario' | 'custom';
+  type: '' | CriteriaTypes;
   state: AcceptanceCriteriaState;
   fullState?: FullCriteriaStatus;
   requiredApprover?: IInternalIdentity;
@@ -204,7 +205,7 @@ export const getTreeProvider = (
             workItemId: x.id,
             title: y.title,
             rowType: 'criteria',
-            type: capitalizeFirstLetter(y.type) as any,
+            type: (capitalizeFirstLetter(y.type) as CriteriaTypes),
             state: y.state,
             requiredApprover: y.requiredApprover,
             criteriaId: y.id,

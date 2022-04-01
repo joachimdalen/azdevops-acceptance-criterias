@@ -37,7 +37,8 @@ export const move = <T>(array: T[], index: number, delta: number): void => {
 
 export const criteriaTypeItems: IListBoxItem<any>[] = [
   { id: 'scenario', text: 'Scenario Based' },
-  { id: 'custom', text: 'Simple' }
+  { id: 'custom', text: 'Simple' },
+  { id: 'checklist', text: 'Checklist' }
 ];
 
 type KeyVal = { [key: string]: string };

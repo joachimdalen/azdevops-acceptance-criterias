@@ -17,9 +17,11 @@ export interface IAcceptanceCriteria {
   order?: number;
   requiredApprover?: IInternalIdentity;
   state: AcceptanceCriteriaState;
-  type: 'scenario' | 'custom';
+  type: CriteriaTypes;
   title: string;
 }
+
+export type CriteriaTypes = 'scenario' | 'custom' | 'checklist';
 
 export interface CriteriaDetailDocument {
   id: string;
@@ -53,7 +55,7 @@ export enum AcceptanceCriteriaState {
 
 export interface ICriteria {
   id: string;
-  type: 'scenario' | 'custom';
+  type: CriteriaTypes;
   scenario: IScenarioCriteria[];
   custom: any[];
 }
@@ -65,6 +67,14 @@ export interface ICustomCriteria {
 export interface IScenario {
   scenario: string;
   criterias: IScenarioCriteria[];
+}
+export interface ICheckList {
+  criterias: ICheckListCriteria[];
+}
+export interface ICheckListCriteria {
+  id: string;
+  completed: boolean;
+  text?: string;
 }
 export interface IScenarioCriteria {
   id: string;

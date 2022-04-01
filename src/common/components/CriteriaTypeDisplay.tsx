@@ -1,8 +1,9 @@
 import { Icon } from 'azure-devops-ui/Icon';
 
 import { capitalizeFirstLetter } from '../common';
+import { CriteriaTypes } from '../types';
 
-const CriteriaTypeDisplay = ({ type }: { type: 'custom' | 'scenario' }): JSX.Element => {
+const CriteriaTypeDisplay = ({ type }: { type: CriteriaTypes }): JSX.Element => {
   const getIcon = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'custom':
