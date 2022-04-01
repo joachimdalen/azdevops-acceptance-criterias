@@ -16,7 +16,7 @@ describe('CriteriaService', () => {
           {
             id: '12',
             state: AcceptanceCriteriaState.New,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           }
         ],
@@ -34,13 +34,13 @@ describe('CriteriaService', () => {
           {
             id: '12',
             state: AcceptanceCriteriaState.New,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           },
           {
             id: '12',
             state: AcceptanceCriteriaState.Completed,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           }
         ],
@@ -58,13 +58,13 @@ describe('CriteriaService', () => {
           {
             id: '12',
             state: AcceptanceCriteriaState.Completed,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           },
           {
             id: '12',
             state: AcceptanceCriteriaState.Completed,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           }
         ],
@@ -82,13 +82,13 @@ describe('CriteriaService', () => {
           {
             id: '12',
             state: AcceptanceCriteriaState.Approved,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           },
           {
             id: '12',
             state: AcceptanceCriteriaState.Approved,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           }
         ],
@@ -106,13 +106,13 @@ describe('CriteriaService', () => {
           {
             id: '12',
             state: AcceptanceCriteriaState.Rejected,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           },
           {
             id: '12',
             state: AcceptanceCriteriaState.Rejected,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           }
         ],
@@ -130,13 +130,13 @@ describe('CriteriaService', () => {
           {
             id: '12',
             state: AcceptanceCriteriaState.AwaitingApproval,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           },
           {
             id: '12',
             state: AcceptanceCriteriaState.AwaitingApproval,
-            type: 'custom',
+            type: 'text',
             title: 'Test criteria'
           }
         ],

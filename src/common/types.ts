@@ -21,13 +21,14 @@ export interface IAcceptanceCriteria {
   title: string;
 }
 
-export type CriteriaTypes = 'scenario' | 'custom' | 'checklist';
+export type CriteriaTypes = 'scenario' | 'text' | 'checklist';
 
 export interface CriteriaDetailDocument {
   id: string;
   processed?: IAcceptanceCriteriaProcess;
   scenario?: IScenario;
-  custom?: ICustomCriteria;
+  text?: ITextCriteria;
+  checklist?: ICheckList;
   readonly __etag?: number;
 }
 
@@ -53,13 +54,13 @@ export enum AcceptanceCriteriaState {
   Rejected = 'rejected'
 }
 
-export interface ICriteria {
-  id: string;
-  type: CriteriaTypes;
-  scenario: IScenarioCriteria[];
-  custom: any[];
-}
-export interface ICustomCriteria {
+// export interface ICriteria {
+//   id: string;
+//   type: CriteriaTypes;
+//   scenario: IScenarioCriteria[];
+//   text: any[];
+// }
+export interface ITextCriteria {
   id: string;
   text: string;
 }
@@ -74,7 +75,7 @@ export interface ICheckList {
 export interface ICheckListCriteria {
   id: string;
   completed: boolean;
-  text?: string;
+  text: string;
 }
 export interface IScenarioCriteria {
   id: string;

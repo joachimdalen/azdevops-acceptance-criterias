@@ -1,13 +1,13 @@
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
-import { CriteriaTypes, ICheckList, ICustomCriteria, IScenario } from '../common/types';
+import { CriteriaTypes, ICheckList, IScenario, ITextCriteria } from '../common/types';
 
 export interface ICriteriaPanelContextState {
   isLoading: boolean;
   isValid: boolean;
   type: CriteriaTypes;
   scenario?: IScenario;
-  custom?: ICustomCriteria;
+  text?: ITextCriteria;
   checklist?: ICheckList;
 }
 
@@ -49,8 +49,8 @@ function panelReducer(
       switch (state.type) {
         case 'scenario':
           return { ...state, scenario: action.data };
-        case 'custom':
-          return { ...state, custom: action.data };
+        case 'text':
+          return { ...state, text: action.data };
         case 'checklist': {
           return { ...state, checklist: action.data };
         }

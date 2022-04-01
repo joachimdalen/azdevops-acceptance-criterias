@@ -26,15 +26,17 @@ import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
   CriteriaPanelConfig,
-  IAcceptanceCriteria
+  IAcceptanceCriteria,
+  CriteriaTypes
 } from '../common/types';
-import CustomCriteriaSection from './components/CustomCriteriaSection';
+import CheckListCriteriaSection from './components/CheckListCriteriaSection';
 import ProcessingContainer from './components/ProcessingContainer';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
-import CustomCriteriaViewSection from './components/view/CustomCriteriaViewSection';
+import TextCriteriaSection from './components/TextCriteriaSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
+import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import CheckListCriteriaSection from './components/CheckListCriteriaSection';
+import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaViewSection';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -53,13 +55,23 @@ const CriteriaPanel = (): React.ReactElement => {
   const [detailsError, setDetailsError] = useState<boolean>(false);
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
+    const getData = () => {
+      switch (crit.type) {
+        case 'text':
+          return details?.text;
+        case 'scenario':
+          return details?.scenario;
+        case 'checklist':
+          return details?.checklist;
+      }
+    };
     dispatch({ type: 'SET_TYPE', data: crit.type });
     setIdentity(crit.requiredApprover);
     setTitle(crit.title);
     setCriteria(crit);
     dispatch({
       type: 'SET_CRITERIA',
-      data: crit.type === 'scenario' ? details?.scenario : details?.custom
+      data: getData()
     });
     setDetails(details);
     setDetailsError(details === undefined);
@@ -165,7 +177,8 @@ const CriteriaPanel = (): React.ReactElement => {
     const acd: CriteriaDetailDocument = {
       __etag: details?.__etag,
       id: id,
-      custom: panelState.type === 'custom' ? panelState.custom : undefined,
+      text: panelState.type === 'text' ? panelState.text : undefined,
+      checklist: panelState.type === 'checklist' ? panelState.checklist : undefined,
       scenario: panelState.type === 'scenario' ? panelState.scenario : undefined
     };
 
@@ -226,8 +239,8 @@ const CriteriaPanel = (): React.ReactElement => {
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
         <ScenarioCriteria />
       </ConditionalChildren>
-      <ConditionalChildren renderChildren={panelState.type === 'custom'}>
-        <CustomCriteriaSection />
+      <ConditionalChildren renderChildren={panelState.type === 'text'}>
+        <TextCriteriaSection />
       </ConditionalChildren>
       <ConditionalChildren renderChildren={panelState.type === 'checklist'}>
         <CheckListCriteriaSection />
@@ -349,9 +362,14 @@ const CriteriaPanel = (): React.ReactElement => {
                 {details?.scenario && <ScenarioCriteriaViewSection details={details} />}
               </ConditionalChildren>
               <ConditionalChildren
-                renderChildren={criteria.type === 'custom' && details !== undefined}
+                renderChildren={criteria.type === 'text' && details !== undefined}
               >
-                {details?.custom && <CustomCriteriaViewSection details={details} />}
+                {details?.text && <TextCriteriaViewSection details={details} />}
+              </ConditionalChildren>
+              <ConditionalChildren
+                renderChildren={criteria.type === 'checklist' && details !== undefined}
+              >
+                {details?.checklist && <ChecklistCriteriaViewSection details={details} />}
               </ConditionalChildren>
             </>
           )}

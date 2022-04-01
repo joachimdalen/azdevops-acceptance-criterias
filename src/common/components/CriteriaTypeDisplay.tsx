@@ -6,10 +6,12 @@ import { CriteriaTypes } from '../types';
 const CriteriaTypeDisplay = ({ type }: { type: CriteriaTypes }): JSX.Element => {
   const getIcon = (type: string) => {
     switch (type?.toLowerCase()) {
-      case 'custom':
+      case 'text':
         return 'Comment';
       case 'scenario':
         return 'Add';
+      case 'checklist':
+        return 'CheckboxComposite';
     }
   };
   return (

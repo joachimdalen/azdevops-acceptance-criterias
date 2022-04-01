@@ -1,22 +1,17 @@
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { Checkbox } from 'azure-devops-ui/Checkbox';
-import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { FormItem } from 'azure-devops-ui/FormItem';
-import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
-import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
-import { capitalizeFirstLetter, move } from '../../common/common';
-import { ICheckList, ICheckListCriteria, IScenario, IScenarioCriteria } from '../../common/types';
+import { move } from '../../common/common';
+import { ICheckList, ICheckListCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
 const CheckListCriteriaSection = (): JSX.Element => {
   const { dispatch, state } = useCriteriaPanelContext();
   const [items, setItems] = useState<ICheckListCriteria[]>(state.checklist?.criterias || []);
-  const [selectedTabId, setSelectedTabId] = useState<string>('details');
   const add = (id: ICheckListCriteria) => {
     setItems(prev => [...prev, id]);
   };
@@ -41,7 +36,7 @@ const CheckListCriteriaSection = (): JSX.Element => {
     if (updateType === 'check' && val !== undefined) {
       item.completed = val;
     } else {
-      item.text = text;
+      item.text = text || '';
     }
     newItems[index] = item;
 
