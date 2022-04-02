@@ -1,6 +1,7 @@
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { Checkbox } from 'azure-devops-ui/Checkbox';
+import { Icon } from 'azure-devops-ui/Icon';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
@@ -24,20 +25,14 @@ const CheckListCriteriaSection = (): JSX.Element => {
 
   const updateItem = (
     criteria: ICheckListCriteria,
-    updateType: 'check' | 'text',
-    text?: string,
-    val?: boolean
+    text: string
   ) => {
     const index = items.findIndex(x => x.id === criteria.id);
     if (index === -1) return;
 
     const newItems = [...items];
     const item = newItems[index];
-    if (updateType === 'check' && val !== undefined) {
-      item.completed = val;
-    } else {
-      item.text = text || '';
-    }
+    item.text = text || '';
     newItems[index] = item;
 
     setItems(newItems);
@@ -76,15 +71,16 @@ const CheckListCriteriaSection = (): JSX.Element => {
         {items.map((item, index) => {
           return (
             <div key={item.id} className="flex-row flex-center rhythm-horizontal-4">
-              <Checkbox
-                checked={item.completed}
-                onChange={(e, c) => updateItem(item, 'check', undefined, c)}
+              <Icon
+                style={{ color: item.completed ? 'green' : 'red' }}
+                iconName={item.completed ? 'Accept' : 'Clear'}
+                className="margin-right-4"
               />
               <TextField
                 containerClassName="flex-grow"
                 width={TextFieldWidth.auto}
                 placeholder={`Some criteria...`}
-                onChange={(_, val) => updateItem(item, 'text', val)}
+                onChange={(_, val) => updateItem(item, val)}
                 value={item.text}
               />
               <Button

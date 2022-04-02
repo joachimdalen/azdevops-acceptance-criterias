@@ -114,7 +114,34 @@ class CriteriaService {
     }
   }
 
-  //TODO: Pass in work item id and load document
+  public async processCheckListCriteria(
+    workItemId: string,
+    criteriaId: string,
+    checkItemId: string,
+    complete: boolean
+  ): Promise<{ details: CriteriaDetailDocument } | undefined> {
+    const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
+    const details: CriteriaDetailDocument = (await this.getCriteriaDetails(criteriaId)) || {
+      id: criteriaId
+    };
+
+    const itemIndex = details.checklist?.criterias?.findIndex(x => x.id === checkItemId);
+
+    if (details.checklist?.criterias !== undefined && itemIndex !== undefined && itemIndex > -1) {
+      const newItem = { ...details.checklist.criterias[itemIndex] };
+      newItem.completed = complete;
+      details.checklist.criterias[itemIndex] = newItem;
+
+      const updated = await this._dataStore.setCriteriaDetailsDocument(details);
+
+      return {
+        details: updated
+      };
+    }
+
+    return undefined;
+  }
+
   public async processCriteria(
     workItemId: string,
     id: string,

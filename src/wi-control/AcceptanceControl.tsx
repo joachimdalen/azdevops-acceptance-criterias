@@ -47,7 +47,6 @@ const AcceptanceControl = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
   const [isReadOnly, setReadOnly] = useState<boolean>(false);
   const [isNew, setIsNew] = useState<boolean>(true);
-  const [workItemId, setWorkItemId] = useState<number>(-1);
   const [error, setError] = useState<string | undefined>();
 
   const provider = useMemo(() => {
@@ -55,7 +54,6 @@ const AcceptanceControl = (): React.ReactElement => {
       onLoaded: async function (workItemLoadedArgs: IWorkItemLoadedArgs): Promise<void> {
         setReadOnly(workItemLoadedArgs.isReadOnly);
         setIsNew(workItemLoadedArgs.isNew);
-        setWorkItemId(workItemLoadedArgs.id);
       }
     };
     return listener;
@@ -83,13 +81,9 @@ const AcceptanceControl = (): React.ReactElement => {
         await DevOps.ready();
         DevOps.register(DevOps.getContributionId(), provider);
 
-        const formService = await DevOps.getService<IWorkItemFormService>(
-          'ms.vss-work-web.work-item-form'
-        );
+        const id = await devOpsService.getCurrentWorkItemId();
 
-        const id = await formService.getId();
-
-        if (id !== 0) {
+        if (id !== undefined && id !== 0) {
           await criteriaService.load(data => {
             if (data.length > 0) {
               WebLogger.trace('Setting data', data);
@@ -122,6 +116,13 @@ const AcceptanceControl = (): React.ReactElement => {
     canEdit?: boolean,
     isCreate?: boolean
   ) => {
+    const workItemId = await devOpsService.getCurrentWorkItemId();
+
+    if (workItemId === undefined) {
+      await devOpsService.showToast('Failed to show criteria. ');
+      return;
+    }
+
     const isRead = isReadOnly || readOnly;
     const config: CriteriaPanelConfig = {
       workItemId: workItemId.toString(),
@@ -200,7 +201,6 @@ const AcceptanceControl = (): React.ReactElement => {
       }
     ];
   }, []);
-
   if (loading) {
     return (
       <div className="acceptance-control-loader">

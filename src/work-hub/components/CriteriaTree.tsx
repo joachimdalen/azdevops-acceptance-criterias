@@ -2,10 +2,6 @@ import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
 import {
-  getWorkItemTitle,
-  getWorkItemTypeDisplayName
-} from '@joachimdalen/azdevops-ext-core/WorkItemUtils';
-import {
   IWorkItemFormNavigationService,
   WorkItem
 } from 'azure-devops-extension-api/WorkItemTracking';

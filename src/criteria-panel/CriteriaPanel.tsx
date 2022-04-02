@@ -122,6 +122,7 @@ const CriteriaPanel = (): React.ReactElement => {
               }
             }
           }
+
           setWorkItemId(config.workItemId);
         }
         setLoading(false);
@@ -189,12 +190,30 @@ const CriteriaPanel = (): React.ReactElement => {
   };
 
   async function processCriteria(id: string, approve: boolean) {
-    if (workItemId) {
+    if (workItemId && parseInt(workItemId) > 0) {
       const result = await criteriaService.processCriteria(workItemId, id, approve);
       if (result !== undefined) {
         toggleWasChanged(true);
         setCriteriaInfo(result.criteria, result.details);
       }
+    } else {
+      WebLogger.error('Precondition failed');
+    }
+  }
+
+  async function processCheckListCriteria(id: string, complete: boolean) {
+    if (workItemId && parseInt(workItemId) > 0 && criteria?.id) {
+      const result = await criteriaService.processCheckListCriteria(
+        workItemId,
+        criteria?.id,
+        id,
+        complete
+      );
+      if (result !== undefined) {
+        setDetails(result.details);
+      }
+    } else {
+      WebLogger.error('Precondition failed ' + workItemId, criteria?.id);
     }
   }
 
@@ -369,7 +388,12 @@ const CriteriaPanel = (): React.ReactElement => {
               <ConditionalChildren
                 renderChildren={criteria.type === 'checklist' && details !== undefined}
               >
-                {details?.checklist && <ChecklistCriteriaViewSection details={details} />}
+                {details?.checklist && (
+                  <ChecklistCriteriaViewSection
+                    details={details}
+                    processItem={processCheckListCriteria}
+                  />
+                )}
               </ConditionalChildren>
             </>
           )}

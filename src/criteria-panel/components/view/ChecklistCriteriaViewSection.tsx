@@ -3,20 +3,17 @@ import { IListItemDetails, ListItem, ScrollableList } from 'azure-devops-ui/List
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { useMemo } from 'react';
 
-import { capitalizeFirstLetter } from '../../../common/common';
-import {
-  CriteriaDetailDocument,
-  ICheckListCriteria,
-  IScenarioCriteria
-} from '../../../common/types';
+import { CriteriaDetailDocument, ICheckListCriteria } from '../../../common/types';
 import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
 
 interface ChecklistCriteriaViewSectionProps {
   details: CriteriaDetailDocument;
+  processItem: (id: string, complete: boolean) => Promise<any>;
 }
 
 const ChecklistCriteriaViewSection = ({
-  details
+  details,
+  processItem
 }: ChecklistCriteriaViewSectionProps): JSX.Element => {
   const { dispatch } = useCriteriaPanelContext();
 
@@ -36,7 +33,11 @@ const ChecklistCriteriaViewSection = ({
     return (
       <ListItem key={key || 'list-item' + index} index={index} details={details}>
         <div className="h-scroll-hidden padding-vertical-4">
-          <Checkbox disabled checked={item.completed} label={item.text} />
+          <Checkbox
+            checked={item.completed}
+            label={item.text}
+            onChange={(v, c) => processItem(item.id, c)}
+          />
         </div>
       </ListItem>
     );

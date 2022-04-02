@@ -5,7 +5,7 @@ import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnFill, ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Toggle } from 'azure-devops-ui/Toggle';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
-import { ExpandableTreeCell, ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
+import { ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
   ITreeItemEx,
@@ -14,7 +14,6 @@ import {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 import { useMemo } from 'react';
 
-import { capitalizeFirstLetter } from '../../common/common';
 import ApproverDisplay from '../../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import InternalLink from '../../common/components/InternalLink';
@@ -302,15 +301,17 @@ const CriteriaView = ({
           contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
           tableColumn={treeColumn}
         >
-          <Toggle
-            checked={data?.state !== AcceptanceCriteriaState.New}
-            onChange={(e, checked: boolean) => {
-              if (data.rawCriteria) {
-                onApprove(data.rawCriteria, checked);
-              }
-              e.preventDefault();
-            }}
-          />
+          <ConditionalChildren renderChildren={data.type !== 'checklist'}>
+            <Toggle
+              checked={data?.state !== AcceptanceCriteriaState.New}
+              onChange={(e, checked: boolean) => {
+                if (data.rawCriteria) {
+                  onApprove(data.rawCriteria, checked);
+                }
+                e.preventDefault();
+              }}
+            />
+          </ConditionalChildren>
         </SimpleTableCell>
       );
     }
