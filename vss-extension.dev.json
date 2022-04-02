@@ -116,7 +116,15 @@
           "light": "dist/assets/hub-icon-dark.png",
           "dark": "dist/assets/hub-icon-light.png"
         }
-      }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
     },
     {
       "id": "criterias-control-page",
@@ -141,7 +149,7 @@
       "targets": ["ms.vss-work-web.work-item-form"],
       "description": "Control to manage acceptance criterias for a work item",
       "properties": {
-        "name": "Acceptance Criterias",
+        "name": "Acceptance Criterias (DEV)",
         "uri": "wi-control.html"
       }
     },
@@ -161,7 +169,7 @@
       "description": "Enables acceptance criteria user hub and admin hub",
       "targets": ["ms.vss-web.managed-features"],
       "properties": {
-        "name": "Acceptance Criterias",
+        "name": "Acceptance Criterias (DEV) - Hubs",
         "userConfigurable": false,
         "hostConfigurable": true,
         "hostScopes": ["project"],
@@ -178,7 +186,7 @@
       "description": "Enables acceptance criteria control on all work item types",
       "targets": ["ms.vss-web.managed-features"],
       "properties": {
-        "name": "Acceptance Criterias",
+        "name": "Acceptance Criterias (DEV) - Work item control",
         "userConfigurable": false,
         "hostConfigurable": true,
         "hostScopes": ["project"],

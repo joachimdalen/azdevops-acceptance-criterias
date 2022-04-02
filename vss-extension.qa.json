@@ -148,13 +148,13 @@
       ]
     },
     {
-      "id": "criterias-progress-control",
+      "id": "criterias-wi-control",
       "type": "ms.vss-work-web.work-item-form-control",
       "targets": ["ms.vss-work-web.work-item-form"],
-      "description": "Progressbar that shows the total progress of acceptance criterias",
+      "description": "Control to manage acceptance criterias for a work item",
       "properties": {
-        "name": "Acceptance Criterias Progress",
-        "uri": "dist/progress-control.html"
+        "name": "Acceptance Criterias",
+        "uri": "wi-control.html"
       }
     },
     {
@@ -163,7 +163,7 @@
       "description": "Enables acceptance criteria user hub and admin hub",
       "targets": ["ms.vss-web.managed-features"],
       "properties": {
-        "name": "Acceptance Criterias",
+        "name": "Acceptance Criterias (QA) - Hubs",
         "userConfigurable": false,
         "hostConfigurable": true,
         "hostScopes": ["project"],
@@ -180,7 +180,7 @@
       "description": "Enables acceptance criteria control on all work item types",
       "targets": ["ms.vss-web.managed-features"],
       "properties": {
-        "name": "Acceptance Criterias",
+        "name": "Acceptance Criterias (QA) - Work item control",
         "userConfigurable": false,
         "hostConfigurable": true,
         "hostScopes": ["project"],
