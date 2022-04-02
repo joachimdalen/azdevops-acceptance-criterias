@@ -13,7 +13,7 @@ import OrphanedCriteriasTab from './tabs/OrphanedCriteriasTab';
 
 const AdminPage = (): React.ReactElement => {
   const [devOpsService] = useMemo(() => [new DevOpsService()], []);
-  const [selectedTab, setSelectedTab] = useState<string>('areas');
+  const [selectedTab, setSelectedTab] = useState<string>('configuration');
 
   const commandBarItems: IHeaderCommandBarItem[] = [
     {
@@ -21,7 +21,9 @@ const AdminPage = (): React.ReactElement => {
       text: 'Open docs',
       iconProps: { iconName: 'Help' },
       onActivate: () => {
-        devOpsService.openLink('https://github.com/joachimdalen/azdevops-acceptance-criterias');
+        devOpsService.openLink(
+          'https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias'
+        );
       }
     }
   ];
@@ -31,8 +33,8 @@ const AdminPage = (): React.ReactElement => {
       <Page className="flex-grow">
         <Header
           commandBarItems={commandBarItems}
-          title="Advanced Acceptance Criterias"
-          description="Management for Advanced Acceptance Criterias"
+          title="Acceptance Criterias"
+          description="Management for Acceptance Criterias"
         />
         <TabBar
           className="margin-bottom-16 margin-top-8"
@@ -52,9 +54,9 @@ const AdminPage = (): React.ReactElement => {
           <ConditionalChildren renderChildren={selectedTab === 'areas'}>
             <DocumentTab />
           </ConditionalChildren>
-          <ConditionalChildren renderChildren={selectedTab === 'orphaned'}>
+          {/* <ConditionalChildren renderChildren={selectedTab === 'orphaned'}>
             <OrphanedCriteriasTab />
-          </ConditionalChildren>
+          </ConditionalChildren> */}
         </Surface>
       </Page>
     </Surface>

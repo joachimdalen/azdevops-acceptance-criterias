@@ -96,6 +96,19 @@ class StorageService implements IStorageService {
       scopeType: this.scopeType
     });
   }
+  public async getAllCriteriaDetails(): Promise<CriteriaDetailDocument[]> {
+    const dataService = await this.getDataService();
+    if (this._criteriaDetailsCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    return dataManager.getDocuments(this._criteriaDetailsCollection, {
+      scopeType: this.scopeType
+    });
+  }
   public async deleteCriteriaDocument(id: string): Promise<void> {
     try {
       const dataService = await this.getDataService();

@@ -231,7 +231,7 @@ const CriteriaPanel = (): React.ReactElement => {
             }}
           />
         </FormItem>
-        <FormItem label="Criteira Type" className="flex-grow">
+        <FormItem label="Criteria Type" className="flex-grow">
           <Dropdown
             disabled={isReadOnly}
             placeholder="Select an Option"

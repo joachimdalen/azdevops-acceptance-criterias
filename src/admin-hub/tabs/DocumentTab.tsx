@@ -38,23 +38,6 @@ const DocumentTab = (): React.ReactElement => {
           );
         })}
       </div>
-
-      <div className="margin-top-16">
-        <Button
-          text="Set info"
-          onClick={async () => {
-            const operation = [
-              {
-                op: 'add',
-                path: '/fields/Jd.AcceptanceCriterias.State',
-                value: FullCriteriaStatus.New.toString()
-              }
-            ];
-            const client = getClient(WorkItemTrackingRestClient);
-            const updated = await client.updateWorkItem(operation, 338, undefined, true);
-          }}
-        ></Button>
-      </div>
     </PageWrapper>
   );
 };
