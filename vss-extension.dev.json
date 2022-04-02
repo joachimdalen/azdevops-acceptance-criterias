@@ -149,7 +149,7 @@
       "targets": ["ms.vss-work-web.work-item-form"],
       "description": "Control to manage acceptance criterias for a work item",
       "properties": {
-        "name": "Acceptance Criterias (DEV)",
+        "name": "Work Item Acceptance Criterias (DEV)",
         "uri": "wi-control.html"
       }
     },

@@ -147,6 +147,16 @@
       ]
     },
     {
+      "id": "criterias-wi-control",
+      "type": "ms.vss-work-web.work-item-form-control",
+      "targets": ["ms.vss-work-web.work-item-form"],
+      "description": "Control to manage acceptance criterias for a work item",
+      "properties": {
+        "name": "Work Item Acceptance Criterias",
+        "uri": "dist/wi-control.html"
+      }
+    },
+    {
       "id": "feature-enabled",
       "type": "ms.vss-web.feature",
       "description": "Enables acceptance criteria user hub and admin hub",
