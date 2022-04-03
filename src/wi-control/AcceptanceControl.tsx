@@ -105,6 +105,9 @@ const AcceptanceControl = (): React.ReactElement => {
       } finally {
         await DevOps.notifyLoadSucceeded();
         setLoading(false);
+        if (window.location.search.indexOf('isControl=true') >= 0) {
+          DevOps.resize();
+        }
       }
     }
 
@@ -163,13 +166,13 @@ const AcceptanceControl = (): React.ReactElement => {
           if (result?.result === 'SAVE' && result.data) {
             const id = await devOpsService.getCurrentWorkItemId();
             if (id) {
-            await criteriaService.createOrUpdate(
-              id.toString(),
-              result.data.criteria,
-              true,
-              result.data.details
-            );
-          }
+              await criteriaService.createOrUpdate(
+                id.toString(),
+                result.data.criteria,
+                true,
+                result.data.details
+              );
+            }
             // TODO: How to send result when X is pressed
           } else if (result?.wasChanged || result === undefined) {
             await reload();
