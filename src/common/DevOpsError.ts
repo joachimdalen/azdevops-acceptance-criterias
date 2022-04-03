@@ -1,3 +1,6 @@
+export enum KnownDevOpsErrors {
+  DocumentOutdated = 'InvalidDocumentVersionException'
+}
 export interface DevOpsError {
   $id: string;
   innerException?: any;
