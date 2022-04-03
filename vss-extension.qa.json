@@ -154,7 +154,7 @@
       "description": "Control to manage acceptance criterias for a work item",
       "properties": {
         "name": "Work Item Acceptance Criterias (QA)",
-        "uri": "dist/wi-control.html"
+        "uri": "dist/wi-control.html?isControl=true"
       }
     },
     {
