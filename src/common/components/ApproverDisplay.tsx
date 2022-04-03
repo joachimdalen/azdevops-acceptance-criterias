@@ -1,11 +1,18 @@
 import { getInitials, Persona, PersonaSize } from '@fluentui/react';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { Icon } from 'azure-devops-ui/Icon';
+import { getScopedGroupParts } from 'azure-devops-ui/IdentityPicker';
 import { useMemo } from 'react';
 
 import { getRawLocalItem, LocalStorageRawKeys } from '../localStorage';
 
-const ApproverDisplay = ({ approver }: { approver?: IInternalIdentity }): JSX.Element => {
+const ApproverDisplay = ({
+  approver,
+  large = false
+}: {
+  approver?: IInternalIdentity;
+  large?: boolean;
+}): JSX.Element => {
   const imageUrl = useMemo(() => {
     const baseUrl = getRawLocalItem(LocalStorageRawKeys.HostUrl);
     const url = baseUrl === undefined ? '' : baseUrl;
@@ -24,12 +31,16 @@ const ApproverDisplay = ({ approver }: { approver?: IInternalIdentity }): JSX.El
     );
   }
 
+  const scoped = getScopedGroupParts(approver as any);
+
   return (
     <Persona
-      text={approver.displayName}
-      size={PersonaSize.size24}
+      text={large ? scoped?.name || approver.displayName : approver.displayName}
+      secondaryText={scoped?.scope}
+      size={large ? PersonaSize.size40 : PersonaSize.size24}
       imageInitials={getInitials(approver.displayName, false)}
       imageUrl={imageUrl}
+      hidePersonaDetails={false}
     />
   );
 };

@@ -2,6 +2,7 @@ import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { getClient } from 'azure-devops-extension-api';
 import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
+import { GraphMembership, GraphRestClient } from 'azure-devops-extension-api/Graph';
 import {
   WorkItemQueryResult,
   WorkItemTrackingRestClient
@@ -308,6 +309,12 @@ class CriteriaService {
     const client = getClient(CoreRestClient);
     const teams = await client.getAllTeams(true);
     return teams;
+  }
+
+  public async getUserGroups(userDescriptor: string): Promise<GraphMembership[]> {
+    const client = getClient(GraphRestClient);
+    const groups = client.listMemberships(userDescriptor);
+    return groups;
   }
 
   public setFullState(document: CriteriaDocument): CriteriaDocument {

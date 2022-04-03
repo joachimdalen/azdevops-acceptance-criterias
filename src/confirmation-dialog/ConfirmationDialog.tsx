@@ -5,6 +5,7 @@ import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { Checkbox } from 'azure-devops-ui/Checkbox';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { MessageBar } from 'azure-devops-ui/MessageBar';
 import { PanelFooter } from 'azure-devops-ui/Panel';
 import { useEffect, useState } from 'react';
 
@@ -72,8 +73,13 @@ const ConfirmationDialog = (): JSX.Element => {
 
   return (
     <div className="flex-column">
+      {config.messageBar && config.messageBarContent && (
+        <MessageBar {...config.messageBar}>{config.messageBarContent}</MessageBar>
+      )}
       <div className="flex-column flex-grow">
-        <div className="padding-4">{config.content}</div>
+        <div className="padding-4">
+          {Array.isArray(config.content) ? config.content.map(ct => <p>{ct}</p>) : config.content}
+        </div>
         <ConditionalChildren renderChildren={config.doNotShowAgain === true}>
           <Checkbox
             className="margin-top-16"

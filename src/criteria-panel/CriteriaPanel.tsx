@@ -4,7 +4,7 @@ import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { IdentityPicker } from '@joachimdalen/azdevops-ext-core/IdentityPicker';
-import { isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
+import { getLoggedInUser, isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
 import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
@@ -26,17 +26,16 @@ import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
   CriteriaPanelConfig,
-  IAcceptanceCriteria,
-  CriteriaTypes
+  IAcceptanceCriteria
 } from '../common/types';
 import CheckListCriteriaSection from './components/CheckListCriteriaSection';
 import ProcessingContainer from './components/ProcessingContainer';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import TextCriteriaSection from './components/TextCriteriaSection';
+import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaViewSection';
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaViewSection';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -114,11 +113,27 @@ const CriteriaPanel = (): React.ReactElement => {
               conCrit.state === AcceptanceCriteriaState.AwaitingApproval &&
               conCrit.requiredApprover !== undefined
             ) {
-              const teams = await criteriaService.getUserTeams();
-              if (isLoggedInUser(conCrit.requiredApprover)) {
-                toggleCanApprove(true);
-              } else if (teams.some(y => y.id === conCrit.requiredApprover?.id)) {
-                toggleCanApprove(true);
+              if (conCrit.requiredApprover.entityType === 'User') {
+                if (isLoggedInUser(conCrit.requiredApprover)) {
+                  toggleCanApprove(true);
+                }
+              } else {
+                const teams = await criteriaService.getUserTeams();
+
+                if (teams.some(y => y.id === conCrit.requiredApprover?.id)) {
+                  toggleCanApprove(true);
+                } else {
+                  const user = await getLoggedInUser();
+                  if (user?.descriptor !== undefined) {
+                    const groups = await criteriaService.getUserGroups(user.descriptor);
+                    const group = groups.find(
+                      x => x.containerDescriptor === conCrit.requiredApprover?.descriptor
+                    );
+                    if (group !== undefined) {
+                      toggleCanApprove(true);
+                    }
+                  }
+                }
               }
             }
           }
@@ -335,36 +350,30 @@ const CriteriaPanel = (): React.ReactElement => {
                 </ConditionalChildren>
                 <div className="flex-row rhythm-horizontal-8">
                   <FormItem label="Required Approver" className="flex-grow">
-                    <ApproverDisplay approver={criteria?.requiredApprover} />
+                    <ApproverDisplay approver={criteria?.requiredApprover} large />
                   </FormItem>
-
+                  <ConditionalChildren
+                    renderChildren={
+                      (criteria.state === AcceptanceCriteriaState.Approved ||
+                        criteria.state === AcceptanceCriteriaState.Rejected) &&
+                      details?.processed?.processedBy !== undefined
+                    }
+                  >
+                    <FormItem
+                      label={
+                        criteria.state === AcceptanceCriteriaState.Approved
+                          ? 'Approved by'
+                          : 'Rejected by'
+                      }
+                      className="flex-grow"
+                    >
+                      <ApproverDisplay approver={details?.processed?.processedBy} large />
+                    </FormItem>
+                  </ConditionalChildren>
                   <FormItem label="State" className="flex-grow">
                     <StatusTag state={criteria.state} />
                   </FormItem>
                 </div>
-                <ConditionalChildren
-                  renderChildren={
-                    criteria.state === AcceptanceCriteriaState.Approved ||
-                    criteria.state === AcceptanceCriteriaState.Rejected
-                  }
-                >
-                  <div className="flex-row rhythm-horizontal-8">
-                    <ConditionalChildren
-                      renderChildren={details?.processed?.processedBy !== undefined}
-                    >
-                      <FormItem
-                        label={
-                          criteria.state === AcceptanceCriteriaState.Approved
-                            ? 'Approved by'
-                            : 'Rejected by'
-                        }
-                        className="flex-grow"
-                      >
-                        <ApproverDisplay approver={details?.processed?.processedBy} />
-                      </FormItem>
-                    </ConditionalChildren>
-                  </div>
-                </ConditionalChildren>
               </div>
               <ConditionalChildren
                 renderChildren={

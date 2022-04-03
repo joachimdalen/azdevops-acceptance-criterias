@@ -3,6 +3,7 @@ import { CoreRestClient } from 'azure-devops-extension-api/Core';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { IButtonProps } from 'azure-devops-ui/Button';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
+import { IMessageBarProps } from 'azure-devops-ui/MessageBar';
 
 import { CriteriaDetailDocument, IAcceptanceCriteria } from './types';
 
@@ -70,5 +71,7 @@ export interface IConfirmationConfig {
   cancelButton: Omit<IButtonProps, 'onClick'>;
   doNotShowAgain?: boolean;
   confirmButton: Omit<IButtonProps, 'onClick'>;
-  content: string;
+  content: string | string[];
+  messageBar?: IMessageBarProps;
+  messageBarContent?: string;
 }

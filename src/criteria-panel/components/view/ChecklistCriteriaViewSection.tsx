@@ -44,7 +44,7 @@ const ChecklistCriteriaViewSection = ({
   };
 
   return (
-    <div className="rhythm-vertical-16 flex-grow margin-top-8">
+    <div className="rhythm-vertical-16 flex-grow margin-top-8 checklist">
       <span className="font-weight-semibold font-size">Items</span>
       <ScrollableList itemProvider={provider} renderRow={renderRow} width="100%" />
     </div>

@@ -18,6 +18,7 @@ import {
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { MessageBarSeverity } from 'azure-devops-ui/MessageBar';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -110,6 +111,34 @@ const AcceptanceControl = (): React.ReactElement => {
     initModule();
   }, []);
 
+  const showDocumentOutdated = async () => {
+    const confirmConfig: IConfirmationConfig = {
+      cancelButton: {
+        text: 'Discard changes',
+        danger: true
+      },
+      confirmButton: {
+        text: 'Force update',
+        primary: true
+      },
+      messageBar: {
+        severity: MessageBarSeverity.Error
+      },
+      messageBarContent: 'Force updating might cause data loss.',
+      content: [
+        'The criteria is outdated and failed to update. This can be caused by a different user updating the document while you were making your changes.',
+        'You can chose to discard or force update.'
+      ]
+    };
+    await devOpsService.showDialog<ActionResult<boolean>, DialogIds>(DialogIds.ConfirmationDialog, {
+      title: 'Criteria outdated',
+      onClose: async result => {
+        console.log('dd');
+      },
+      configuration: confirmConfig
+    });
+  };
+
   const showPanel = async (
     criteria?: IAcceptanceCriteria,
     readOnly?: boolean,
@@ -130,9 +159,10 @@ const AcceptanceControl = (): React.ReactElement => {
       isReadOnly: isRead,
       canEdit: canEdit,
       onClose: async (result: CriteriaModalResult | undefined) => {
-        if (result?.result === 'SAVE' && result.data) {
-          const id = await devOpsService.getCurrentWorkItemId();
-          if (id) {
+        try {
+          if (result?.result === 'SAVE' && result.data) {
+            const id = await devOpsService.getCurrentWorkItemId();
+            if (id) {
             await criteriaService.createOrUpdate(
               id.toString(),
               result.data.criteria,
@@ -140,9 +170,12 @@ const AcceptanceControl = (): React.ReactElement => {
               result.data.details
             );
           }
-          // TODO: How to send result when X is pressed
-        } else if (result?.wasChanged || result === undefined) {
-          await reload();
+            // TODO: How to send result when X is pressed
+          } else if (result?.wasChanged || result === undefined) {
+            await reload();
+          }
+        } catch (error: any) {
+          devOpsService.showToast(error.message);
         }
       }
     };
