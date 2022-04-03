@@ -9,11 +9,11 @@ import React, { useMemo, useState } from 'react';
 
 import AdminConfigurationTab from './tabs/AdminConfigurationTab';
 import DocumentTab from './tabs/DocumentTab';
-import OrphanedCriteriasTab from './tabs/OrphanedCriteriasTab';
+import OrphanedDocumentsTab from './tabs/orphaned/OrphanedDocumentsTab';
 
 const AdminPage = (): React.ReactElement => {
   const [devOpsService] = useMemo(() => [new DevOpsService()], []);
-  const [selectedTab, setSelectedTab] = useState<string>('configuration');
+  const [selectedTab, setSelectedTab] = useState<string>('orphaned');
 
   const commandBarItems: IHeaderCommandBarItem[] = [
     {
@@ -42,7 +42,7 @@ const AdminPage = (): React.ReactElement => {
           selectedTabId={selectedTab}
           tabSize={TabSize.Compact}
         >
-          <Tab name="Configuration" id="configuration" iconProps={{ iconName: 'Settings' }} />
+          <Tab name="Configuration" id="configuration" />
           <Tab name="Areas" id="areas" />
           <Tab name="Orphaned Criterias" id="orphaned" />
         </TabBar>
@@ -54,9 +54,9 @@ const AdminPage = (): React.ReactElement => {
           <ConditionalChildren renderChildren={selectedTab === 'areas'}>
             <DocumentTab />
           </ConditionalChildren>
-          {/* <ConditionalChildren renderChildren={selectedTab === 'orphaned'}>
-            <OrphanedCriteriasTab />
-          </ConditionalChildren> */}
+          <ConditionalChildren renderChildren={selectedTab === 'orphaned'}>
+            <OrphanedDocumentsTab />
+          </ConditionalChildren>
         </Surface>
       </Page>
     </Surface>
