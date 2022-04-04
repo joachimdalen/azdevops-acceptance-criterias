@@ -6,8 +6,14 @@ export interface IProgressBarProps {
   currentValue: number;
   maxValue: number;
   labelType?: ProgressBarLabelType;
+  fixedColor?: boolean;
 }
-const ProgressBar = ({ currentValue, maxValue, labelType }: IProgressBarProps): JSX.Element => {
+const ProgressBar = ({
+  currentValue,
+  maxValue,
+  labelType,
+  fixedColor
+}: IProgressBarProps): JSX.Element => {
   const current = useMemo(() => currentValue / maxValue, [currentValue, maxValue]);
   const currentText = useMemo(() => {
     if (labelType === undefined) return;
@@ -18,8 +24,8 @@ const ProgressBar = ({ currentValue, maxValue, labelType }: IProgressBarProps): 
   const progressClass = useMemo(() => {
     if (current < 0.5) return;
     if (current === 1) return `progress-bar-status-completed`;
-    return `progress-bar-status-close`;
-  }, [current]);
+    return fixedColor ? '' : `progress-bar-status-close`;
+  }, [current, fixedColor]);
 
   return (
     <div className="flex-row flex-center progress-bar">

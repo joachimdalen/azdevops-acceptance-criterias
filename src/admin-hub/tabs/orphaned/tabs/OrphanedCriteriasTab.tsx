@@ -81,7 +81,7 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
         return {
           id: crit.id,
           workItemId: doc.id,
-          title: `${crit.id} - ${crit.title}`,
+          title: crit.title,
           type: crit.type
         };
       });

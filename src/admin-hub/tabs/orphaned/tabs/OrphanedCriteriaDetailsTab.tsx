@@ -1,8 +1,11 @@
+import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { getClient } from 'azure-devops-extension-api';
 import { WorkItemTrackingRestClient } from 'azure-devops-extension-api/WorkItemTracking';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { ObservableValue } from 'azure-devops-ui/Core/Observable';
+import { Dialog } from 'azure-devops-ui/Dialog';
 import { ListSelection } from 'azure-devops-ui/List';
 import {
   ColumnMore,
@@ -15,12 +18,11 @@ import {
 } from 'azure-devops-ui/Table';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { useEffect, useMemo, useState } from 'react';
-import { Dialog } from 'azure-devops-ui/Dialog';
+
 import CriteriaTypeDisplay from '../../../../common/components/CriteriaTypeDisplay';
+import ProgressBar from '../../../../common/components/ProgressBar';
 import { StorageService } from '../../../../common/services/StorageService';
 import { CriteriaDetailDocument, CriteriaTypes } from '../../../../common/types';
-import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
-import ProgressBar from '../../../../common/components/ProgressBar';
 
 const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
   const [service, workItemService] = useMemo(
@@ -30,7 +32,10 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
   const [documents, setDocuments] = useState<CriteriaDetailDocument[]>([]);
   const [showDelete, toggleShowDelete] = useBooleanToggle();
   const [currentValue, setCurrentValue] = useState(0);
-  const [progrss, setProgress] = useState<{ max: number; current: number }>({ max: 0, current: 0 });
+  const [progress, setProgress] = useState<{ max: number; current: number }>({
+    max: 0,
+    current: 0
+  });
 
   useEffect(() => {
     let interval: any = null;
@@ -88,7 +93,9 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
       id: 'id',
       name: 'Criteria Id',
       renderCell: renderSimpleCell,
-      width: 250
+      onSize: onSize,
+      readonly: true,
+      width: new ObservableValue(250)
     },
     {
       id: 'type',
@@ -100,6 +107,7 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
         tableItem: OrphanedCriteriaDetail,
         ariaRowIndex?: number
       ) => {
+        console.log('rerender');
         return (
           <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn}>
             {tableItem.type === 'Unknown' ? (
@@ -110,7 +118,7 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
           </SimpleTableCell>
         );
       },
-      width: -100
+      width: new ObservableValue(-100)
     },
     new ColumnMore((item: OrphanedCriteriaDetail) => {
       return {
@@ -129,11 +137,15 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
       };
     })
   ];
+  function onSize(event: MouseEvent, index: number, width: number) {
+    (columns[index].width as ObservableValue<number>).value = width;
+  }
 
   return (
     <div className="flex-column">
       <ButtonGroup>
         <Button
+          disabled={selection.selectedCount === 0}
           danger
           text="Delete all"
           onClick={async () => {
@@ -148,7 +160,10 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
               await service.deleteCriteriaDetilsDocument(item.id);
               setProgress(prg => ({ max: prg.max, current: prg.current + 1 }));
             }
-            console.log(selectedGroups);
+
+            const newItems = documents.filter(x => !selectedGroups.some(y => x.id === y.id));
+            setDocuments(newItems);
+            selection.clear();
           }}
         />
       </ButtonGroup>
@@ -163,17 +178,29 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
       />
       <ConditionalChildren renderChildren={showDelete}>
         <Dialog
-          titleProps={{ text: 'Confirm' }}
-          footerButtonProps={[
-            {
-              text: 'Cancel',
-              onClick: () => toggleShowDelete(false)
-            }
-          ]}
+          titleProps={{
+            text:
+              progress.current === progress.max ? 'Criteria details deleted' : 'Deleting criterias'
+          }}
+          footerButtonProps={
+            progress.current === progress.max
+              ? [
+                  {
+                    primary: true,
+                    text: 'Dismiss',
+                    onClick: () => toggleShowDelete(false)
+                  }
+                ]
+              : []
+          }
           onDismiss={() => toggleShowDelete(false)}
         >
-          <p>Deleting criterias</p>
-          <ProgressBar maxValue={progrss.max} currentValue={progrss.current} labelType="count" />
+          <ProgressBar
+            fixedColor
+            maxValue={progress.max}
+            currentValue={progress.current}
+            labelType="count"
+          />
         </Dialog>
       </ConditionalChildren>
     </div>
