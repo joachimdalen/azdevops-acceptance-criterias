@@ -1,5 +1,6 @@
 import { Checkbox } from 'azure-devops-ui/Checkbox';
 import { IListItemDetails, ListItem, ScrollableList } from 'azure-devops-ui/List';
+import { ClipboardButton } from 'azure-devops-ui/Clipboard';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { useMemo } from 'react';
 
@@ -32,12 +33,14 @@ const ChecklistCriteriaViewSection = ({
   ): JSX.Element => {
     return (
       <ListItem key={key || 'list-item' + index} index={index} details={details}>
-        <div className="h-scroll-hidden padding-vertical-4">
+        <div className="h-scroll-hidden padding-vertical-4 flex-row flex-grow">
           <Checkbox
+            className="flex-grow"
             checked={item.completed}
             label={item.text}
             onChange={(v, c) => processItem(item.id, c)}
           />
+          <ClipboardButton getContent={() => item.text} />
         </div>
       </ListItem>
     );

@@ -226,6 +226,7 @@ const CriteriaPanel = (): React.ReactElement => {
       );
       if (result !== undefined) {
         setDetails(result.details);
+        if (result.criteria) setCriteria(result.criteria);
       }
     } else {
       WebLogger.error('Precondition failed ' + workItemId, criteria?.id);

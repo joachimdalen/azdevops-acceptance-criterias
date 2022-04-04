@@ -120,7 +120,7 @@ class CriteriaService {
     criteriaId: string,
     checkItemId: string,
     complete: boolean
-  ): Promise<{ details: CriteriaDetailDocument } | undefined> {
+  ): Promise<{ details: CriteriaDetailDocument; criteria?: IAcceptanceCriteria } | undefined> {
     const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
     const details: CriteriaDetailDocument = (await this.getCriteriaDetails(criteriaId)) || {
       id: criteriaId
@@ -129,11 +129,27 @@ class CriteriaService {
     const itemIndex = details.checklist?.criterias?.findIndex(x => x.id === checkItemId);
 
     if (details.checklist?.criterias !== undefined && itemIndex !== undefined && itemIndex > -1) {
+      const preEditComplete = details.checklist.criterias.every(x => x.completed);
       const newItem = { ...details.checklist.criterias[itemIndex] };
       newItem.completed = complete;
       details.checklist.criterias[itemIndex] = newItem;
-
       const updated = await this._dataStore.setCriteriaDetailsDocument(details);
+      const isAllCompleted = details.checklist.criterias.every(x => x.completed);
+      if (doc !== undefined && (isAllCompleted || preEditComplete)) {
+        const newDoc = { ...doc };
+        const criteria = newDoc.criterias.find(x => x.id === criteriaId);
+        if (criteria !== undefined) {
+          const updt = this.setCriteriaItems(criteria, updated);
+          if (updt.criteria && updt.details) {
+            this.update(doc, updt.criteria, updt.details);
+
+            return {
+              details: updt.details,
+              criteria: updt.criteria
+            };
+          }
+        }
+      }
 
       return {
         details: updated
@@ -141,6 +157,32 @@ class CriteriaService {
     }
 
     return undefined;
+  }
+
+  private setCriteriaItems(criteria?: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
+    if (criteria && details) {
+      if (
+        criteria.state === AcceptanceCriteriaState.AwaitingApproval ||
+        criteria.state === AcceptanceCriteriaState.Completed ||
+        criteria.state === AcceptanceCriteriaState.Approved ||
+        criteria.state === AcceptanceCriteriaState.Rejected
+      ) {
+        criteria.state = AcceptanceCriteriaState.New;
+        details.processed = undefined;
+      } else {
+        if (criteria.requiredApprover) {
+          criteria.state = AcceptanceCriteriaState.AwaitingApproval;
+        } else {
+          criteria.state = AcceptanceCriteriaState.Completed;
+        }
+
+        details.processed = {
+          completedAt: new Date()
+        };
+      }
+    }
+
+    return { criteria, details };
   }
 
   public async processCriteria(
@@ -187,28 +229,12 @@ class CriteriaService {
     if (doc) {
       const details = (await this.getCriteriaDetails(id)) || { id: id };
       const criteria = doc.criterias.find(x => x.id === id);
-      if (criteria) {
-        if (
-          criteria.state === AcceptanceCriteriaState.AwaitingApproval ||
-          criteria.state === AcceptanceCriteriaState.Completed ||
-          criteria.state === AcceptanceCriteriaState.Approved ||
-          criteria.state === AcceptanceCriteriaState.Rejected
-        ) {
-          criteria.state = AcceptanceCriteriaState.New;
-          details.processed = undefined;
-        } else {
-          if (criteria.requiredApprover) {
-            criteria.state = AcceptanceCriteriaState.AwaitingApproval;
-          } else {
-            criteria.state = AcceptanceCriteriaState.Completed;
-          }
-
-          details.processed = {
-            completedAt: new Date()
-          };
+      const { criteria: crit, details: det } = this.setCriteriaItems(criteria, details);
+      if (crit) {
+        const updated = await this.createOrUpdate(doc.id, crit, true);
+        if (det) {
+          await this._dataStore.setCriteriaDetailsDocument(det);
         }
-        const updated = await this.createOrUpdate(doc.id, criteria, true);
-        await this._dataStore.setCriteriaDetailsDocument(details);
         return updated;
       }
     }
