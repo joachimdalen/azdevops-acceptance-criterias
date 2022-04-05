@@ -36,6 +36,7 @@ import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaVie
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
+import CompletionContainer from './components/CompletionContainer';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -390,6 +391,9 @@ const CriteriaPanel = (): React.ReactElement => {
                 }
               >
                 <ProcessingContainer processCriteria={processCriteria} criteriaId={criteria.id} />
+              </ConditionalChildren>
+              <ConditionalChildren renderChildren={criteria.state === AcceptanceCriteriaState.New}>
+                <CompletionContainer criteria={criteria} />
               </ConditionalChildren>
               <ConditionalChildren
                 renderChildren={criteria.type === 'scenario' && details !== undefined}
