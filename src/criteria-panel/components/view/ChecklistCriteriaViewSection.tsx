@@ -5,7 +5,6 @@ import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { useMemo } from 'react';
 
 import { CriteriaDetailDocument, ICheckListCriteria } from '../../../common/types';
-import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
 
 interface ChecklistCriteriaViewSectionProps {
   details: CriteriaDetailDocument;
@@ -16,8 +15,6 @@ const ChecklistCriteriaViewSection = ({
   details,
   processItem
 }: ChecklistCriteriaViewSectionProps): JSX.Element => {
-  const { dispatch } = useCriteriaPanelContext();
-
   const provider = useMemo(() => {
     if (details.checklist?.criterias) {
       return new ArrayItemProvider(details.checklist.criterias);
