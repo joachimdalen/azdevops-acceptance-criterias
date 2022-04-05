@@ -48,7 +48,8 @@
     "azure-devops-ui": "^2.167.22",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "prepare:dev": "npm run compile:dev && npm run changelog:prod && npm run docs:readme && npm run package:dev",
