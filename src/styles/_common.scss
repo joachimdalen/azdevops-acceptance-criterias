@@ -39,6 +39,9 @@
   }
 }
 .ac-link {
+  text-overflow: ellipsis;
+  width: 100%;
+  overflow: hidden;
   text-decoration: none;
   &:hover {
     text-decoration: underline;

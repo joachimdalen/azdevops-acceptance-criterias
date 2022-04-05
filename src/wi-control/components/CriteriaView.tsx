@@ -53,9 +53,9 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
 
 const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
   id: 'id',
-  minWidth: 200,
   name: 'ID',
   renderCell: renderTreeCell,
+  minWidth: 100,
   width: -100
 };
 const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
@@ -154,7 +154,8 @@ const CriteriaView = ({
   });
   const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'title',
-    minWidth: 200,
+    minWidth: 300,
+    width: -100,
     name: 'Title',
     renderCell: (
       rowIndex: number,
@@ -197,12 +198,11 @@ const CriteriaView = ({
           {content}
         </SimpleTableCell>
       );
-    },
-    width: -100
+    }
   };
   const approverCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'requiredApprover',
-    minWidth: 200,
+    width: -100,
     name: 'Required Approver',
     renderCell: (
       rowIndex: number,
@@ -232,8 +232,7 @@ const CriteriaView = ({
           <ApproverDisplay approver={data?.requiredApprover} />
         </SimpleTableCell>
       );
-    },
-    width: -100
+    }
   };
 
   const typeCell: ITreeColumn<IWorkItemCriteriaCell> = {
@@ -274,8 +273,8 @@ const CriteriaView = ({
   const toggleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'toggle',
     minWidth: 50,
-    width: 80,
-    name: '',
+    width: 100,
+    name: 'Completed',
     renderCell: (
       rowIndex: number,
       columnIndex: number,
