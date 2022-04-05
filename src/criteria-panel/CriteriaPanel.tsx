@@ -247,15 +247,6 @@ const CriteriaPanel = (): React.ReactElement => {
             }}
           />
         </FormItem>
-        <FormItem label="Criteria Type" className="flex-grow">
-          <Dropdown
-            disabled={isReadOnly}
-            placeholder="Select an Option"
-            items={criteriaTypeItems}
-            selection={typeSelection}
-            onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
-          />
-        </FormItem>
         <FormItem label="Required Approver">
           <IdentityPicker
             localStorageKey={LocalStorageRawKeys.HostUrl}
@@ -264,6 +255,15 @@ const CriteriaPanel = (): React.ReactElement => {
               setIdentity(i);
             }}
             onClear={() => setIdentity(undefined)}
+          />
+        </FormItem>
+        <FormItem label="Criteria Type" className="flex-grow">
+          <Dropdown
+            disabled={isReadOnly}
+            placeholder="Select an Option"
+            items={criteriaTypeItems}
+            selection={typeSelection}
+            onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
           />
         </FormItem>
         {/* <FormItem label="Tags" className="flex-grow">

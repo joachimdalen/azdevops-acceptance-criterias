@@ -1,3 +1,4 @@
+import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroData';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
@@ -85,12 +86,6 @@ const ScenarioCriteriaSection = (): JSX.Element => {
         />
         <Button
           subtle
-          text="And"
-          iconProps={{ iconName: 'Add' }}
-          onClick={() => add({ id: uuidV4(), type: 'and' })}
-        />
-        <Button
-          subtle
           text="When"
           iconProps={{ iconName: 'Add' }}
           onClick={() => add({ id: uuidV4(), type: 'when' })}
@@ -101,52 +96,66 @@ const ScenarioCriteriaSection = (): JSX.Element => {
           iconProps={{ iconName: 'Add' }}
           onClick={() => add({ id: uuidV4(), type: 'then' })}
         />
+        <Button
+          subtle
+          text="And"
+          iconProps={{ iconName: 'Add' }}
+          onClick={() => add({ id: uuidV4(), type: 'and' })}
+        />
       </ButtonGroup>
       <div className="rhythm-vertical-8 padding-bottom-16">
-        {items.map((item, index) => {
-          return (
-            <FormItem key={item.id} label={capitalizeFirstLetter(item.type)}>
-              <div className="flex-row flex-center rhythm-horizontal-4">
-                <TextField
-                  containerClassName="flex-grow"
-                  width={TextFieldWidth.auto}
-                  placeholder={`${capitalizeFirstLetter(item.type)}...`}
-                  onChange={(_, val) => updateItem(item, val)}
-                  value={item.text}
-                />
-                <Button
-                  disabled={index === 0}
-                  iconProps={{ iconName: 'Up' }}
-                  subtle
-                  tooltipProps={{ text: 'Move Up' }}
-                  onClick={() => {
-                    const nI = [...items];
-                    move(nI, index, -1);
-                    setItems(nI);
-                  }}
-                />
+        <ConditionalChildren renderChildren={items.length === 0}>
+          <div className="flex-column flex-center">
+            <h3 className="secondary-text">Build your criteria</h3>
+            <p className="secondary-text">Add your Given/When/Then sequence elements</p>
+          </div>
+        </ConditionalChildren>
+        <ConditionalChildren renderChildren={items.length !== 0}>
+          {items.map((item, index) => {
+            return (
+              <FormItem key={item.id} label={capitalizeFirstLetter(item.type)}>
+                <div className="flex-row flex-center rhythm-horizontal-4">
+                  <TextField
+                    containerClassName="flex-grow"
+                    width={TextFieldWidth.auto}
+                    placeholder={`${capitalizeFirstLetter(item.type)}...`}
+                    onChange={(_, val) => updateItem(item, val)}
+                    value={item.text}
+                  />
+                  <Button
+                    disabled={index === 0}
+                    iconProps={{ iconName: 'Up' }}
+                    subtle
+                    tooltipProps={{ text: 'Move Up' }}
+                    onClick={() => {
+                      const nI = [...items];
+                      move(nI, index, -1);
+                      setItems(nI);
+                    }}
+                  />
 
-                <Button
-                  disabled={index === items.length - 1}
-                  iconProps={{ iconName: 'Down' }}
-                  subtle
-                  tooltipProps={{ text: 'Move Down' }}
-                  onClick={() => {
-                    const nI = [...items];
-                    move(nI, index, 1);
-                    setItems(nI);
-                  }}
-                />
-                <Button
-                  iconProps={{ iconName: 'Delete' }}
-                  subtle
-                  tooltipProps={{ text: 'Remove' }}
-                  onClick={() => remove(item)}
-                />
-              </div>
-            </FormItem>
-          );
-        })}
+                  <Button
+                    disabled={index === items.length - 1}
+                    iconProps={{ iconName: 'Down' }}
+                    subtle
+                    tooltipProps={{ text: 'Move Down' }}
+                    onClick={() => {
+                      const nI = [...items];
+                      move(nI, index, 1);
+                      setItems(nI);
+                    }}
+                  />
+                  <Button
+                    iconProps={{ iconName: 'Delete' }}
+                    subtle
+                    tooltipProps={{ text: 'Remove' }}
+                    onClick={() => remove(item)}
+                  />
+                </div>
+              </FormItem>
+            );
+          })}
+        </ConditionalChildren>
       </div>
     </div>
   );
