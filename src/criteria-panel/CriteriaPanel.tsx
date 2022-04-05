@@ -108,34 +108,7 @@ const CriteriaPanel = (): React.ReactElement => {
             const conCrit = config.criteria as IAcceptanceCriteria;
             const details = await criteriaService.getCriteriaDetails(conCrit.id);
             setCriteriaInfo(conCrit, details);
-
-            if (
-              conCrit.state === AcceptanceCriteriaState.AwaitingApproval &&
-              conCrit.requiredApprover !== undefined
-            ) {
-              if (conCrit.requiredApprover.entityType === 'User') {
-                if (isLoggedInUser(conCrit.requiredApprover)) {
-                  toggleCanApprove(true);
-                }
-              } else {
-                const teams = await criteriaService.getUserTeams();
-
-                if (teams.some(y => y.id === conCrit.requiredApprover?.id)) {
-                  toggleCanApprove(true);
-                } else {
-                  const user = await getLoggedInUser();
-                  if (user?.descriptor !== undefined) {
-                    const groups = await criteriaService.getUserGroups(user.descriptor);
-                    const group = groups.find(
-                      x => x.containerDescriptor === conCrit.requiredApprover?.descriptor
-                    );
-                    if (group !== undefined) {
-                      toggleCanApprove(true);
-                    }
-                  }
-                }
-              }
-            }
+            await checkApproval(conCrit);
           }
 
           setWorkItemId(config.workItemId);
@@ -152,6 +125,36 @@ const CriteriaPanel = (): React.ReactElement => {
 
     initModule();
   }, []);
+
+  const checkApproval = async (criteria: IAcceptanceCriteria) => {
+    if (
+      criteria.state === AcceptanceCriteriaState.AwaitingApproval &&
+      criteria.requiredApprover !== undefined
+    ) {
+      if (criteria.requiredApprover.entityType === 'User') {
+        if (isLoggedInUser(criteria.requiredApprover)) {
+          toggleCanApprove(true);
+        }
+      } else {
+        const teams = await criteriaService.getUserTeams();
+
+        if (teams.some(y => y.id === criteria.requiredApprover?.id)) {
+          toggleCanApprove(true);
+        } else {
+          const user = await getLoggedInUser();
+          if (user?.descriptor !== undefined) {
+            const groups = await criteriaService.getUserGroups(user.descriptor);
+            const group = groups.find(
+              x => x.containerDescriptor === criteria.requiredApprover?.descriptor
+            );
+            if (group !== undefined) {
+              toggleCanApprove(true);
+            }
+          }
+        }
+      }
+    }
+  };
 
   const typeSelection = useDropdownSelection(criteriaTypeItems, panelState.type);
 
@@ -226,7 +229,10 @@ const CriteriaPanel = (): React.ReactElement => {
       );
       if (result !== undefined) {
         setDetails(result.details);
-        if (result.criteria) setCriteria(result.criteria);
+        if (result.criteria) {
+          setCriteria(result.criteria);
+          await checkApproval(result.criteria);
+        }
       }
     } else {
       WebLogger.error('Precondition failed ' + workItemId, criteria?.id);
