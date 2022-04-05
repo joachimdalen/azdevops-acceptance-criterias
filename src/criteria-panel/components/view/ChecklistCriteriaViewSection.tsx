@@ -1,6 +1,6 @@
 import { Checkbox } from 'azure-devops-ui/Checkbox';
-import { IListItemDetails, ListItem, ScrollableList } from 'azure-devops-ui/List';
 import { ClipboardButton } from 'azure-devops-ui/Clipboard';
+import { IListItemDetails, ListItem, ScrollableList } from 'azure-devops-ui/List';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { useMemo } from 'react';
 

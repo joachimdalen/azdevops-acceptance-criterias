@@ -10,7 +10,7 @@ const TextCriteriaViewSection = ({ details }: TextCriteriaViewSectionProps): JSX
   return (
     <div className="rhythm-vertical-16 flex-grow margin-top-8">
       <FormItem label="Content" className="flex-grow">
-        {details.text?.text}
+        {details.text?.description}
       </FormItem>
     </div>
   );

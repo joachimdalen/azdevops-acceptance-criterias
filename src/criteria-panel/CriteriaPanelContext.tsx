@@ -4,7 +4,6 @@ import { CriteriaTypes, ICheckList, IScenario, ITextCriteria } from '../common/t
 
 export interface ICriteriaPanelContextState {
   isLoading: boolean;
-  isValid: boolean;
   type: CriteriaTypes;
   scenario?: IScenario;
   text?: ITextCriteria;
@@ -18,7 +17,6 @@ export interface ReducerAction {
 
 const defaultState: ICriteriaPanelContextState = {
   isLoading: true,
-  isValid: false,
   type: 'scenario'
 };
 
@@ -29,7 +27,7 @@ export interface ICriteriaPanelContext {
 
 const CriteriaPanelContext = createContext<ICriteriaPanelContext>({} as any);
 
-export type ContextAction = 'INIT' | 'SET_CRITERIA' | 'SET_TYPE' | 'SET_VALID';
+export type ContextAction = 'INIT' | 'SET_CRITERIA' | 'SET_TYPE';
 type CriteriaPanelProviderProps = { children: React.ReactNode };
 function panelReducer(
   state: ICriteriaPanelContextState,
@@ -42,9 +40,7 @@ function panelReducer(
     case 'SET_TYPE': {
       return { ...state, type: action.data };
     }
-    case 'SET_VALID': {
-      return { ...state, isValid: action.data };
-    }
+
     case 'SET_CRITERIA': {
       switch (state.type) {
         case 'scenario':

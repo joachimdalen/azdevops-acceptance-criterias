@@ -54,15 +54,9 @@ export enum AcceptanceCriteriaState {
   Rejected = 'rejected'
 }
 
-// export interface ICriteria {
-//   id: string;
-//   type: CriteriaTypes;
-//   scenario: IScenarioCriteria[];
-//   text: any[];
-// }
 export interface ITextCriteria {
   id: string;
-  text: string;
+  description?: string;
 }
 
 export interface IScenario {

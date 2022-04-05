@@ -1,3 +1,4 @@
+import { IDocumentOptions, IExtensionDataManager } from 'azure-devops-extension-api';
 import {
   IWorkItemChangedArgs,
   IWorkItemFieldChangedArgs,
@@ -69,6 +70,7 @@ export const mockAddToast = jest.fn();
 export const mockOpenPanel = jest.fn();
 export const mockOpenNewWindow = jest.fn();
 export const mockGetQueryParams = jest.fn().mockRejectedValue(new Error('Not implemented'));
+export const mockGetDocument = jest.fn();
 export const mockGetResourceAreaLocation = jest
   .fn()
   .mockRejectedValue(new Error('Not implemented'));
@@ -109,6 +111,25 @@ export function getService(contributionId: string) {
         getResourceAreaLocation: mockGetResourceAreaLocation
       };
     }
+    case 'ms.vss-features.extension-data-service': {
+      return {
+        getExtensionDataManager: (extensionId: string, accessToken: string) => {
+          const dm: Partial<IExtensionDataManager> = {
+            getDocument: (
+              collectionName: string,
+              id: string,
+              documentOptions?: IDocumentOptions
+            ): Promise<any> => {
+              return new Promise(resolve =>
+                resolve(mockGetDocument(collectionName, id, documentOptions))
+              );
+            }
+          };
+
+          return dm;
+        }
+      };
+    }
   }
 }
 
@@ -117,10 +138,11 @@ export const mockReady = jest.fn();
 export const mockGetConfiguration = jest.fn();
 
 export const mockNotifyLoadSucceeded = jest.fn();
+export const mockGetAccessToken = jest.fn().mockReturnValue('Token');
 export const mockGetExtensionContext = jest.fn().mockReturnValue({
-  id: 'as-pub.work-item-wiki',
+  id: 'as-pub.acceptance-criterias',
   publisherId: 'as-pub',
-  extensionId: 'work-item-wiki',
+  extensionId: 'acceptance-criterias',
   version: '0.1.1'
 });
 export const mockNotifyLoadFailed = jest.fn();
@@ -144,4 +166,7 @@ export function getExtensionContext(): IExtensionContext {
 }
 export function notifyLoadFailed(e: Error | string): Promise<void> {
   return new Promise(resolve => resolve(mockNotifyLoadFailed(e)));
+}
+export function getAccessToken(): Promise<string> {
+  return new Promise(resolve => resolve(mockGetAccessToken()));
 }

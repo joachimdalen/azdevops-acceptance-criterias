@@ -1,3 +1,5 @@
+import { mockGetDevOpsProject } from '../../../__mocks__/@joachimdalen/azdevops-ext-core/DevOpsService';
+import { mockGetDocument, mockGetProject } from '../../../__mocks__/azure-devops-extension-sdk';
 import CriteriaService from '../../../common/services/CriteriaService';
 import {
   AcceptanceCriteriaState,
@@ -144,6 +146,25 @@ describe('CriteriaService', () => {
       };
       const result = service.setFullState(document);
       expect(result.state).toEqual(FullCriteriaStatus.Partial);
+    });
+  });
+  describe('load', () => {
+    describe('singleItem', () => {
+      beforeEach(() => {
+        mockGetDevOpsProject.mockResolvedValue({
+          name: 'MyProject',
+          id: 'ac8bc00e-6c55-4c23-ab83-dd3763ccd974'
+        });
+      });
+      it('should set empty array if data is undefined', async () => {
+        const service = new CriteriaService();
+        mockGetDocument.mockReturnValue(undefined);
+
+        const result = await service.load(undefined, '1');
+
+        expect(result.success).toBeTruthy();
+        expect(result.data).toEqual([]);
+      });
     });
   });
 });

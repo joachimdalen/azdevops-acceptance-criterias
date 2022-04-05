@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 
 import { capitalizeFirstLetter } from '../../../common/common';
 import { CriteriaDetailDocument, IScenarioCriteria } from '../../../common/types';
-import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
 
 interface ScenarioCriteriaViewSectionProps {
   details: CriteriaDetailDocument;
@@ -13,8 +12,6 @@ interface ScenarioCriteriaViewSectionProps {
 const ScenarioCriteriaViewSection = ({
   details
 }: ScenarioCriteriaViewSectionProps): JSX.Element => {
-  const { dispatch } = useCriteriaPanelContext();
-
   const provider = useMemo(() => {
     if (details.scenario?.criterias) {
       return new ArrayItemProvider(details.scenario.criterias);
@@ -46,7 +43,7 @@ const ScenarioCriteriaViewSection = ({
         <span className="font-weight-semibold font-size">Scenario</span>
         <p>{details.scenario?.scenario}</p>
       </div>
-      <ScrollableList  itemProvider={provider} renderRow={renderRow} width="100%" />
+      <ScrollableList itemProvider={provider} renderRow={renderRow} width="100%" />
     </div>
   );
 };

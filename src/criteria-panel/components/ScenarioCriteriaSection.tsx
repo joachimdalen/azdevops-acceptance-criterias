@@ -1,23 +1,26 @@
-import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroData';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { FormItem } from 'azure-devops-ui/FormItem';
-import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
-import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
+import { MessageBar, MessageBarSeverity } from 'azure-devops-ui/MessageBar';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { capitalizeFirstLetter, move } from '../../common/common';
+import { getCombined, hasError } from '../../common/errorUtils';
 import { IScenario, IScenarioCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
-const ScenarioCriteriaSection = (): JSX.Element => {
+interface ScenarioCriteriaSectionProps {
+  errors: { [key: string]: string[] } | undefined;
+}
+
+const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.Element => {
   const { dispatch, state } = useCriteriaPanelContext();
   const [scenario, setScenario] = useState<string>(state.scenario?.scenario || '');
   const [items, setItems] = useState<IScenarioCriteria[]>(state.scenario?.criterias || []);
-  const [selectedTabId, setSelectedTabId] = useState<string>('details');
+
   const add = (id: IScenarioCriteria) => {
     setItems(prev => [...prev, id]);
   };
@@ -41,30 +44,20 @@ const ScenarioCriteriaSection = (): JSX.Element => {
   };
 
   useEffect(() => {
-    let shouldUpdate = true;
-    if (scenario === '') {
-      shouldUpdate = false;
-    } else if (items.length === 0) {
-      shouldUpdate = false;
-    } else if (items.every(x => x.text === undefined || x.text === '')) {
-      shouldUpdate = false;
-    }
-
-    if (!shouldUpdate) {
-      dispatch({ type: 'SET_VALID', data: false });
-    } else {
-      const item: IScenario = {
-        scenario,
-        criterias: items
-      };
-      dispatch({ type: 'SET_CRITERIA', data: item });
-      dispatch({ type: 'SET_VALID', data: true });
-    }
+    const item: IScenario = {
+      scenario,
+      criterias: items
+    };
+    dispatch({ type: 'SET_CRITERIA', data: item });
   }, [items, scenario]);
 
   return (
     <div className="rhythm-vertical-16 flex-grow margin-top-8">
-      <FormItem label="Scenario">
+      <FormItem
+        label="Scenario"
+        error={hasError(errors, 'scenario.scenario')}
+        message={getCombined(errors, 'scenario.scenario', 'Scenario')}
+      >
         <TextField
           width={TextFieldWidth.auto}
           placeholder="Short description.."
@@ -104,16 +97,31 @@ const ScenarioCriteriaSection = (): JSX.Element => {
         />
       </ButtonGroup>
       <div className="rhythm-vertical-8 padding-bottom-16">
-        <ConditionalChildren renderChildren={items.length === 0}>
+        <ConditionalChildren
+          renderChildren={items.length === 0 && !hasError(errors, 'scenario.criterias')}
+        >
           <div className="flex-column flex-center">
             <h3 className="secondary-text">Build your criteria</h3>
             <p className="secondary-text">Add your Given/When/Then sequence elements</p>
           </div>
         </ConditionalChildren>
+        <ConditionalChildren
+          renderChildren={items.length === 0 && hasError(errors, 'scenario.criterias')}
+        >
+          <MessageBar severity={MessageBarSeverity.Error}>
+            {getCombined(errors, 'scenario.criterias', 'Checklist')}
+          </MessageBar>
+        </ConditionalChildren>
+
         <ConditionalChildren renderChildren={items.length !== 0}>
           {items.map((item, index) => {
             return (
-              <FormItem key={item.id} label={capitalizeFirstLetter(item.type)}>
+              <FormItem
+                key={item.id}
+                label={capitalizeFirstLetter(item.type)}
+                error={hasError(errors, `scenario.criterias[${index}].text`)}
+                message={getCombined(errors, `scenario.criterias[${index}].text`, 'Text')}
+              >
                 <div className="flex-row flex-center rhythm-horizontal-4">
                   <TextField
                     containerClassName="flex-grow"
@@ -122,6 +130,7 @@ const ScenarioCriteriaSection = (): JSX.Element => {
                     onChange={(_, val) => updateItem(item, val)}
                     value={item.text}
                   />
+
                   <Button
                     disabled={index === 0}
                     iconProps={{ iconName: 'Up' }}

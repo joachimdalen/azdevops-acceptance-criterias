@@ -16,17 +16,20 @@ import { FormItem } from 'azure-devops-ui/FormItem';
 import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
+import * as yup from 'yup';
 
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import StatusTag from '../common/components/StatusTag';
 import { isCompleted, isProcessed } from '../common/criteriaUtils';
+import { getCombined, hasError, parseValidationError } from '../common/errorUtils';
 import { LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
   CriteriaPanelConfig,
+  CriteriaTypes,
   IAcceptanceCriteria
 } from '../common/types';
 import CheckListCriteriaSection from './components/CheckListCriteriaSection';
@@ -38,6 +41,61 @@ import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaVie
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
+
+const getSchema = (type: CriteriaTypes) => {
+  const baseSchema = yup.object().shape({
+    title: yup.string().required().min(4).max(300),
+    requiredApprover: yup.object()
+  });
+
+  switch (type) {
+    case 'checklist': {
+      return baseSchema.concat(
+        yup.object().shape({
+          checklist: yup.object().shape({
+            criterias: yup
+              .array()
+              .of(
+                yup.object().shape({
+                  text: yup.string().required().min(4)
+                })
+              )
+              .min(1)
+          })
+        })
+      );
+    }
+    case 'scenario': {
+      return baseSchema.concat(
+        yup.object().shape({
+          scenario: yup.object().shape({
+            scenario: yup.string().required().min(4),
+            criterias: yup
+              .array()
+              .of(
+                yup.object().shape({
+                  text: yup.string().required().min(4)
+                })
+              )
+              .min(1)
+          })
+        })
+      );
+    }
+    case 'text': {
+      return baseSchema.concat(
+        yup.object().shape({
+          text: yup
+            .object()
+            .shape({
+              text: yup.string().required().min(4)
+            })
+            .required()
+        })
+      );
+    }
+  }
+};
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -54,6 +112,7 @@ const CriteriaPanel = (): React.ReactElement => {
   const [wasChanged, toggleWasChanged] = useBooleanToggle();
   const [editAfterComplete, toggleEditAfterComplete] = useBooleanToggle();
   const [detailsError, setDetailsError] = useState<boolean>(false);
+  const [errors, setErrors] = useState<{ [key: string]: string[] } | undefined>();
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
     const getData = () => {
@@ -170,15 +229,33 @@ const CriteriaPanel = (): React.ReactElement => {
       config.panel.close(res);
     }
   };
-  const save = () => {
+  const save = async () => {
     const config = DevOps.getConfiguration();
     if (config.panel) {
+      const schema = getSchema(panelState.type);
       const ac = getCriteriaPayload();
-      const res: CriteriaModalResult = {
-        result: 'SAVE',
-        data: ac
-      };
-      config.panel.close(res);
+      try {
+        await schema.validate(
+          {
+            ...ac.criteria,
+            ...ac.details
+          },
+          { abortEarly: false }
+        );
+        setErrors(undefined);
+        const res: CriteriaModalResult = {
+          result: 'SAVE',
+          data: ac
+        };
+        config.panel.close(res);
+      } catch (error) {
+        if (error instanceof yup.ValidationError) {
+          const data = parseValidationError(error);
+          setErrors(data);
+        } else {
+          console.log('not err', error);
+        }
+      }
     }
   };
 
@@ -244,7 +321,11 @@ const CriteriaPanel = (): React.ReactElement => {
   const editContent = (
     <>
       <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
-        <FormItem label="Title">
+        <FormItem
+          label="Title"
+          error={hasError(errors, 'title')}
+          message={getCombined(errors, 'title')}
+        >
           <TextField
             width={TextFieldWidth.auto}
             placeholder="Short title.."
@@ -280,13 +361,13 @@ const CriteriaPanel = (): React.ReactElement => {
       </div>
 
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
-        <ScenarioCriteria />
+        <ScenarioCriteria errors={errors} />
       </ConditionalChildren>
       <ConditionalChildren renderChildren={panelState.type === 'text'}>
-        <TextCriteriaSection />
+        <TextCriteriaSection errors={errors} />
       </ConditionalChildren>
       <ConditionalChildren renderChildren={panelState.type === 'checklist'}>
-        <CheckListCriteriaSection />
+        <CheckListCriteriaSection errors={errors} />
       </ConditionalChildren>
     </>
   );
@@ -315,8 +396,7 @@ const CriteriaPanel = (): React.ReactElement => {
               text: 'Save',
               primary: true,
               onClick: () => save(),
-              iconProps: { iconName: 'Save' },
-              disabled: !panelState.isValid || title === ''
+              iconProps: { iconName: 'Save' }
             }
       }
       showVersion={!isReadOnly}

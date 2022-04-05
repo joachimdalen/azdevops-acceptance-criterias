@@ -1,17 +1,22 @@
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
-import { Checkbox } from 'azure-devops-ui/Checkbox';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { Icon } from 'azure-devops-ui/Icon';
+import { FormItem } from 'azure-devops-ui/FormItem';
+import { MessageBar, MessageBarSeverity } from 'azure-devops-ui/MessageBar';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { move } from '../../common/common';
+import { hasError, getCombined } from '../../common/errorUtils';
 import { ICheckList, ICheckListCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
-const CheckListCriteriaSection = (): JSX.Element => {
+interface CheckListCriteriaSectionProps {
+  errors: { [key: string]: string[] } | undefined;
+}
+
+const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JSX.Element => {
   const { dispatch, state } = useCriteriaPanelContext();
   const [items, setItems] = useState<ICheckListCriteria[]>(state.checklist?.criterias || []);
   const add = (id: ICheckListCriteria) => {
@@ -37,22 +42,10 @@ const CheckListCriteriaSection = (): JSX.Element => {
   };
 
   useEffect(() => {
-    let shouldUpdate = true;
-    if (items.length === 0) {
-      shouldUpdate = false;
-    } else if (items.every(x => x.text === undefined || x.text === '')) {
-      shouldUpdate = false;
-    }
-
-    if (!shouldUpdate) {
-      dispatch({ type: 'SET_VALID', data: false });
-    } else {
-      const item: ICheckList = {
-        criterias: items
-      };
-      dispatch({ type: 'SET_CRITERIA', data: item });
-      dispatch({ type: 'SET_VALID', data: true });
-    }
+    const item: ICheckList = {
+      criterias: items
+    };
+    dispatch({ type: 'SET_CRITERIA', data: item });
   }, [items]);
 
   const addItemToolbar = (
@@ -70,59 +63,69 @@ const CheckListCriteriaSection = (): JSX.Element => {
     <div className="rhythm-vertical-16 flex-grow margin-top-8">
       {addItemToolbar}
       <div className="rhythm-vertical-8 padding-bottom-16">
-        <ConditionalChildren renderChildren={items.length === 0}>
+        <ConditionalChildren
+          renderChildren={items.length === 0 && !hasError(errors, 'checklist.criterias')}
+        >
           <div className="flex-column flex-center">
             <h3 className="secondary-text">Build your criteria</h3>
             <p className="secondary-text">Add your checklist items</p>
           </div>
         </ConditionalChildren>
+        <ConditionalChildren
+          renderChildren={items.length === 0 && hasError(errors, 'checklist.criterias')}
+        >
+          <MessageBar severity={MessageBarSeverity.Error}>
+            {getCombined(errors, 'checklist.criterias', 'Checklist')}
+          </MessageBar>
+        </ConditionalChildren>
 
         <ConditionalChildren renderChildren={items.length !== 0}>
           {items.map((item, index) => {
             return (
-              <div key={item.id} className="flex-row flex-center rhythm-horizontal-4">
-                <Icon
-                  style={{ color: item.completed ? 'green' : 'red' }}
-                  iconName={item.completed ? 'Accept' : 'Clear'}
-                  className="margin-right-4"
-                />
-                <TextField
-                  containerClassName="flex-grow"
-                  width={TextFieldWidth.auto}
-                  placeholder={`Some criteria...`}
-                  onChange={(_, val) => updateItem(item, val)}
-                  value={item.text}
-                />
-                <Button
-                  disabled={index === 0}
-                  iconProps={{ iconName: 'Up' }}
-                  subtle
-                  tooltipProps={{ text: 'Move Up' }}
-                  onClick={() => {
-                    const nI = [...items];
-                    move(nI, index, -1);
-                    setItems(nI);
-                  }}
-                />
+              <FormItem
+                key={item.id}
+                error={hasError(errors, 'checklist.scenario')}
+                message={getCombined(errors, 'checklist.scenario', 'Scenario')}
+              >
+                <div className="flex-row flex-center rhythm-horizontal-4">
+                  <TextField
+                    containerClassName="flex-grow"
+                    width={TextFieldWidth.auto}
+                    placeholder={`Some criteria...`}
+                    onChange={(_, val) => updateItem(item, val)}
+                    value={item.text}
+                  />
+                  <Button
+                    disabled={index === 0}
+                    iconProps={{ iconName: 'Up' }}
+                    subtle
+                    tooltipProps={{ text: 'Move Up' }}
+                    onClick={() => {
+                      const nI = [...items];
+                      move(nI, index, -1);
+                      setItems(nI);
+                    }}
+                  />
 
-                <Button
-                  disabled={index === items.length - 1}
-                  iconProps={{ iconName: 'Down' }}
-                  subtle
-                  tooltipProps={{ text: 'Move Down' }}
-                  onClick={() => {
-                    const nI = [...items];
-                    move(nI, index, 1);
-                    setItems(nI);
-                  }}
-                />
-                <Button
-                  iconProps={{ iconName: 'Delete' }}
-                  subtle
-                  tooltipProps={{ text: 'Remove' }}
-                  onClick={() => remove(item)}
-                />
-              </div>
+                  <Button
+                    disabled={index === items.length - 1}
+                    iconProps={{ iconName: 'Down' }}
+                    subtle
+                    tooltipProps={{ text: 'Move Down' }}
+                    onClick={() => {
+                      const nI = [...items];
+                      move(nI, index, 1);
+                      setItems(nI);
+                    }}
+                  />
+                  <Button
+                    iconProps={{ iconName: 'Delete' }}
+                    subtle
+                    tooltipProps={{ text: 'Remove' }}
+                    onClick={() => remove(item)}
+                  />
+                </div>
+              </FormItem>
             );
           })}
         </ConditionalChildren>
