@@ -20,6 +20,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import StatusTag from '../common/components/StatusTag';
+import { isCompleted, isProcessed } from '../common/criteriaUtils';
 import { LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
 import {
@@ -29,6 +30,7 @@ import {
   IAcceptanceCriteria
 } from '../common/types';
 import CheckListCriteriaSection from './components/CheckListCriteriaSection';
+import CompletionContainer from './components/CompletionContainer';
 import ProcessingContainer from './components/ProcessingContainer';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import TextCriteriaSection from './components/TextCriteriaSection';
@@ -36,7 +38,6 @@ import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaVie
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import CompletionContainer from './components/CompletionContainer';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -332,13 +333,7 @@ const CriteriaPanel = (): React.ReactElement => {
             <>
               <div className="rhythm-vertical-16 flex-grow border-bottom-light padding-bottom-16">
                 <ConditionalChildren
-                  renderChildren={
-                    (criteria.state === AcceptanceCriteriaState.Approved ||
-                      criteria.state === AcceptanceCriteriaState.Rejected ||
-                      criteria.state === AcceptanceCriteriaState.Completed) &&
-                    editAfterComplete === false &&
-                    canEdit
-                  }
+                  renderChildren={isCompleted(criteria) && editAfterComplete === false && canEdit}
                 >
                   <MessageCard
                     className="flex-self-stretch"
@@ -360,13 +355,7 @@ const CriteriaPanel = (): React.ReactElement => {
                   <FormItem label="Required Approver" className="flex-grow">
                     <ApproverDisplay approver={criteria?.requiredApprover} large />
                   </FormItem>
-                  <ConditionalChildren
-                    renderChildren={
-                      (criteria.state === AcceptanceCriteriaState.Approved ||
-                        criteria.state === AcceptanceCriteriaState.Rejected) &&
-                      details?.processed?.processedBy !== undefined
-                    }
-                  >
+                  <ConditionalChildren renderChildren={isProcessed(criteria, details)}>
                     <FormItem
                       label={
                         criteria.state === AcceptanceCriteriaState.Approved
