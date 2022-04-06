@@ -8,12 +8,14 @@ import { CriteriaDetailDocument, ICheckListCriteria } from '../../../common/type
 
 interface ChecklistCriteriaViewSectionProps {
   details: CriteriaDetailDocument;
+  isCompleted: boolean;
   processItem: (id: string, complete: boolean) => Promise<any>;
 }
 
 const ChecklistCriteriaViewSection = ({
   details,
-  processItem
+  processItem,
+  isCompleted
 }: ChecklistCriteriaViewSectionProps): JSX.Element => {
   const provider = useMemo(() => {
     if (details.checklist?.criterias) {
@@ -25,13 +27,14 @@ const ChecklistCriteriaViewSection = ({
   const renderRow = (
     index: number,
     item: ICheckListCriteria,
-    details: IListItemDetails<ICheckListCriteria>,
+    listDetails: IListItemDetails<ICheckListCriteria>,
     key?: string
   ): JSX.Element => {
     return (
-      <ListItem key={key || 'list-item' + index} index={index} details={details}>
+      <ListItem key={key || 'list-item' + index} index={index} details={listDetails}>
         <div className="h-scroll-hidden padding-vertical-4 flex-row flex-grow">
           <Checkbox
+            disabled={isCompleted}
             className="flex-grow"
             checked={item.completed}
             label={item.text}

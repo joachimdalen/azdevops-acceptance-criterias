@@ -514,6 +514,7 @@ const CriteriaPanel = (): React.ReactElement => {
               >
                 {details?.checklist && (
                   <ChecklistCriteriaViewSection
+                    isCompleted={isCompleted(criteria)}
                     details={details}
                     processItem={processCheckListCriteria}
                   />
