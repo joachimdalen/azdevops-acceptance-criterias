@@ -95,7 +95,7 @@ export interface IProgressStatus {
 
 export interface CriteriaPanelConfig {
   workItemId?: string;
-  criteria?: IAcceptanceCriteria;
+  criteriaId?: string;
   isReadOnly?: boolean;
   isNew?: boolean;
   canEdit?: boolean;

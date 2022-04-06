@@ -35,6 +35,7 @@ import {
 import CheckListCriteriaSection from './components/CheckListCriteriaSection';
 import CompletionContainer from './components/CompletionContainer';
 import ProcessingContainer from './components/ProcessingContainer';
+import RejectionProcessContainer from './components/RejectionProcessContainer';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
 import TextCriteriaSection from './components/TextCriteriaSection';
 import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaViewSection';
@@ -165,11 +166,18 @@ const CriteriaPanel = (): React.ReactElement => {
           if (config.canEdit !== undefined) {
             setCanEdit(config.canEdit);
           }
-          if (config.criteria) {
-            const conCrit = config.criteria as IAcceptanceCriteria;
-            const details = await criteriaService.getCriteriaDetails(conCrit.id);
-            setCriteriaInfo(conCrit, details);
-            await checkApproval(conCrit);
+          if (config.criteriaId && config.workItemId) {
+            const details = await criteriaService.getCriteriaDetails(config.criteriaId);
+
+            await criteriaService.load(async data => {
+              const doc = data.find(x => x.criterias.find(y => y.id === config.criteriaId));
+              const crit = doc?.criterias.find(x => x.id === config.criteriaId);
+
+              if (crit) {
+                setCriteriaInfo(crit, details);
+                await checkApproval(crit);
+              }
+            }, config.workItemId);
           }
 
           setWorkItemId(config.workItemId);
@@ -413,7 +421,12 @@ const CriteriaPanel = (): React.ReactElement => {
             <>
               <div className="rhythm-vertical-16 flex-grow border-bottom-light padding-bottom-16">
                 <ConditionalChildren
-                  renderChildren={isCompleted(criteria) && editAfterComplete === false && canEdit}
+                  renderChildren={
+                    isCompleted(criteria) &&
+                    editAfterComplete === false &&
+                    canEdit &&
+                    criteria.state !== AcceptanceCriteriaState.Rejected
+                  }
                 >
                   <MessageCard
                     className="flex-self-stretch"
@@ -462,6 +475,16 @@ const CriteriaPanel = (): React.ReactElement => {
                 <ProcessingContainer processCriteria={processCriteria} criteriaId={criteria.id} />
               </ConditionalChildren>
               <ConditionalChildren
+                renderChildren={criteria.state === AcceptanceCriteriaState.Rejected}
+              >
+                <RejectionProcessContainer
+                  criteria={criteria}
+                  onProcess={async (criteriaId: string, action: string) => {
+                    await criteriaService.toggleCompletion(criteriaId, action === 'resubmit');
+                  }}
+                />
+              </ConditionalChildren>
+              <ConditionalChildren
                 renderChildren={
                   criteria.state === AcceptanceCriteriaState.New &&
                   (criteria.type !== 'checklist' ||
@@ -469,7 +492,12 @@ const CriteriaPanel = (): React.ReactElement => {
                       details?.checklist?.criterias?.every(x => x.completed)))
                 }
               >
-                <CompletionContainer criteria={criteria} />
+                <CompletionContainer
+                  criteria={criteria}
+                  onComplete={async (criteriaId: string) => {
+                    await criteriaService.toggleCompletion(criteriaId, true);
+                  }}
+                />
               </ConditionalChildren>
               <ConditionalChildren
                 renderChildren={criteria.type === 'scenario' && details !== undefined}

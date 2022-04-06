@@ -20,6 +20,7 @@ const TextCriteriaSection = ({ errors }: TextCriteriaSectionProps): JSX.Element 
     };
     dispatch({ type: 'SET_CRITERIA', data: item });
   }, [description]);
+  console.log(errors);
 
   return (
     <div className="rhythm-vertical-16 margin-top-8 flex-grow">

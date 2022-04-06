@@ -158,7 +158,7 @@ const AcceptanceControl = (): React.ReactElement => {
     const isRead = isReadOnly || readOnly;
     const config: CriteriaPanelConfig = {
       workItemId: workItemId.toString(),
-      criteria: criteria,
+      criteriaId: criteria?.id,
       isReadOnly: isRead,
       canEdit: canEdit,
       onClose: async (result: CriteriaModalResult | undefined) => {
@@ -184,7 +184,7 @@ const AcceptanceControl = (): React.ReactElement => {
     };
 
     if (isCreate !== true || getLocalItem<boolean>(LocalStorageKeys.NewStateFlow)) {
-      await criteriaService.showPanel(config);
+      await criteriaService.showPanel(config, criteria);
     } else {
       const confirmConfig: IConfirmationConfig = {
         cancelButton: {
@@ -207,7 +207,7 @@ const AcceptanceControl = (): React.ReactElement => {
                 setLocalItem(LocalStorageKeys.NewStateFlow, true);
               }
             }
-            await criteriaService.showPanel(config);
+            await criteriaService.showPanel(config, criteria);
           },
           configuration: confirmConfig
         }
@@ -265,7 +265,7 @@ const AcceptanceControl = (): React.ReactElement => {
       complete === false
     ) {
       if (getLocalItem<boolean>(LocalStorageKeys.UndoCompleted)) {
-        await criteriaService.toggleCompletion(criteria.id, complete);
+        await criteriaService.toggleCompletion(criteria.id);
       } else {
         const config: IConfirmationConfig = {
           cancelButton: {
@@ -287,7 +287,7 @@ const AcceptanceControl = (): React.ReactElement => {
                 if (result.message === 'DO_NOT_SHOW_AGAIN') {
                   setLocalItem(LocalStorageKeys.UndoCompleted, true);
                 }
-                await criteriaService.toggleCompletion(criteria.id, complete);
+                await criteriaService.toggleCompletion(criteria.id);
               }
             },
             configuration: config
@@ -295,7 +295,7 @@ const AcceptanceControl = (): React.ReactElement => {
         );
       }
     } else {
-      await criteriaService.toggleCompletion(criteria.id, complete);
+      await criteriaService.toggleCompletion(criteria.id);
     }
   }
   async function onDelete(id: string) {

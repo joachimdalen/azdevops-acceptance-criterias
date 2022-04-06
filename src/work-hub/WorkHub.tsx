@@ -283,7 +283,10 @@ const WorkHub = (): JSX.Element => {
     if (criteria === undefined) {
       await devOpsService.showToast('Failed to find criteria');
     } else {
-      await criteriaService.showPanel({ criteria, canEdit: false, isReadOnly: true });
+      await criteriaService.showPanel(
+        { criteriaId: criteria.id, canEdit: false, isReadOnly: true },
+        criteria
+      );
     }
   };
 
@@ -339,12 +342,15 @@ const WorkHub = (): JSX.Element => {
                     documents={documents}
                     workItemTypes={wiMap}
                     onClick={async (workItemId: string, criteria: IAcceptanceCriteria) => {
-                      await criteriaService.showPanel({
-                        criteria,
-                        workItemId,
-                        isReadOnly: true,
-                        canEdit: false
-                      });
+                      await criteriaService.showPanel(
+                        {
+                          criteriaId: criteria.id,
+                          workItemId,
+                          isReadOnly: true,
+                          canEdit: false
+                        },
+                        criteria
+                      );
                     }}
                   />
                 </ConditionalChildren>

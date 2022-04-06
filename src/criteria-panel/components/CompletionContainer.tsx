@@ -4,9 +4,10 @@ import { AcceptanceCriteriaState, IAcceptanceCriteria } from '../../common/types
 
 interface CompletionContainerProps {
   criteria: IAcceptanceCriteria;
+  onComplete: (criteriaId: string) => Promise<void>;
 }
 
-const CompletionContainer = ({ criteria }: CompletionContainerProps): JSX.Element => {
+const CompletionContainer = ({ criteria, onComplete }: CompletionContainerProps): JSX.Element => {
   const getTexts = (): { title: string; description: string; buttonText: string } => {
     if (criteria.state === AcceptanceCriteriaState.New && criteria.requiredApprover !== undefined) {
       return {
@@ -38,9 +39,7 @@ const CompletionContainer = ({ criteria }: CompletionContainerProps): JSX.Elemen
             text={content.buttonText}
             primary
             iconProps={{ iconName: 'CheckMark' }}
-            onClick={async () => {
-              console.log('');
-            }}
+            onClick={() => onComplete(criteria.id)}
           />
         </div>
       </div>

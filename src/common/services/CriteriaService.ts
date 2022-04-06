@@ -159,7 +159,11 @@ class CriteriaService {
     return undefined;
   }
 
-  private setCriteriaItems(criteria?: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
+  private setCriteriaItems(
+    criteria?: IAcceptanceCriteria,
+    details?: CriteriaDetailDocument,
+    reApprove?: boolean
+  ) {
     if (criteria && details) {
       if (
         criteria.state === AcceptanceCriteriaState.AwaitingApproval ||
@@ -167,7 +171,11 @@ class CriteriaService {
         criteria.state === AcceptanceCriteriaState.Approved ||
         criteria.state === AcceptanceCriteriaState.Rejected
       ) {
-        criteria.state = AcceptanceCriteriaState.New;
+        if (reApprove) {
+          criteria.state = AcceptanceCriteriaState.AwaitingApproval;
+        } else {
+          criteria.state = AcceptanceCriteriaState.New;
+        }
         details.processed = undefined;
       } else {
         if (criteria.requiredApprover) {
@@ -222,14 +230,14 @@ class CriteriaService {
 
   public async toggleCompletion(
     id: string,
-    complete: boolean
+    reApprove?: boolean
   ): Promise<CriteriaDocument | undefined> {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
 
     if (doc) {
       const details = (await this.getCriteriaDetails(id)) || { id: id };
       const criteria = doc.criterias.find(x => x.id === id);
-      const { criteria: crit, details: det } = this.setCriteriaItems(criteria, details);
+      const { criteria: crit, details: det } = this.setCriteriaItems(criteria, details, reApprove);
       if (crit) {
         const updated = await this.createOrUpdate(doc.id, crit, true);
         if (det) {
@@ -379,9 +387,12 @@ class CriteriaService {
     return doc;
   }
 
-  public async showPanel(options: CriteriaPanelConfig): Promise<void> {
+  public async showPanel(
+    options: CriteriaPanelConfig,
+    criteria?: IAcceptanceCriteria
+  ): Promise<void> {
     const intConfig: Omit<CriteriaPanelConfig, 'onClose'> = {
-      criteria: options.criteria,
+      criteriaId: options.criteriaId,
       canEdit: options.canEdit === undefined ? false : options.canEdit,
       isReadOnly: options.isReadOnly === undefined ? false : options.isReadOnly,
       isNew: options.isNew === undefined ? false : options.isNew,
@@ -391,9 +402,7 @@ class CriteriaService {
       PanelIds.CriteriaPanel,
       {
         title:
-          options.criteria !== undefined
-            ? `${options?.criteria?.id} - ${options?.criteria?.title}`
-            : 'Acceptance Criteria',
+          criteria !== undefined ? `${criteria?.id} - ${criteria?.title}` : 'Acceptance Criteria',
         size: 2,
         configuration: intConfig,
         onClose: options.onClose
