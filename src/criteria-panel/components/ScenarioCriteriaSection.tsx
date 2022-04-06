@@ -109,7 +109,7 @@ const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.
           renderChildren={items.length === 0 && hasError(errors, 'scenario.criterias')}
         >
           <MessageBar severity={MessageBarSeverity.Error}>
-            {getCombined(errors, 'scenario.criterias', 'Checklist')}
+            {getCombined(errors, 'scenario.criterias', 'Criterias')}
           </MessageBar>
         </ConditionalChildren>
 

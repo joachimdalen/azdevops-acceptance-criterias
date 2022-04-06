@@ -88,7 +88,7 @@ const getSchema = (type: CriteriaTypes) => {
           text: yup
             .object()
             .shape({
-              text: yup.string().required().min(4)
+              description: yup.string().required().min(4)
             })
             .required()
         })
@@ -461,7 +461,14 @@ const CriteriaPanel = (): React.ReactElement => {
               >
                 <ProcessingContainer processCriteria={processCriteria} criteriaId={criteria.id} />
               </ConditionalChildren>
-              <ConditionalChildren renderChildren={criteria.state === AcceptanceCriteriaState.New}>
+              <ConditionalChildren
+                renderChildren={
+                  criteria.state === AcceptanceCriteriaState.New &&
+                  (criteria.type !== 'checklist' ||
+                    (criteria.type === 'checklist' &&
+                      details?.checklist?.criterias?.every(x => x.completed)))
+                }
+              >
                 <CompletionContainer criteria={criteria} />
               </ConditionalChildren>
               <ConditionalChildren
