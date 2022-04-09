@@ -94,7 +94,11 @@
       "properties": {
         "name": "Acceptance Criterias (DEV)",
         "order": 1,
-        "uri": "admin-hub.html"
+        "uri": "admin-hub.html",
+        "icon": {
+          "light": "dist/assets/hub-icon-dark.png",
+          "dark": "dist/assets/hub-icon-light.png"
+        }
       },
       "constraints": [
         {
@@ -182,7 +186,7 @@
       "targets": ["ms.vss-web.project-hub-groups-collection"],
       "properties": {
         "name": "Acceptance Criterias (DEV)",
-        "order": 100,
+        "order": 3,
         "icon": {
           "light": "dist/assets/hub-group-icon.png",
           "dark": "dist/assets/hub-group-icon.png"
