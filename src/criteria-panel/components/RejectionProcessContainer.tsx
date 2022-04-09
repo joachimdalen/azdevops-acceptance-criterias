@@ -6,15 +6,13 @@ import {
 } from 'azure-devops-ui/RadioButton';
 import { useState } from 'react';
 
-import { IAcceptanceCriteria } from '../../common/types';
-
 interface RejectionProcessContainerProps {
-  criteria: IAcceptanceCriteria;
+  criteriaId: string;
   onProcess: (criteriaId: string, action: string) => Promise<void>;
 }
 
 const RejectionProcessContainer = ({
-  criteria,
+  criteriaId,
   onProcess
 }: RejectionProcessContainerProps): JSX.Element => {
   const [selected, setSelected] = useState<string>('dummy');
@@ -40,7 +38,7 @@ const RejectionProcessContainer = ({
           primary
           disabled={selected === 'dummy'}
           iconProps={{ iconName: 'Save' }}
-          onClick={() => onProcess(criteria.id, selected)}
+          onClick={() => onProcess(criteriaId, selected)}
         />
       </div>
     </div>

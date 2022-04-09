@@ -15,7 +15,7 @@ export interface ReducerAction {
   data?: any;
 }
 
-const defaultState: ICriteriaPanelContextState = {
+const intDefaultState: ICriteriaPanelContextState = {
   isLoading: true,
   type: 'scenario'
 };
@@ -28,7 +28,10 @@ export interface ICriteriaPanelContext {
 const CriteriaPanelContext = createContext<ICriteriaPanelContext>({} as any);
 
 export type ContextAction = 'INIT' | 'SET_CRITERIA' | 'SET_TYPE';
-type CriteriaPanelProviderProps = { children: React.ReactNode };
+type CriteriaPanelProviderProps = {
+  children: React.ReactNode;
+  defaultState?: ICriteriaPanelContextState;
+};
 function panelReducer(
   state: ICriteriaPanelContextState,
   action: ReducerAction
@@ -60,8 +63,11 @@ function panelReducer(
     }
   }
 }
-function CriteriaPanelProvider({ children }: CriteriaPanelProviderProps): JSX.Element {
-  const [state, dispatch] = useReducer(panelReducer, defaultState);
+function CriteriaPanelProvider({
+  children,
+  defaultState
+}: CriteriaPanelProviderProps): JSX.Element {
+  const [state, dispatch] = useReducer(panelReducer, defaultState || intDefaultState);
 
   const value: ICriteriaPanelContext = { state, dispatch };
   return <CriteriaPanelContext.Provider value={value}>{children}</CriteriaPanelContext.Provider>;

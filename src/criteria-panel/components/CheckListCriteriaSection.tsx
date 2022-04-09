@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { move } from '../../common/common';
-import { hasError, getCombined } from '../../common/errorUtils';
+import { getCombined, hasError } from '../../common/errorUtils';
 import { ICheckList, ICheckListCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
 
@@ -96,6 +96,7 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
                     value={item.text}
                   />
                   <Button
+                    id={`${item.id}-up`}
                     disabled={index === 0}
                     iconProps={{ iconName: 'Up' }}
                     subtle
@@ -108,6 +109,7 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
                   />
 
                   <Button
+                    id={`${item.id}-down`}
                     disabled={index === items.length - 1}
                     iconProps={{ iconName: 'Down' }}
                     subtle
@@ -119,6 +121,7 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
                     }}
                   />
                   <Button
+                    id={`${item.id}-remove`}
                     iconProps={{ iconName: 'Delete' }}
                     subtle
                     tooltipProps={{ text: 'Remove' }}

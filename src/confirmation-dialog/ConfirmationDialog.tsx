@@ -78,7 +78,9 @@ const ConfirmationDialog = (): JSX.Element => {
       )}
       <div className="flex-column flex-grow">
         <div className="padding-4">
-          {Array.isArray(config.content) ? config.content.map(ct => <p>{ct}</p>) : config.content}
+          {Array.isArray(config.content)
+            ? config.content.map(ct => <p key={ct}>{ct}</p>)
+            : config.content}
         </div>
         <ConditionalChildren renderChildren={config.doNotShowAgain === true}>
           <Checkbox
