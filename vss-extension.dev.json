@@ -196,6 +196,48 @@
           }
         }
       }
+    },
+    {
+      "id": "acceptance-hub",
+      "type": "ms.vss-web.hub-group",
+      "targets": ["ms.vss-web.project-hub-groups-collection"],
+      "properties": {
+        "name": "Acceptance Criterias (DEV)",
+        "order": 100,
+        "icon": {
+          "light": "dist/assets/hub-group-icon.png",
+          "dark": "dist/assets/hub-group-icon.png"
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "work-hub2",
+      "type": "ms.vss-web.hub",
+      "targets": [".acceptance-hub"],
+      "properties": {
+        "name": "Criterias",
+        "uri": "work-hub.html",
+        "icon": {
+          "light": "dist/assets/hub-icon-dark.png",
+          "dark": "dist/assets/hub-icon-light.png"
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
     }
   ]
 }

@@ -12,7 +12,8 @@ const modules = [
     generate: true,
     assets: [
       { source: './src/work-hub/assets/hub-icon-dark.png', dest: 'assets/hub-icon-dark.png' },
-      { source: './src/work-hub/assets/hub-icon-light.png', dest: 'assets/hub-icon-light.png' }
+      { source: './src/work-hub/assets/hub-icon-light.png', dest: 'assets/hub-icon-light.png' },
+      { source: './hub-group-icon.png', dest: 'assets/hub-group-icon.png' }
     ]
   },
   {
