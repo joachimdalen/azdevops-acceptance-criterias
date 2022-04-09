@@ -1,3 +1,5 @@
+import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
+import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { getClient } from 'azure-devops-extension-api';
 import {
   WorkItem,
@@ -30,6 +32,7 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
     []
   );
   const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
+  const [loading, toggleLoading] = useBooleanToggle(false);
 
   const selection = useMemo(() => {
     return new ListSelection({ selectOnFocus: false, multiSelect: true });
@@ -37,6 +40,7 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
 
   useEffect(() => {
     async function init() {
+      toggleLoading(true);
       const criterias = await service.getAllCriterias();
 
       const ids = criterias.map(x => parseInt(x.id));
@@ -45,6 +49,7 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
       const notFound = ids.filter(x => !workItmes.some(y => x === y.id));
       const updated = await workItemService.getDeletedWorkItems(notFound);
       setDocuments(criterias.filter(x => updated.some(y => x.id === y.id.toString())));
+      toggleLoading(false);
     }
 
     init();
@@ -144,6 +149,8 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
       };
     })
   ];
+
+  if (loading) return <LoadingSection isLoading={loading} text="Loading criterias..." />;
 
   return (
     <div className="flex-column">

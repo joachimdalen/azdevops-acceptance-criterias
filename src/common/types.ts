@@ -101,3 +101,11 @@ export interface CriteriaPanelConfig {
   canEdit?: boolean;
   onClose?: (result: CriteriaModalResult | undefined) => Promise<void>;
 }
+
+export interface GlobalSettingsDocument {
+  readonly id: string;
+  readonly __etag?: number;
+  limitAllowedCriteriaTypes: boolean;
+  allowedCriteriaTypes: CriteriaTypes[];
+  requireApprovers: boolean;
+}

@@ -1,3 +1,4 @@
+import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
 import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { getClient } from 'azure-devops-extension-api';
 import { WorkItemTrackingRestClient } from 'azure-devops-extension-api/WorkItemTracking';
@@ -25,29 +26,18 @@ import { StorageService } from '../../../../common/services/StorageService';
 import { CriteriaDetailDocument, CriteriaTypes } from '../../../../common/types';
 
 const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
+  const [loading, toggleLoading] = useBooleanToggle(false);
   const [service, workItemService] = useMemo(
     () => [new StorageService(), getClient(WorkItemTrackingRestClient)],
     []
   );
   const [documents, setDocuments] = useState<CriteriaDetailDocument[]>([]);
   const [showDelete, toggleShowDelete] = useBooleanToggle();
-  const [currentValue, setCurrentValue] = useState(0);
+
   const [progress, setProgress] = useState<{ max: number; current: number }>({
     max: 0,
     current: 0
   });
-
-  useEffect(() => {
-    let interval: any = null;
-    if (showDelete) {
-      interval = setInterval(() => {
-        setCurrentValue(seconds => seconds + 1);
-      }, 1000);
-    } else if (!showDelete && currentValue !== 0) {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [showDelete, currentValue]);
 
   const selection = useMemo(() => {
     return new ListSelection({ selectOnFocus: false, multiSelect: true });
@@ -62,11 +52,13 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
 
   useEffect(() => {
     async function init() {
+      toggleLoading(true);
       const criterias = await service.getAllCriterias();
       const details = await service.getAllCriteriaDetails();
       const ids = criterias.flatMap(x => x.criterias.map(y => y.id));
       const exists = details.filter(x => !ids.some(y => x.id === y));
       setDocuments(exists);
+      toggleLoading(false);
     }
 
     init();
@@ -141,6 +133,26 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
     (columns[index].width as ObservableValue<number>).value = width;
   }
 
+  async function deleteDocuments() {
+    const selectedGroups = selection.value.flatMap(x => {
+      const slice = documents.slice(x.beginIndex, x.endIndex + 1);
+      return slice;
+    });
+    setProgress({ max: selectedGroups.length, current: 0 });
+    toggleShowDelete();
+
+    for (const item of selectedGroups) {
+      await service.deleteCriteriaDetilsDocument(item.id);
+      setProgress(prg => ({ max: prg.max, current: prg.current + 1 }));
+    }
+
+    const newItems = documents.filter(x => !selectedGroups.some(y => x.id === y.id));
+    setDocuments(newItems);
+    selection.clear();
+  }
+
+  if (loading) return <LoadingSection isLoading={loading} text="Loading criterias details..." />;
+
   return (
     <div className="flex-column">
       <ButtonGroup>
@@ -148,23 +160,7 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
           disabled={selection.selectedCount === 0}
           danger
           text="Delete all"
-          onClick={async () => {
-            const selectedGroups = selection.value.flatMap(x => {
-              const slice = documents.slice(x.beginIndex, x.endIndex + 1);
-              return slice;
-            });
-            setProgress({ max: selectedGroups.length, current: 0 });
-            toggleShowDelete();
-
-            for (const item of selectedGroups) {
-              await service.deleteCriteriaDetilsDocument(item.id);
-              setProgress(prg => ({ max: prg.max, current: prg.current + 1 }));
-            }
-
-            const newItems = documents.filter(x => !selectedGroups.some(y => x.id === y.id));
-            setDocuments(newItems);
-            selection.clear();
-          }}
+          onClick={deleteDocuments}
         />
       </ButtonGroup>
       <Table
@@ -178,6 +174,7 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
       />
       <ConditionalChildren renderChildren={showDelete}>
         <Dialog
+          lightDismiss={false}
           titleProps={{
             text:
               progress.current === progress.max ? 'Criteria details deleted' : 'Deleting criterias'

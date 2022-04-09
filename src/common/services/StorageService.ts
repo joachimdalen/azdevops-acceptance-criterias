@@ -2,8 +2,7 @@ import { DevOpsService, IDevOpsService } from '@joachimdalen/azdevops-ext-core/D
 import { IExtensionDataService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
 
-import SettingDocument from '../models/SettingDocument';
-import { CriteriaDetailDocument, CriteriaDocument } from '../types';
+import { CriteriaDetailDocument, CriteriaDocument, GlobalSettingsDocument } from '../types';
 
 enum ScopeType {
   Default = 'Default',
@@ -24,6 +23,7 @@ export interface IStorageService {
   getCriteriaDetail(id: string): Promise<CriteriaDetailDocument | undefined>;
   setCriteriaDetailsDocument(data: CriteriaDetailDocument): Promise<CriteriaDetailDocument>;
   deleteCriteriaDetilsDocument(id: string): Promise<void>;
+  resetSettings(): Promise<void>;
 }
 class StorageService implements IStorageService {
   private readonly _devOpsService: IDevOpsService;
@@ -31,6 +31,7 @@ class StorageService implements IStorageService {
   private dataService?: IExtensionDataService;
   private _criteriaCollection?: string;
   private _criteriaDetailsCollection?: string;
+  private _settingsCollection?: string;
 
   private _projectId?: string;
 
@@ -46,7 +47,11 @@ class StorageService implements IStorageService {
       );
     }
 
-    if (this._criteriaCollection === undefined || this._criteriaDetailsCollection === undefined) {
+    if (
+      this._criteriaCollection === undefined ||
+      this._criteriaDetailsCollection === undefined ||
+      this._settingsCollection === undefined
+    ) {
       const project = await this._devOpsService.getProject();
 
       if (project === undefined) {
@@ -55,6 +60,7 @@ class StorageService implements IStorageService {
 
       this._criteriaCollection = `${project.id}-${CollectionNames.Criterias}`;
       this._criteriaDetailsCollection = `${project.id}-${CollectionNames.Details}`;
+      this._settingsCollection = `${project.id}-${CollectionNames.Settings}`;
       this._projectId = project.id;
     }
 
@@ -143,13 +149,21 @@ class StorageService implements IStorageService {
     });
   }
 
-  public async getSettings(): Promise<SettingDocument> {
-    const defaultDocument: SettingDocument = {
-      id: '',
-      __etag: '-1'
+  public async getSettings(): Promise<GlobalSettingsDocument> {
+    const defaultDocument: GlobalSettingsDocument = {
+      id: 'Global',
+      limitAllowedCriteriaTypes: false,
+      allowedCriteriaTypes: [],
+      requireApprovers: false,
+      __etag: -1
     };
     try {
       const dataService = await this.getDataService();
+
+      if (this._settingsCollection === undefined) {
+        throw new Error('Failed to initialize ');
+      }
+
       if (!this._projectId) {
         return defaultDocument;
       }
@@ -158,7 +172,7 @@ class StorageService implements IStorageService {
         await DevOps.getAccessToken()
       );
 
-      const document = await dataManager.getDocument(CollectionNames.Settings, this._projectId, {
+      const document = await dataManager.getDocument(this._settingsCollection, 'Global', {
         defaultValue: defaultDocument
       });
 
@@ -172,17 +186,32 @@ class StorageService implements IStorageService {
     }
   }
 
-  public async setSettings(data: SettingDocument): Promise<SettingDocument> {
+  public async setSettings(data: GlobalSettingsDocument): Promise<GlobalSettingsDocument> {
     const dataService = await this.getDataService();
+
+    if (this._settingsCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
 
     const dataManager = await dataService.getExtensionDataManager(
       DevOps.getExtensionContext().id,
       await DevOps.getAccessToken()
     );
-    return dataManager.setDocument(CollectionNames.Settings, {
-      ...data,
-      id: this._projectId
-    });
+    return dataManager.setDocument(this._settingsCollection, data);
+  }
+
+  public async resetSettings(): Promise<void> {
+    const dataService = await this.getDataService();
+
+    if (this._settingsCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    return dataManager.deleteDocument(this._settingsCollection, 'Global');
   }
 
   // Criteria details

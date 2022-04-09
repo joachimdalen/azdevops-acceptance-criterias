@@ -13,7 +13,7 @@ import OrphanedDocumentsTab from './tabs/orphaned/OrphanedDocumentsTab';
 
 const AdminPage = (): React.ReactElement => {
   const [devOpsService] = useMemo(() => [new DevOpsService()], []);
-  const [selectedTab, setSelectedTab] = useState<string>('orphaned');
+  const [selectedTab, setSelectedTab] = useState<string>('configuration');
 
   const commandBarItems: IHeaderCommandBarItem[] = [
     {
