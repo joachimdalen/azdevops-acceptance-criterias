@@ -106,27 +106,6 @@
       ]
     },
     {
-      "id": "work-hub",
-      "type": "ms.vss-web.hub",
-      "targets": ["ms.vss-work-web.work-hub-group"],
-      "properties": {
-        "name": "Acceptance Criterias (DEV)",
-        "uri": "work-hub.html",
-        "icon": {
-          "light": "dist/assets/hub-icon-dark.png",
-          "dark": "dist/assets/hub-icon-light.png"
-        }
-      },
-      "constraints": [
-        {
-          "name": "Feature",
-          "properties": {
-            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
-          }
-        }
-      ]
-    },
-    {
       "id": "criterias-control-page",
       "type": "ms.vss-work-web.work-item-form-page",
       "targets": ["ms.vss-work-web.work-item-form"],
@@ -219,7 +198,7 @@
       ]
     },
     {
-      "id": "work-hub2",
+      "id": "work-hub",
       "type": "ms.vss-web.hub",
       "targets": [".acceptance-hub"],
       "properties": {

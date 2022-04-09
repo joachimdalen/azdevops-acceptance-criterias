@@ -110,27 +110,6 @@
       ]
     },
     {
-      "id": "work-hub",
-      "type": "ms.vss-web.hub",
-      "targets": ["ms.vss-work-web.work-hub-group"],
-      "properties": {
-        "name": "Acceptance Criterias (QA)",
-        "uri": "dist/work-hub.html",
-        "icon": {
-          "light": "dist/assets/hub-icon-dark.png",
-          "dark": "dist/assets/hub-icon-light.png"
-        }
-      },
-      "constraints": [
-        {
-          "name": "Feature",
-          "properties": {
-            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
-          }
-        }
-      ]
-    },
-    {
       "id": "criterias-control-page",
       "type": "ms.vss-work-web.work-item-form-page",
       "targets": ["ms.vss-work-web.work-item-form"],
@@ -190,6 +169,48 @@
           }
         }
       }
+    },
+    {
+      "id": "acceptance-hub",
+      "type": "ms.vss-web.hub-group",
+      "targets": ["ms.vss-web.project-hub-groups-collection"],
+      "properties": {
+        "name": "Acceptance Criterias (QA)",
+        "order": 100,
+        "icon": {
+          "light": "dist/assets/hub-group-icon.png",
+          "dark": "dist/assets/hub-group-icon.png"
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "work-hub",
+      "type": "ms.vss-web.hub",
+      "targets": [".acceptance-hub"],
+      "properties": {
+        "name": "Criterias",
+        "uri": "dist/work-hub.html",
+        "icon": {
+          "light": "dist/assets/hub-icon-dark.png",
+          "dark": "dist/assets/hub-icon-light.png"
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
+          }
+        }
+      ]
     }
   ]
 }
