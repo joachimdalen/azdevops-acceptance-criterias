@@ -25,11 +25,13 @@ import { isCompleted, isProcessed } from '../common/criteriaUtils';
 import { getCombined, hasError, parseValidationError } from '../common/errorUtils';
 import { LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
+import { StorageService } from '../common/services/StorageService';
 import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
   CriteriaPanelConfig,
   CriteriaTypes,
+  GlobalSettingsDocument,
   IAcceptanceCriteria
 } from '../common/types';
 import CheckListCriteriaSection from './components/CheckListCriteriaSection';
@@ -43,10 +45,12 @@ import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewS
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
 
-const getSchema = (type: CriteriaTypes) => {
+const getSchema = (type: CriteriaTypes, approverRequired = false) => {
   const baseSchema = yup.object().shape({
     title: yup.string().required().min(4).max(300),
-    requiredApprover: yup.object()
+    requiredApprover: approverRequired
+      ? yup.object().required('Required approver must be defined. Configured by policy')
+      : yup.object()
   });
 
   switch (type) {
@@ -100,7 +104,10 @@ const getSchema = (type: CriteriaTypes) => {
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
-  const criteriaService = useMemo(() => new CriteriaService(), []);
+  const [criteriaService, storageService] = useMemo(
+    () => [new CriteriaService(), new StorageService()],
+    []
+  );
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [canEdit, setCanEdit] = useState(true);
   const [identity, setIdentity] = useState<IInternalIdentity | undefined>(undefined);
@@ -110,10 +117,22 @@ const CriteriaPanel = (): React.ReactElement => {
   const [canApprove, toggleCanApprove] = useBooleanToggle();
   const [loading, setLoading] = useState(true);
   const [workItemId, setWorkItemId] = useState<string | undefined>();
+  const [settings, setSettings] = useState<GlobalSettingsDocument>();
   const [wasChanged, toggleWasChanged] = useBooleanToggle();
   const [editAfterComplete, toggleEditAfterComplete] = useBooleanToggle();
   const [detailsError, setDetailsError] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string[] } | undefined>();
+
+  const criteriaTypeItemsFiltered = useMemo(() => {
+    if (settings?.limitAllowedCriteriaTypes) {
+      return criteriaTypeItems.filter(x => {
+        const tp = x.id as CriteriaTypes;
+        return settings.allowedCriteriaTypes.includes(tp);
+      });
+    }
+
+    return criteriaTypeItems;
+  }, [settings]);
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
     const getData = () => {
@@ -181,6 +200,17 @@ const CriteriaPanel = (): React.ReactElement => {
           }
 
           setWorkItemId(config.workItemId);
+
+          const fetchedSettings = await storageService.getSettings();
+
+          if (
+            fetchedSettings.limitAllowedCriteriaTypes &&
+            fetchedSettings.allowedCriteriaTypes.length > 0
+          ) {
+            dispatch({ type: 'SET_TYPE', data: fetchedSettings.allowedCriteriaTypes[0] });
+          }
+
+          setSettings(fetchedSettings);
         }
         setLoading(false);
         await DevOps.notifyLoadSucceeded();
@@ -240,7 +270,7 @@ const CriteriaPanel = (): React.ReactElement => {
   const save = async () => {
     const config = DevOps.getConfiguration();
     if (config.panel) {
-      const schema = getSchema(panelState.type);
+      const schema = getSchema(panelState.type, settings?.requireApprovers || false);
       const ac = getCriteriaPayload();
       try {
         await schema.validate(
@@ -344,7 +374,11 @@ const CriteriaPanel = (): React.ReactElement => {
             }}
           />
         </FormItem>
-        <FormItem label="Required Approver">
+        <FormItem
+          label="Required Approver"
+          error={hasError(errors, 'requiredApprover')}
+          message={getCombined(errors, 'requiredApprover')}
+        >
           <IdentityPicker
             localStorageKey={LocalStorageRawKeys.HostUrl}
             identity={identity}
@@ -358,7 +392,7 @@ const CriteriaPanel = (): React.ReactElement => {
           <Dropdown
             disabled={isReadOnly}
             placeholder="Select an Option"
-            items={criteriaTypeItems}
+            items={criteriaTypeItemsFiltered}
             selection={typeSelection}
             onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
           />
@@ -478,7 +512,7 @@ const CriteriaPanel = (): React.ReactElement => {
                 renderChildren={criteria.state === AcceptanceCriteriaState.Rejected}
               >
                 <RejectionProcessContainer
-                  criteria={criteria}
+                  criteriaId={criteria.id}
                   onProcess={async (criteriaId: string, action: string) => {
                     await criteriaService.toggleCompletion(criteriaId, action === 'resubmit');
                   }}
