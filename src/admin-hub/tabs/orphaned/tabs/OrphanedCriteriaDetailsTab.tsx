@@ -156,12 +156,7 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
   return (
     <div className="flex-column">
       <ButtonGroup>
-        <Button
-          disabled={selection.selectedCount === 0}
-          danger
-          text="Delete all"
-          onClick={deleteDocuments}
-        />
+        <Button danger text="Delete all" onClick={deleteDocuments} />
       </ButtonGroup>
       <Table
         ariaLabel="Basic Table"

@@ -8,6 +8,8 @@ import {
 } from 'azure-devops-extension-api/WorkItemTracking';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
+import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { Dialog } from 'azure-devops-ui/Dialog';
 import { ListSelection } from 'azure-devops-ui/List';
 import {
   ColumnMore,
@@ -23,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { chunk } from '../../../../common/chunkUtil';
 import CriteriaTypeDisplay from '../../../../common/components/CriteriaTypeDisplay';
+import ProgressBar from '../../../../common/components/ProgressBar';
 import { StorageService } from '../../../../common/services/StorageService';
 import { CriteriaDocument, CriteriaTypes } from '../../../../common/types';
 
@@ -33,6 +36,12 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
   );
   const [documents, setDocuments] = useState<CriteriaDocument[]>([]);
   const [loading, toggleLoading] = useBooleanToggle(false);
+  const [showDelete, toggleShowDelete] = useBooleanToggle();
+
+  const [progress, setProgress] = useState<{ max: number; current: number }>({
+    max: 0,
+    current: 0
+  });
 
   const selection = useMemo(() => {
     return new ListSelection({ selectOnFocus: false, multiSelect: true });
@@ -47,13 +56,34 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
 
       const workItmes = await getBatched(ids);
       const notFound = ids.filter(x => !workItmes.some(y => x === y.id));
-      const updated = await workItemService.getDeletedWorkItems(notFound);
-      setDocuments(criterias.filter(x => updated.some(y => x.id === y.id.toString())));
+      if (notFound?.length !== 0) {
+        const updated = await workItemService.getDeletedWorkItems(notFound);
+        setDocuments(criterias.filter(x => updated.some(y => x.id === y.id.toString())));
+      }
+      setDocuments([]);
       toggleLoading(false);
     }
 
     init();
   }, []);
+
+  async function deleteDocuments() {
+    const selectedGroups = selection.value.flatMap(x => {
+      const slice = documents.slice(x.beginIndex, x.endIndex + 1);
+      return slice;
+    });
+    setProgress({ max: selectedGroups.length, current: 0 });
+    toggleShowDelete();
+
+    for (const item of selectedGroups) {
+      await service.deleteCriteriaDocument(item.id);
+      setProgress(prg => ({ max: prg.max, current: prg.current + 1 }));
+    }
+
+    const newItems = documents.filter(x => !selectedGroups.some(y => x.id === y.id));
+    setDocuments(newItems);
+    selection.clear();
+  }
 
   const getBatched = async (workItemIds: number[]): Promise<WorkItem[]> => {
     const batched = chunk(workItemIds, 175);
@@ -155,17 +185,7 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
   return (
     <div className="flex-column">
       <ButtonGroup>
-        <Button
-          danger
-          text="Delete all"
-          onClick={() => {
-            const selectedGroups = selection.value.flatMap(x => {
-              const slice = documents.slice(x.beginIndex, x.endIndex + 1);
-              return slice;
-            });
-            console.log(selectedGroups);
-          }}
-        />
+        <Button danger text="Delete all" onClick={deleteDocuments} />
       </ButtonGroup>
       <Table
         ariaLabel="Basic Table"
@@ -176,6 +196,33 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
         className="table-example"
         containerClassName="h-scroll-auto"
       />
+      <ConditionalChildren renderChildren={showDelete}>
+        <Dialog
+          lightDismiss={false}
+          titleProps={{
+            text: progress.current === progress.max ? 'Criterias deleted' : 'Deleting criterias'
+          }}
+          footerButtonProps={
+            progress.current === progress.max
+              ? [
+                  {
+                    primary: true,
+                    text: 'Dismiss',
+                    onClick: () => toggleShowDelete(false)
+                  }
+                ]
+              : []
+          }
+          onDismiss={() => toggleShowDelete(false)}
+        >
+          <ProgressBar
+            fixedColor
+            maxValue={progress.max}
+            currentValue={progress.current}
+            labelType="count"
+          />
+        </Dialog>
+      </ConditionalChildren>
     </div>
   );
 };
