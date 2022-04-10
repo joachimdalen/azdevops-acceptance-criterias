@@ -132,6 +132,7 @@ const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.
                   />
 
                   <Button
+                    id={`${item.id}-up`}
                     disabled={index === 0}
                     iconProps={{ iconName: 'Up' }}
                     subtle
@@ -144,6 +145,7 @@ const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.
                   />
 
                   <Button
+                    id={`${item.id}-down`}
                     disabled={index === items.length - 1}
                     iconProps={{ iconName: 'Down' }}
                     subtle
@@ -155,6 +157,7 @@ const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.
                     }}
                   />
                   <Button
+                    id={`${item.id}-remove`}
                     iconProps={{ iconName: 'Delete' }}
                     subtle
                     tooltipProps={{ text: 'Remove' }}

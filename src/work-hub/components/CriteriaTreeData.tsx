@@ -5,9 +5,9 @@ import {
 } from '@joachimdalen/azdevops-ext-core/WorkItemUtils';
 import { WorkItem } from 'azure-devops-extension-api/WorkItemTracking';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { ObservableLike } from 'azure-devops-ui/Core/Observable';
+import { ObservableLike, ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { SimpleTableCell } from 'azure-devops-ui/Table';
-import { ITreeColumn, renderTreeCell } from 'azure-devops-ui/TreeEx';
+import { ITreeColumn } from 'azure-devops-ui/TreeEx';
 import {
   ITreeItem,
   ITreeItemEx,
@@ -16,8 +16,10 @@ import {
 } from 'azure-devops-ui/Utilities/TreeItemProvider';
 
 import { capitalizeFirstLetter } from '../../common/common';
+import ApproverDisplay from '../../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import FullStatusTag from '../../common/components/FullStatusTag';
+import ProgressBar from '../../common/components/ProgressBar';
 import StatusTag from '../../common/components/StatusTag';
 import {
   AcceptanceCriteriaState,
@@ -70,7 +72,6 @@ export const typeItemCell: ITreeColumn<IWorkItemCriteriaCell> = {
       typeof treeCell !== 'number' &&
       treeCell.href
     );
-    // const approver = identities.get(data.requiredApprover);
     return (
       <SimpleTableCell
         key={`${columnIndex}-${data.id}`}
@@ -85,7 +86,7 @@ export const typeItemCell: ITreeColumn<IWorkItemCriteriaCell> = {
       </SimpleTableCell>
     );
   },
-  width: -100
+  width: new ObservableValue(-100)
 };
 export const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
   id: 'workItemId',
@@ -107,7 +108,6 @@ export const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
       typeof treeCell !== 'number' &&
       treeCell.href
     );
-    // const approver = identities.get(data.requiredApprover);
     return (
       <SimpleTableCell
         key={`${columnIndex}-${data.id}`}
@@ -120,7 +120,7 @@ export const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
       </SimpleTableCell>
     );
   },
-  width: 100
+  width: new ObservableValue(100)
 };
 
 export const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
@@ -164,7 +164,91 @@ export const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
 
     return defaultCell;
   },
-  width: -100
+  width: new ObservableValue(-100)
+};
+
+export const approverCell: ITreeColumn<IWorkItemCriteriaCell> = {
+  id: 'requiredApprover',
+  minWidth: 200,
+  name: 'Required Approver',
+  renderCell: (
+    rowIndex: number,
+    columnIndex: number,
+    treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
+    treeItem: ITreeItemEx<IWorkItemCriteriaCell>
+  ) => {
+    const underlyingItem = treeItem.underlyingItem;
+    const data = ObservableLike.getValue(underlyingItem.data);
+    const treeCell = data && data[treeColumn.id];
+    // Do not include padding if the table cell has an href
+    const hasLink = !!(
+      treeCell &&
+      typeof treeCell !== 'string' &&
+      typeof treeCell !== 'number' &&
+      treeCell.href
+    );
+    return (
+      <SimpleTableCell
+        ariaRowIndex={rowIndex}
+        key={rowIndex + '-' + columnIndex}
+        className={treeColumn.className}
+        columnIndex={columnIndex}
+        contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
+        tableColumn={treeColumn}
+      >
+        <ConditionalChildren renderChildren={data.rowType === 'criteria'}>
+          <ApproverDisplay approver={data?.requiredApprover} />
+        </ConditionalChildren>
+      </SimpleTableCell>
+    );
+  },
+  width: new ObservableValue(-100)
+};
+
+export const progressCell: ITreeColumn<IWorkItemCriteriaCell> = {
+  id: 'progress',
+  minWidth: 200,
+  name: 'Progress',
+  renderCell: (
+    rowIndex: number,
+    columnIndex: number,
+    treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
+    treeItem: ITreeItemEx<IWorkItemCriteriaCell>
+  ) => {
+    const underlyingItem = treeItem.underlyingItem;
+    const data = ObservableLike.getValue(underlyingItem.data);
+    const treeCell = data && data[treeColumn.id];
+    // Do not include padding if the table cell has an href
+    const hasLink = !!(
+      treeCell &&
+      typeof treeCell !== 'string' &&
+      typeof treeCell !== 'number' &&
+      treeCell.href
+    );
+    return (
+      <SimpleTableCell
+        ariaRowIndex={rowIndex}
+        key={rowIndex + '-' + columnIndex}
+        className={treeColumn.className}
+        columnIndex={columnIndex}
+        contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
+        tableColumn={treeColumn}
+      >
+        <ConditionalChildren
+          renderChildren={data.rowType === 'workItem' && data.progress !== undefined}
+        >
+          {data.progress && (
+            <ProgressBar
+              maxValue={data.progress.maxValue}
+              currentValue={data.progress.value}
+              labelType={data.progress.type}
+            />
+          )}
+        </ConditionalChildren>
+      </SimpleTableCell>
+    );
+  },
+  width: new ObservableValue(-100)
 };
 
 export const getProgress = (
@@ -205,7 +289,7 @@ export const getTreeProvider = (
             workItemId: x.id,
             title: y.title,
             rowType: 'criteria',
-            type: (capitalizeFirstLetter(y.type) as CriteriaTypes),
+            type: capitalizeFirstLetter(y.type) as CriteriaTypes,
             state: y.state,
             requiredApprover: y.requiredApprover,
             criteriaId: y.id,
