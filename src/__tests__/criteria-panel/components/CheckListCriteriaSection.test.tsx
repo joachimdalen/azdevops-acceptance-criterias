@@ -44,7 +44,7 @@ describe('CheckListCriteriaSection', () => {
     expect(addButtons.length).toEqual(2);
   });
   it('should render items when passed', async () => {
-    const { container } = render(
+    render(
       <CriteriaPanelProvider
         defaultState={{
           isLoading: false,
@@ -63,7 +63,7 @@ describe('CheckListCriteriaSection', () => {
     expect(boxes[0].value).toEqual('This item');
   });
   it('should remove item when clicked', async () => {
-    const { container } = render(
+    render(
       <CriteriaPanelProvider
         defaultState={{
           isLoading: false,
