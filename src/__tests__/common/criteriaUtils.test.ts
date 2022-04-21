@@ -67,8 +67,5 @@ describe('criteriaUtils', () => {
     it('should return undefined when wrong format', () => {
       expect(getWorkItemIdFromCriteriaId('AC-12345')).toBeUndefined();
     });
-    it('should return undefined when wrong format two', () => {
-      expect(getWorkItemIdFromCriteriaId('AC-12345-')).toBeUndefined();
-    });
   });
 });

@@ -41,14 +41,15 @@ const CriteriaTypeDisplay = ({
       }?color=${mappings[stringType].color}&api-version=7.1-preview.1`
     );
   }, [type]);
+  const typeText = capitalizeFirstLetter(type || 'Unknown');
   return (
     <div className="flex-row flex-grow flex-center">
-      <Tooltip text={capitalizeFirstLetter(type || 'Unknown')}>
+      <Tooltip text={typeText}>
         <img src={iconUrl} height={16} />
       </Tooltip>
       <span className="margin-horizontal-8 flex-grow body-m">
-        <Tooltip text={title || 'Unknown'}>
-          <span>{title || 'Unknown'}</span>
+        <Tooltip text={title || typeText}>
+          <span>{title || typeText}</span>
         </Tooltip>
       </span>
     </div>
