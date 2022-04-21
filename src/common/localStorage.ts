@@ -6,7 +6,8 @@ export enum LocalStorageKeys {
   NewStateFlow = 'AC_NEW_FLOW'
 }
 export enum LocalStorageRawKeys {
-  HostUrl = 'AC_HOST_BASE_URL'
+  HostUrl = 'AC_HOST_BASE_URL',
+  HostUrlWithOrg = 'AC_HOST_BASE_URL_ORG'
 }
 
 export const setLocalItem = <T>(key: LocalStorageKeys, data: T): void => {

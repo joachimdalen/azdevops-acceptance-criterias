@@ -79,6 +79,7 @@ const AcceptanceControl = (): React.ReactElement => {
         loadTheme(createTheme(appTheme));
 
         getHostUrl(LocalStorageRawKeys.HostUrl);
+        getHostUrl(LocalStorageRawKeys.HostUrlWithOrg, true);
         await DevOps.ready();
         DevOps.register(DevOps.getContributionId(), provider);
 

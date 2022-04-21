@@ -1,6 +1,6 @@
 import './index.scss';
 
-import { createTheme, loadTheme } from '@fluentui/react';
+import { createTheme, ISelection, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { IdentityPicker } from '@joachimdalen/azdevops-ext-core/IdentityPicker';
@@ -13,7 +13,9 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
+import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
+import { ITableColumn, SimpleTableCell } from 'azure-devops-ui/Table';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
 import * as yup from 'yup';
@@ -44,6 +46,8 @@ import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaVie
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
+import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
+import { IListSelection } from 'azure-devops-ui/List';
 
 const getSchema = (type: CriteriaTypes, approverRequired = false) => {
   const baseSchema = yup.object().shape({
@@ -395,6 +399,19 @@ const CriteriaPanel = (): React.ReactElement => {
             items={criteriaTypeItemsFiltered}
             selection={typeSelection}
             onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
+            renderItem={(
+              rowIndex: number,
+              columnIndex: number,
+              tableColumn: ITableColumn<IListBoxItem>,
+              tableItem: IListBoxItem
+            ) => {
+              const date: any = tableItem.data;
+              return (
+                <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
+                  <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
+                </SimpleTableCell>
+              );
+            }}
           />
         </FormItem>
         {/* <FormItem label="Tags" className="flex-grow">

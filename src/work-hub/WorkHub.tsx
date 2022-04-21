@@ -32,6 +32,7 @@ import cx from 'classnames';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { chunk } from '../common/chunkUtil';
+import { getWorkItemIdFromCriteriaId } from '../common/criteriaUtils';
 import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
@@ -118,6 +119,7 @@ const WorkHub = (): JSX.Element => {
         loadTheme(createTheme(appTheme));
         await DevOps.init();
         getHostUrl(LocalStorageRawKeys.HostUrl);
+        getHostUrl(LocalStorageRawKeys.HostUrlWithOrg, true);
         const loadedTypes = await workItemService.getWorkItemTypes();
 
         setWorkItemTypes(loadedTypes);
@@ -284,7 +286,12 @@ const WorkHub = (): JSX.Element => {
       await devOpsService.showToast('Failed to find criteria');
     } else {
       await criteriaService.showPanel(
-        { criteriaId: criteria.id, canEdit: false, isReadOnly: true },
+        {
+          criteriaId: criteria.id,
+          workItemId: getWorkItemIdFromCriteriaId(criteria.id),
+          canEdit: false,
+          isReadOnly: true
+        },
         criteria
       );
     }

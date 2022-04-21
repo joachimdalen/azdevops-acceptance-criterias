@@ -9,7 +9,7 @@ import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike, ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { MenuItemType } from 'azure-devops-ui/Menu';
-import { ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
+import { ColumnMore } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { ExpandableTreeCell, ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
 import { ITreeItemEx, ITreeItemProvider } from 'azure-devops-ui/Utilities/TreeItemProvider';
@@ -17,9 +17,8 @@ import { copyToClipboard } from 'azure-devops-ui/Utils/ClipboardUtils';
 import { useMemo } from 'react';
 
 import { DialogIds, getUrl, IConfirmationConfig } from '../../common/common';
-import ApproverDisplay from '../../common/components/ApproverDisplay';
+import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import InternalLink from '../../common/components/InternalLink';
-import ProgressBar from '../../common/components/ProgressBar';
 import { getLocalItem, LocalStorageKeys, setLocalItem } from '../../common/localStorage';
 import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../../common/types';
 import {
@@ -28,8 +27,7 @@ import {
   getTreeProvider,
   idCell,
   IWorkItemCriteriaCell,
-  progressCell,
-  typeItemCell
+  progressCell
 } from './CriteriaTreeData';
 import WorkItemTypeTag from './WorkItemTypeTag';
 
@@ -188,7 +186,13 @@ const CriteriaTree = ({
               }}
             >
               <Tooltip text={data.title}>
-                <span>{data.title}</span>
+                <div className=" flex-row flex-center">
+                  {data.type !== '' ? (
+                    <CriteriaTypeDisplay type={data.type} title={data.title} />
+                  ) : (
+                    <span>{data.title}</span>
+                  )}
+                </div>
               </Tooltip>
             </InternalLink>
           </ConditionalChildren>
@@ -233,15 +237,7 @@ const CriteriaTree = ({
       </div>
     );
 
-  const columns = [
-    idCell,
-    titleCell,
-    moreColumn,
-    progressCell,
-    criteriaState,
-    approverCell,
-    typeItemCell
-  ];
+  const columns = [idCell, titleCell, moreColumn, progressCell, criteriaState, approverCell];
 
   function onSize(event: MouseEvent, index: number, width: number) {
     (columns[index].width as ObservableValue<number>).value = width;

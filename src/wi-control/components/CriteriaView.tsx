@@ -182,7 +182,13 @@ const CriteriaView = ({
           }}
         >
           <Tooltip text={data.title}>
-            <span>{data.title}</span>
+            <div className=" flex-row flex-center">
+              {data.type !== '' ? (
+                <CriteriaTypeDisplay type={data.type} title={data.title} />
+              ) : (
+                <span>{data.title}</span>
+              )}
+            </div>
           </Tooltip>
         </InternalLink>
       );
@@ -235,41 +241,6 @@ const CriteriaView = ({
     }
   };
 
-  const typeCell: ITreeColumn<IWorkItemCriteriaCell> = {
-    id: 'type',
-    minWidth: 200,
-    name: 'Criteria Type',
-    renderCell: (
-      rowIndex: number,
-      columnIndex: number,
-      treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
-      treeItem: ITreeItemEx<IWorkItemCriteriaCell>
-    ) => {
-      const underlyingItem = treeItem.underlyingItem;
-      const data = ObservableLike.getValue(underlyingItem.data);
-      const treeCell = data && data[treeColumn.id];
-      // Do not include padding if the table cell has an href
-      const hasLink = !!(
-        treeCell &&
-        typeof treeCell !== 'string' &&
-        typeof treeCell !== 'number' &&
-        treeCell.href
-      );
-      // const approver = identities.get(data.requiredApprover);
-      return (
-        <SimpleTableCell
-          key={`${columnIndex}-${data.id}`}
-          className={treeColumn.className}
-          columnIndex={columnIndex}
-          contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
-          tableColumn={treeColumn}
-        >
-          {data.type !== '' && <CriteriaTypeDisplay type={data.type} />}
-        </SimpleTableCell>
-      );
-    },
-    width: -100
-  };
   const toggleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'toggle',
     minWidth: 50,
@@ -320,12 +291,11 @@ const CriteriaView = ({
     <Tree<IWorkItemCriteriaCell>
       ariaLabel="Basic tree"
       columns={[
-        toggleCell,
+        //toggleCell,
         idCell,
         titleCell,
         criteriaState,
         approverCell,
-        typeCell,
         ColumnFill,
         moreColumn as any
       ]}

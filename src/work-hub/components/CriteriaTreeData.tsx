@@ -52,42 +52,6 @@ interface WorkItemDetails {
   tag?: WorkItemTypeTagProps;
 }
 
-export const typeItemCell: ITreeColumn<IWorkItemCriteriaCell> = {
-  id: 'type',
-  minWidth: 200,
-  name: 'Criteria Type',
-  renderCell: (
-    rowIndex: number,
-    columnIndex: number,
-    treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
-    treeItem: ITreeItemEx<IWorkItemCriteriaCell>
-  ) => {
-    const underlyingItem = treeItem.underlyingItem;
-    const data = ObservableLike.getValue(underlyingItem.data);
-    const treeCell = data && data[treeColumn.id];
-    // Do not include padding if the table cell has an href
-    const hasLink = !!(
-      treeCell &&
-      typeof treeCell !== 'string' &&
-      typeof treeCell !== 'number' &&
-      treeCell.href
-    );
-    return (
-      <SimpleTableCell
-        key={`${columnIndex}-${data.id}`}
-        className={treeColumn.className}
-        columnIndex={columnIndex}
-        contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
-        tableColumn={treeColumn}
-      >
-        <ConditionalChildren renderChildren={data.rowType === 'criteria'}>
-          {data.type !== '' && <CriteriaTypeDisplay type={data.type} />}
-        </ConditionalChildren>
-      </SimpleTableCell>
-    );
-  },
-  width: new ObservableValue(-100)
-};
 export const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
   id: 'workItemId',
   minWidth: 50,

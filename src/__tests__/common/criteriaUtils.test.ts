@@ -1,5 +1,5 @@
 import { chunk } from '../../common/chunkUtil';
-import { isCompleted, isProcessed } from '../../common/criteriaUtils';
+import { getWorkItemIdFromCriteriaId, isCompleted, isProcessed } from '../../common/criteriaUtils';
 import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
@@ -58,6 +58,17 @@ describe('criteriaUtils', () => {
         type: 'checklist'
       };
       expect(isCompleted(crit)).toBeFalsy();
+    });
+  });
+  describe('getWorkItemIdFromCriteriaId', () => {
+    it('should return id when correct format', () => {
+      expect(getWorkItemIdFromCriteriaId('AC-12345-123')).toEqual('12345');
+    });
+    it('should return undefined when wrong format', () => {
+      expect(getWorkItemIdFromCriteriaId('AC-12345')).toBeUndefined();
+    });
+    it('should return undefined when wrong format two', () => {
+      expect(getWorkItemIdFromCriteriaId('AC-12345-')).toBeUndefined();
     });
   });
 });

@@ -17,3 +17,9 @@ export const isCompleted = (criteria: IAcceptanceCriteria): boolean => {
     criteria.state === AcceptanceCriteriaState.Completed
   );
 };
+
+export const getWorkItemIdFromCriteriaId = (id: string): string | undefined => {
+  const parts = id.split('-');
+  if (parts.length !== 3) return undefined;
+  return parts[1];
+};
