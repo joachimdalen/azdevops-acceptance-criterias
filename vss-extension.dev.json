@@ -133,7 +133,8 @@
       "description": "Control to manage acceptance criterias for a work item",
       "properties": {
         "name": "Work Item Acceptance Criterias (DEV)",
-        "uri": "wi-control.html?isControl=true"
+        "uri": "wi-control.html?isControl=true",
+        "height": 500
       }
     },
     {
