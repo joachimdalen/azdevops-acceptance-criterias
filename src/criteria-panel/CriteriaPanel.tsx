@@ -1,6 +1,6 @@
 import './index.scss';
 
-import { createTheme, ISelection, loadTheme } from '@fluentui/react';
+import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { IdentityPicker } from '@joachimdalen/azdevops-ext-core/IdentityPicker';
@@ -22,6 +22,7 @@ import * as yup from 'yup';
 
 import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
+import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
 import StatusTag from '../common/components/StatusTag';
 import { isCompleted, isProcessed } from '../common/criteriaUtils';
 import { getCombined, hasError, parseValidationError } from '../common/errorUtils';
@@ -46,8 +47,6 @@ import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaVie
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
-import { IListSelection } from 'azure-devops-ui/List';
 
 const getSchema = (type: CriteriaTypes, approverRequired = false) => {
   const baseSchema = yup.object().shape({
@@ -190,6 +189,16 @@ const CriteriaPanel = (): React.ReactElement => {
             setCanEdit(config.canEdit);
           }
           if (config.criteriaId && config.workItemId) {
+            const fetchedSettings = await storageService.getSettings();
+
+            if (
+              fetchedSettings.limitAllowedCriteriaTypes &&
+              fetchedSettings.allowedCriteriaTypes.length > 0
+            ) {
+              dispatch({ type: 'SET_TYPE', data: fetchedSettings.allowedCriteriaTypes[0] });
+            }
+
+            setSettings(fetchedSettings);
             const details = await criteriaService.getCriteriaDetails(config.criteriaId);
 
             await criteriaService.load(async data => {
@@ -204,17 +213,6 @@ const CriteriaPanel = (): React.ReactElement => {
           }
 
           setWorkItemId(config.workItemId);
-
-          const fetchedSettings = await storageService.getSettings();
-
-          if (
-            fetchedSettings.limitAllowedCriteriaTypes &&
-            fetchedSettings.allowedCriteriaTypes.length > 0
-          ) {
-            dispatch({ type: 'SET_TYPE', data: fetchedSettings.allowedCriteriaTypes[0] });
-          }
-
-          setSettings(fetchedSettings);
         }
         setLoading(false);
         await DevOps.notifyLoadSucceeded();
