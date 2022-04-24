@@ -20,7 +20,7 @@ import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
 import * as yup from 'yup';
 
-import { CriteriaModalResult, criteriaTypeItems } from '../common/common';
+import { CriteriaModalResult } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
 import StatusTag from '../common/components/StatusTag';
@@ -80,13 +80,26 @@ const CriteriaPanel = (): React.ReactElement => {
 
   const criteriaTypeItemsFiltered = useMemo(() => {
     if (settings?.limitAllowedCriteriaTypes) {
-      return criteriaTypeItems.filter(x => {
-        const tp = x.id as CriteriaTypes;
-        return settings.allowedCriteriaTypes.includes(tp);
-      });
+      return [
+        {
+          id: 'checklist',
+          text: 'Checklist',
+          disabled: !settings.allowedCriteriaTypes.includes('checklist')
+        },
+        {
+          id: 'scenario',
+          text: 'Scenario',
+          disabled: !settings.allowedCriteriaTypes.includes('scenario')
+        },
+        { id: 'text', text: 'Text', disabled: !settings.allowedCriteriaTypes.includes('text') }
+      ];
     }
 
-    return criteriaTypeItems;
+    return [
+      { id: 'checklist', text: 'Checklist' },
+      { id: 'scenario', text: 'Scenario' },
+      { id: 'text', text: 'Text' }
+    ];
   }, [settings]);
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
@@ -140,17 +153,20 @@ const CriteriaPanel = (): React.ReactElement => {
           if (config.canEdit !== undefined) {
             setCanEdit(config.canEdit);
           }
+
+          const fetchedSettings = await storageService.getSettings();
+
+          if (
+            fetchedSettings.limitAllowedCriteriaTypes &&
+            fetchedSettings.allowedCriteriaTypes.length > 0
+          ) {
+            console.log(fetchedSettings.allowedCriteriaTypes);
+            dispatch({ type: 'SET_TYPE', data: fetchedSettings.allowedCriteriaTypes[0] });
+          }
+
+          setSettings(fetchedSettings);
+
           if (config.criteriaId && config.workItemId) {
-            const fetchedSettings = await storageService.getSettings();
-
-            if (
-              fetchedSettings.limitAllowedCriteriaTypes &&
-              fetchedSettings.allowedCriteriaTypes.length > 0
-            ) {
-              dispatch({ type: 'SET_TYPE', data: fetchedSettings.allowedCriteriaTypes[0] });
-            }
-
-            setSettings(fetchedSettings);
             const details = await criteriaService.getCriteriaDetails(config.criteriaId);
 
             await criteriaService.load(async data => {
@@ -209,7 +225,7 @@ const CriteriaPanel = (): React.ReactElement => {
     }
   };
 
-  const typeSelection = useDropdownSelection(criteriaTypeItems, panelState.type);
+  const typeSelection = useDropdownSelection(criteriaTypeItemsFiltered, panelState.type);
 
   const dismiss = () => {
     const config = DevOps.getConfiguration();
@@ -358,7 +374,14 @@ const CriteriaPanel = (): React.ReactElement => {
               const date: any = tableItem.data;
               return (
                 <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
-                  <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
+                  <div className="flex-column justify-center">
+                    <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
+                    {tableItem.disabled && (
+                      <span className="font-size-xs error-text margin-top-4">
+                        This criteria type is disallowed by setting set by a project admin
+                      </span>
+                    )}
+                  </div>
                 </SimpleTableCell>
               );
             }}

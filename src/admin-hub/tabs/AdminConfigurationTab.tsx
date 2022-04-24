@@ -117,6 +117,9 @@ const AdminConfigurationTab = (): React.ReactElement => {
       }
     }
 
+    newSettings.allowedCriteriaTypes = newSettings.allowedCriteriaTypes.sort(
+      (a: CriteriaTypes, b: CriteriaTypes) => (a as string).localeCompare(b as string)
+    );
     const updated = await storageService.setSettings(newSettings);
     setSettings(updated);
   };
@@ -131,6 +134,11 @@ const AdminConfigurationTab = (): React.ReactElement => {
           checked: settings?.limitAllowedCriteriaTypes || false,
           options: [
             {
+              id: 'checklist',
+              title: 'Checklist',
+              checked: settings?.allowedCriteriaTypes.includes('checklist') || false
+            },
+            {
               id: 'scenario',
               title: 'Scenario',
               checked: settings?.allowedCriteriaTypes.includes('scenario') || false
@@ -139,11 +147,6 @@ const AdminConfigurationTab = (): React.ReactElement => {
               id: 'text',
               title: 'Text',
               checked: settings?.allowedCriteriaTypes.includes('text') || false
-            },
-            {
-              id: 'checklist',
-              title: 'Checklist',
-              checked: settings?.allowedCriteriaTypes.includes('checklist') || false
             }
           ]
         },
