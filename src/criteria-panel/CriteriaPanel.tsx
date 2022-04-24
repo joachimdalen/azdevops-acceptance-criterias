@@ -38,6 +38,7 @@ import {
   IAcceptanceCriteria
 } from '../common/types';
 import CheckListCriteriaSection from './components/CheckListCriteriaSection';
+import CompletedProcessContainer from './components/CompletedProcessContainer';
 import CompletionContainer from './components/CompletionContainer';
 import ProcessingContainer from './components/ProcessingContainer';
 import RejectionProcessContainer from './components/RejectionProcessContainer';
@@ -47,68 +48,19 @@ import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaVie
 import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
-
-const getSchema = (type: CriteriaTypes, approverRequired = false) => {
-  const baseSchema = yup.object().shape({
-    title: yup.string().required().min(4).max(300),
-    requiredApprover: approverRequired
-      ? yup.object().required('Required approver must be defined. Configured by policy')
-      : yup.object()
-  });
-
-  switch (type) {
-    case 'checklist': {
-      return baseSchema.concat(
-        yup.object().shape({
-          checklist: yup.object().shape({
-            criterias: yup
-              .array()
-              .of(
-                yup.object().shape({
-                  text: yup.string().required().min(4)
-                })
-              )
-              .min(1)
-          })
-        })
-      );
-    }
-    case 'scenario': {
-      return baseSchema.concat(
-        yup.object().shape({
-          scenario: yup.object().shape({
-            scenario: yup.string().required().min(4),
-            criterias: yup
-              .array()
-              .of(
-                yup.object().shape({
-                  text: yup.string().required().min(4)
-                })
-              )
-              .min(1)
-          })
-        })
-      );
-    }
-    case 'text': {
-      return baseSchema.concat(
-        yup.object().shape({
-          text: yup
-            .object()
-            .shape({
-              description: yup.string().required().min(4)
-            })
-            .required()
-        })
-      );
-    }
-  }
-};
+import { getSchema } from './CriteriaPanelData';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
+  const [isError, setIsError] = useBooleanToggle();
   const [criteriaService, storageService] = useMemo(
-    () => [new CriteriaService(), new StorageService()],
+    () => [
+      new CriteriaService(error => {
+        console.log('Setting error...');
+        setIsError(true);
+      }),
+      new StorageService()
+    ],
     []
   );
   const [isReadOnly, setIsReadOnly] = useState(false);
@@ -465,6 +417,11 @@ const CriteriaPanel = (): React.ReactElement => {
             Failed to load critiera details.
           </MessageCard>
         </ConditionalChildren>
+        <ConditionalChildren renderChildren={isError}>
+          <MessageCard className="margin-bottom-8" severity={MessageCardSeverity.Error}>
+            An error occurred. Please refresh and try again
+          </MessageCard>
+        </ConditionalChildren>
         <ConditionalChildren renderChildren={isReadOnly}>
           {criteria && (
             <>
@@ -527,6 +484,16 @@ const CriteriaPanel = (): React.ReactElement => {
                 renderChildren={criteria.state === AcceptanceCriteriaState.Rejected}
               >
                 <RejectionProcessContainer
+                  criteriaId={criteria.id}
+                  onProcess={async (criteriaId: string, action: string) => {
+                    await criteriaService.toggleCompletion(criteriaId, action === 'resubmit');
+                  }}
+                />
+              </ConditionalChildren>
+              <ConditionalChildren
+                renderChildren={criteria.state === AcceptanceCriteriaState.Completed}
+              >
+                <CompletedProcessContainer
                   criteriaId={criteria.id}
                   onProcess={async (criteriaId: string, action: string) => {
                     await criteriaService.toggleCompletion(criteriaId, action === 'resubmit');

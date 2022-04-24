@@ -19,19 +19,32 @@ import {
   IAcceptanceCriteria
 } from '../types';
 import { IStorageService, StorageService } from './StorageService';
+
 type CriteriaServiceOnChange = (data: CriteriaDocument[]) => void;
+enum CriteriaErrorCode {
+  InvalidDocumentVersionException = 0,
+  Failed = 1
+}
+interface CriteriaError {
+  error: CriteriaErrorCode;
+  criteria?: CriteriaDocument;
+  details?: CriteriaDetailDocument;
+}
+type CriteriaServiceOnError = (error: CriteriaError) => void;
+
 class CriteriaService {
   private readonly _dataStore: IStorageService;
   private _isInitialized = false;
   private _data: CriteriaDocument[];
   private _changeHandler?: CriteriaServiceOnChange;
   private _devOpsService: DevOpsService;
+  private _errorHandler?: CriteriaServiceOnError;
 
-  constructor(dataStore?: IStorageService) {
+  constructor(onError?: CriteriaServiceOnError, dataStore?: IStorageService) {
     this._dataStore = dataStore || new StorageService();
     this._devOpsService = new DevOpsService();
-
     this._data = [];
+    this._errorHandler = onError;
   }
 
   public isInitialized(): boolean {
@@ -81,6 +94,8 @@ class CriteriaService {
       return details;
     } catch (error: any) {
       if (error?.status !== 404) {
+        if (this._errorHandler)
+          this._errorHandler({ error: CriteriaErrorCode.InvalidDocumentVersionException });
         throw new Error(error);
       }
     }
@@ -121,42 +136,48 @@ class CriteriaService {
     checkItemId: string,
     complete: boolean
   ): Promise<{ details: CriteriaDetailDocument; criteria?: IAcceptanceCriteria } | undefined> {
-    const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
-    const details: CriteriaDetailDocument = (await this.getCriteriaDetails(criteriaId)) || {
-      id: criteriaId
-    };
+    try {
+      const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
+      const details: CriteriaDetailDocument = (await this.getCriteriaDetails(criteriaId)) || {
+        id: criteriaId
+      };
 
-    const itemIndex = details.checklist?.criterias?.findIndex(x => x.id === checkItemId);
+      const itemIndex = details.checklist?.criterias?.findIndex(x => x.id === checkItemId);
 
-    if (details.checklist?.criterias !== undefined && itemIndex !== undefined && itemIndex > -1) {
-      const preEditComplete = details.checklist.criterias.every(x => x.completed);
-      const newItem = { ...details.checklist.criterias[itemIndex] };
-      newItem.completed = complete;
-      details.checklist.criterias[itemIndex] = newItem;
-      const updated = await this._dataStore.setCriteriaDetailsDocument(details);
-      const isAllCompleted = details.checklist.criterias.every(x => x.completed);
-      if (doc !== undefined && (isAllCompleted || preEditComplete)) {
-        const newDoc = { ...doc };
-        const criteria = newDoc.criterias.find(x => x.id === criteriaId);
-        if (criteria !== undefined) {
-          const updt = this.setCriteriaItems(criteria, updated);
-          if (updt.criteria && updt.details) {
-            this.update(doc, updt.criteria, updt.details);
+      if (details.checklist?.criterias !== undefined && itemIndex !== undefined && itemIndex > -1) {
+        const preEditComplete = details.checklist.criterias.every(x => x.completed);
+        const newItem = { ...details.checklist.criterias[itemIndex] };
+        newItem.completed = complete;
+        details.checklist.criterias[itemIndex] = newItem;
+        const updated = await this._dataStore.setCriteriaDetailsDocument(details);
+        const isAllCompleted = details.checklist.criterias.every(x => x.completed);
+        if (doc !== undefined && (isAllCompleted || preEditComplete)) {
+          const newDoc = { ...doc };
+          const criteria = newDoc.criterias.find(x => x.id === criteriaId);
+          if (criteria !== undefined) {
+            const updt = this.setCriteriaItems(criteria, updated);
+            if (updt.criteria && updt.details) {
+              this.update(doc, updt.criteria, updt.details);
 
-            return {
-              details: updt.details,
-              criteria: updt.criteria
-            };
+              return {
+                details: updt.details,
+                criteria: updt.criteria
+              };
+            }
           }
         }
+
+        return {
+          details: updated
+        };
       }
 
-      return {
-        details: updated
-      };
+      return undefined;
+    } catch (error: any) {
+      if (this._errorHandler)
+        this._errorHandler({ error: CriteriaErrorCode.InvalidDocumentVersionException });
+      throw new Error(error);
     }
-
-    return undefined;
   }
 
   private setCriteriaItems(
@@ -198,33 +219,39 @@ class CriteriaService {
     id: string,
     approved: boolean
   ): Promise<{ criteria: IAcceptanceCriteria; details: CriteriaDetailDocument } | undefined> {
-    const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
-    const details: CriteriaDetailDocument = (await this.getCriteriaDetails(id)) || { id: id };
-    const approver = await getLoggedInUser();
-    if (doc) {
-      const criteria = doc.criterias.find(x => x.id === id);
-      if (criteria) {
-        if (details.processed !== undefined) {
-          details.processed = {
-            ...details.processed,
-            processedAt: new Date(),
-            processedBy: approver
-          };
-        } else {
-          details.processed = {
-            completedAt: new Date(),
-            processedAt: new Date(),
-            processedBy: approver
-          };
+    try {
+      const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
+      const details: CriteriaDetailDocument = (await this.getCriteriaDetails(id)) || { id: id };
+      const approver = await getLoggedInUser();
+      if (doc) {
+        const criteria = doc.criterias.find(x => x.id === id);
+        if (criteria) {
+          if (details.processed !== undefined) {
+            details.processed = {
+              ...details.processed,
+              processedAt: new Date(),
+              processedBy: approver
+            };
+          } else {
+            details.processed = {
+              completedAt: new Date(),
+              processedAt: new Date(),
+              processedBy: approver
+            };
+          }
+
+          criteria.state = approved
+            ? AcceptanceCriteriaState.Approved
+            : AcceptanceCriteriaState.Rejected;
+
+          const res = await this.update(doc, criteria, details);
+          return res;
         }
-
-        criteria.state = approved
-          ? AcceptanceCriteriaState.Approved
-          : AcceptanceCriteriaState.Rejected;
-
-        const res = await this.update(doc, criteria, details);
-        return res;
       }
+    } catch (error: any) {
+      if (this._errorHandler)
+        this._errorHandler({ error: CriteriaErrorCode.InvalidDocumentVersionException });
+      throw new Error(error);
     }
   }
 
@@ -233,18 +260,27 @@ class CriteriaService {
     reApprove?: boolean
   ): Promise<CriteriaDocument | undefined> {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
-
-    if (doc) {
-      const details = (await this.getCriteriaDetails(id)) || { id: id };
-      const criteria = doc.criterias.find(x => x.id === id);
-      const { criteria: crit, details: det } = this.setCriteriaItems(criteria, details, reApprove);
-      if (crit) {
-        const updated = await this.createOrUpdate(doc.id, crit, true);
-        if (det) {
-          await this._dataStore.setCriteriaDetailsDocument(det);
+    try {
+      if (doc) {
+        const details = (await this.getCriteriaDetails(id)) || { id: id };
+        const criteria = doc.criterias.find(x => x.id === id);
+        const { criteria: crit, details: det } = this.setCriteriaItems(
+          criteria,
+          details,
+          reApprove
+        );
+        if (crit) {
+          const updated = await this.createOrUpdate(doc.id, crit, true);
+          if (det) {
+            await this._dataStore.setCriteriaDetailsDocument(det);
+          }
+          return updated;
         }
-        return updated;
       }
+    } catch (error: any) {
+      if (this._errorHandler)
+        this._errorHandler({ error: CriteriaErrorCode.InvalidDocumentVersionException });
+      throw new Error(error);
     }
   }
 

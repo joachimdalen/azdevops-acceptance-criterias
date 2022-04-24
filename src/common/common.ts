@@ -64,7 +64,7 @@ export const getUrl = async ({ ...urlParams }: KeyVal): Promise<string> => {
   const contrib = DevOps.getContributionId();
   const params = new URLSearchParams(urlParams);
 
-  return `${hostBaseUrl}${project.name}/_apps/hub/${contrib}?${params.toString()}`;
+  return encodeURI(`${hostBaseUrl}${project.name}/_apps/hub/${contrib}?${params.toString()}`);
 };
 
 export interface IConfirmationConfig {

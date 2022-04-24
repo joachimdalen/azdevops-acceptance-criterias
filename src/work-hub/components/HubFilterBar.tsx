@@ -3,7 +3,7 @@ import { distinct, distinctBy, isDefined } from '@joachimdalen/azdevops-ext-core
 import { DropdownFilterBarItem } from 'azure-devops-ui/Dropdown';
 import { FilterBar } from 'azure-devops-ui/FilterBar';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
-import { SimpleTableCell } from 'azure-devops-ui/Table';
+import { ITableColumn, SimpleTableCell } from 'azure-devops-ui/Table';
 import { KeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
 import {
   DropdownMultiSelection,
@@ -18,6 +18,7 @@ import {
 import { useEffect, useMemo } from 'react';
 
 import { capitalizeFirstLetter, criteriaTypeItems } from '../../common/common';
+import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import StatusTag from '../../common/components/StatusTag';
 import {
   getLocalItem,
@@ -26,7 +27,7 @@ import {
   LocalStorageRawKeys,
   setLocalItem
 } from '../../common/localStorage';
-import { IAcceptanceCriteria } from '../../common/types';
+import { CriteriaTypes, IAcceptanceCriteria } from '../../common/types';
 
 interface HubFilterBarProps {
   criterias: IAcceptanceCriteria[];
@@ -127,6 +128,18 @@ const HubFilterBar = ({
         items={criteriaTypeItems}
         selection={typeSelection}
         placeholder="Type"
+        renderItem={(
+          rowIndex: number,
+          columnIndex: number,
+          tableColumn: ITableColumn<IListBoxItem>,
+          tableItem: IListBoxItem
+        ) => {
+          return (
+            <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
+              <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
+            </SimpleTableCell>
+          );
+        }}
       />
       <DropdownFilterBarItem
         filterItemKey="approvers"

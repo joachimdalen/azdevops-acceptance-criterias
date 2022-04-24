@@ -2,6 +2,7 @@ import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { distinct, isDefined } from '@joachimdalen/azdevops-ext-core/CoreUtils';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { ErrorBoundary } from '@joachimdalen/azdevops-ext-core/ErrorBoundary';
 import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroData';
 import { getHostUrl } from '@joachimdalen/azdevops-ext-core/HostUtils';
 import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
@@ -32,6 +33,7 @@ import cx from 'classnames';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { chunk } from '../common/chunkUtil';
+import { SlimErrorBoundary } from '../common/components/SlimErrorBoundary';
 import { getWorkItemIdFromCriteriaId } from '../common/criteriaUtils';
 import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
@@ -312,11 +314,13 @@ const WorkHub = (): JSX.Element => {
             <div className="page-content-bottom">
               <div className="page-content-top">
                 <ConditionalChildren renderChildren={isActive}>
-                  <HubFilterBar
-                    criterias={criterias}
-                    showFilter={showFilter}
-                    onFilterChanged={filter => applyFilter(filter)}
-                  />
+                  <SlimErrorBoundary title="Error in filtering">
+                    <HubFilterBar
+                      criterias={criterias}
+                      showFilter={showFilter}
+                      onFilterChanged={filter => applyFilter(filter)}
+                    />
+                  </SlimErrorBoundary>
                 </ConditionalChildren>
               </div>
             </div>
@@ -343,23 +347,25 @@ const WorkHub = (): JSX.Element => {
               </ConditionalChildren>
               <ConditionalChildren renderChildren={isActive}>
                 <ConditionalChildren renderChildren={workItems.length > 0 && documents.length > 0}>
-                  <CriteriaTree
-                    workItems={workItems}
-                    visibleDocuments={visibleDocuments}
-                    documents={documents}
-                    workItemTypes={wiMap}
-                    onClick={async (workItemId: string, criteria: IAcceptanceCriteria) => {
-                      await criteriaService.showPanel(
-                        {
-                          criteriaId: criteria.id,
-                          workItemId,
-                          isReadOnly: true,
-                          canEdit: false
-                        },
-                        criteria
-                      );
-                    }}
-                  />
+                  <SlimErrorBoundary>
+                    <CriteriaTree
+                      workItems={workItems}
+                      visibleDocuments={visibleDocuments}
+                      documents={documents}
+                      workItemTypes={wiMap}
+                      onClick={async (workItemId: string, criteria: IAcceptanceCriteria) => {
+                        await criteriaService.showPanel(
+                          {
+                            criteriaId: criteria.id,
+                            workItemId,
+                            isReadOnly: true,
+                            canEdit: false
+                          },
+                          criteria
+                        );
+                      }}
+                    />
+                  </SlimErrorBoundary>
                 </ConditionalChildren>
 
                 <ConditionalChildren
