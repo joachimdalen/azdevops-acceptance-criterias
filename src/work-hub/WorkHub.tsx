@@ -2,7 +2,6 @@ import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { distinct, isDefined } from '@joachimdalen/azdevops-ext-core/CoreUtils';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
-import { ErrorBoundary } from '@joachimdalen/azdevops-ext-core/ErrorBoundary';
 import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroData';
 import { getHostUrl } from '@joachimdalen/azdevops-ext-core/HostUtils';
 import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
@@ -18,13 +17,13 @@ import {
 import {
   WorkItem,
   WorkItemErrorPolicy,
+  WorkItemStateColor,
   WorkItemType
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header, TitleSize } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
-import { IconSize } from 'azure-devops-ui/Icon';
 import { Page } from 'azure-devops-ui/Page';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
@@ -193,6 +192,28 @@ const WorkHub = (): JSX.Element => {
     return mp;
   }, [workItems]);
 
+  const wiStates: Map<string, WorkItemStateColor[]> = useMemo(() => {
+    const mp = new Map<string, WorkItemStateColor[]>();
+    workItems
+      .map(x => getWorkItemTypeDisplayName(x))
+      .filter(isDefined)
+      .filter(distinct)
+      .map(y => {
+        if (mp.has(y)) return;
+        const refName = getWorkItemReferenceNameFromDisplayName(y, workItemTypes);
+        if (refName === undefined) return;
+
+        const item = workItemTypes.find(x => x.referenceName === refName);
+        if (item?.states) {
+          mp.set(y, item?.states);
+        }
+      });
+
+    return mp;
+  }, [workItems]);
+
+  console.log(wiStates);
+
   const innerFilter = (
     items: CriteriaDocument[],
     predicate: (v: IAcceptanceCriteria) => boolean
@@ -239,7 +260,7 @@ const WorkHub = (): JSX.Element => {
     setVisibleDocuments(items);
   };
 
-  const fields: string[] = ['System.Title', 'System.WorkItemType'];
+  const fields: string[] = ['System.Title', 'System.WorkItemType', 'System.State'];
 
   const getBatched = async (workItemIds: number[]) => {
     const batched = chunk(workItemIds, 175);
@@ -353,6 +374,7 @@ const WorkHub = (): JSX.Element => {
                       visibleDocuments={visibleDocuments}
                       documents={documents}
                       workItemTypes={wiMap}
+                      workItemStates={wiStates}
                       onClick={async (workItemId: string, criteria: IAcceptanceCriteria) => {
                         await criteriaService.showPanel(
                           {

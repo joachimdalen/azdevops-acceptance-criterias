@@ -1,9 +1,11 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { WorkItemStateDisplayProps } from '@joachimdalen/azdevops-ext-core/WorkItemStateDisplay';
 import {
+  getWorkItemState,
   getWorkItemTitle,
   getWorkItemTypeDisplayName
 } from '@joachimdalen/azdevops-ext-core/WorkItemUtils';
-import { WorkItem } from 'azure-devops-extension-api/WorkItemTracking';
+import { WorkItem, WorkItemStateColor } from 'azure-devops-extension-api/WorkItemTracking';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike, ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { SimpleTableCell } from 'azure-devops-ui/Table';
@@ -17,7 +19,6 @@ import {
 
 import { capitalizeFirstLetter } from '../../common/common';
 import ApproverDisplay from '../../common/components/ApproverDisplay';
-import CriteriaTypeDisplay from '../../common/components/CriteriaTypeDisplay';
 import FullStatusTag from '../../common/components/FullStatusTag';
 import ProgressBar from '../../common/components/ProgressBar';
 import StatusTag from '../../common/components/StatusTag';
@@ -35,6 +36,7 @@ import {
 export interface IWorkItemCriteriaCell extends IExtendedTableCell {
   criteriaId?: string;
   workItemId: string;
+  workItemState?: WorkItemStateDisplayProps;
   title: string;
   rowType: 'workItem' | 'criteria';
   type: '' | CriteriaTypes;
@@ -235,7 +237,8 @@ export const getTreeProvider = (
   documents: CriteriaDocument[],
   visibleDocuments: CriteriaDocument[],
   workItems: WorkItem[],
-  workItemTypes: Map<string, WorkItemTypeTagProps>
+  workItemTypes: Map<string, WorkItemTypeTagProps>,
+  workItemStates: Map<string, WorkItemStateColor[]>
 ): ITreeItemProvider<IWorkItemCriteriaCell> => {
   const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = visibleDocuments
     .sort((a, b) => {
@@ -246,6 +249,10 @@ export const getTreeProvider = (
       const type = wi === undefined ? 'Unknown' : getWorkItemTypeDisplayName(wi);
       const title = wi === undefined ? 'Unknown' : getWorkItemTitle(wi);
       const dta = workItemTypes.get(type);
+      const state =
+        wi === undefined
+          ? undefined
+          : workItemStates.get(type)?.find(x => x.name === getWorkItemState(wi));
 
       const criteriaRows = x.criterias.map(y => {
         const it: ITreeItem<IWorkItemCriteriaCell> = {
@@ -265,6 +272,10 @@ export const getTreeProvider = (
       const item: ITreeItem<IWorkItemCriteriaCell> = {
         data: {
           workItemId: x.id,
+          workItemState: state && {
+            color: state.color,
+            text: state.name
+          },
           title: '',
           rowType: 'workItem',
           type: '',

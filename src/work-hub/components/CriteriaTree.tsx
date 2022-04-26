@@ -1,15 +1,17 @@
 import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
+import { WorkItemStateDisplay } from '@joachimdalen/azdevops-ext-core/WorkItemStateDisplay';
 import {
   IWorkItemFormNavigationService,
-  WorkItem
+  WorkItem,
+  WorkItemStateColor
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike, ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { MenuItemType } from 'azure-devops-ui/Menu';
-import { ColumnMore } from 'azure-devops-ui/Table';
+import { ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { ExpandableTreeCell, ITreeColumn, Tree } from 'azure-devops-ui/TreeEx';
 import { ITreeItemEx, ITreeItemProvider } from 'azure-devops-ui/Utilities/TreeItemProvider';
@@ -33,6 +35,7 @@ import WorkItemTypeTag from './WorkItemTypeTag';
 
 interface CriteriaTreeProps {
   workItemTypes: Map<string, WorkItemTypeTagProps>;
+  workItemStates: Map<string, WorkItemStateColor[]>;
   workItems: WorkItem[];
   visibleDocuments: CriteriaDocument[];
   documents: CriteriaDocument[];
@@ -42,6 +45,7 @@ interface CriteriaTreeProps {
 const CriteriaTree = ({
   workItemTypes,
   workItems,
+  workItemStates,
   onClick,
   visibleDocuments,
   documents
@@ -53,7 +57,8 @@ const CriteriaTree = ({
       documents,
       visibleDocuments.filter(x => workItems.some(y => y.id.toString() === x.id)),
       workItems,
-      workItemTypes
+      workItemTypes,
+      workItemStates
     );
   }, [visibleDocuments]);
 
@@ -147,6 +152,45 @@ const CriteriaTree = ({
     }
   };
 
+  const workItemState: ITreeColumn<IWorkItemCriteriaCell> = {
+    id: 'workItemState',
+    minWidth: 100,
+    name: 'Work Item State',
+    renderCell: (
+      rowIndex: number,
+      columnIndex: number,
+      treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
+      treeItem: ITreeItemEx<IWorkItemCriteriaCell>
+    ) => {
+      const underlyingItem = treeItem.underlyingItem;
+      const data = ObservableLike.getValue(underlyingItem.data);
+      const treeCell = data && data[treeColumn.id];
+      // Do not include padding if the table cell has an href
+      const hasLink = !!(
+        treeCell &&
+        typeof treeCell !== 'string' &&
+        typeof treeCell !== 'number' &&
+        treeCell.href
+      );
+
+      const defaultCell = (
+        <SimpleTableCell
+          ariaRowIndex={rowIndex}
+          key={rowIndex + '-' + columnIndex}
+          className={treeColumn.className}
+          columnIndex={columnIndex}
+          contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
+          tableColumn={treeColumn}
+        >
+          {data.workItemState && <WorkItemStateDisplay {...data.workItemState} />}
+        </SimpleTableCell>
+      );
+
+      return defaultCell;
+    },
+    width: new ObservableValue(-100)
+  };
+
   const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'title',
     minWidth: 300,
@@ -237,7 +281,15 @@ const CriteriaTree = ({
       </div>
     );
 
-  const columns = [idCell, titleCell, moreColumn, progressCell, criteriaState, approverCell];
+  const columns = [
+    idCell,
+    titleCell,
+    moreColumn,
+    progressCell,
+    criteriaState,
+    approverCell,
+    workItemState
+  ];
 
   function onSize(event: MouseEvent, index: number, width: number) {
     (columns[index].width as ObservableValue<number>).value = width;
