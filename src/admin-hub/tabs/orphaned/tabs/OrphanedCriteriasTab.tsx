@@ -21,6 +21,7 @@ import {
   Table
 } from 'azure-devops-ui/Table';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
+import { ZeroData } from 'azure-devops-ui/ZeroData';
 import { useEffect, useMemo, useState } from 'react';
 
 import { chunk } from '../../../../common/chunkUtil';
@@ -60,7 +61,6 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
         const updated = await workItemService.getDeletedWorkItems(notFound);
         setDocuments(criterias.filter(x => updated.some(y => x.id === y.id.toString())));
       }
-      setDocuments([]);
       toggleLoading(false);
     }
 
@@ -184,18 +184,23 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
 
   return (
     <div className="flex-column">
-      <ButtonGroup>
-        <Button danger text="Delete all" onClick={deleteDocuments} />
-      </ButtonGroup>
-      <Table
-        ariaLabel="Basic Table"
-        columns={columns}
-        itemProvider={provider}
-        selection={selection}
-        role="table"
-        className="table-example"
-        containerClassName="h-scroll-auto"
-      />
+      <ConditionalChildren renderChildren={documents.length > 0}>
+        <ButtonGroup>
+          <Button danger text="Delete all" onClick={deleteDocuments} />
+        </ButtonGroup>
+        <Table
+          ariaLabel="Basic Table"
+          columns={columns}
+          itemProvider={provider}
+          selection={selection}
+          role="table"
+          className="table-example"
+          containerClassName="h-scroll-auto"
+        />
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={documents.length === 0}>
+        <ZeroData imageAltText="" primaryText="No orphaned criterias" />
+      </ConditionalChildren>
       <ConditionalChildren renderChildren={showDelete}>
         <Dialog
           lightDismiss={false}

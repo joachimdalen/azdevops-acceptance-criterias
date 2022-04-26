@@ -18,6 +18,7 @@ import {
   Table
 } from 'azure-devops-ui/Table';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
+import { ZeroData } from 'azure-devops-ui/ZeroData';
 import { useEffect, useMemo, useState } from 'react';
 
 import CriteriaTypeDisplay from '../../../../common/components/CriteriaTypeDisplay';
@@ -155,18 +156,23 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
 
   return (
     <div className="flex-column">
-      <ButtonGroup>
-        <Button danger text="Delete all" onClick={deleteDocuments} />
-      </ButtonGroup>
-      <Table
-        ariaLabel="Basic Table"
-        columns={columns}
-        itemProvider={provider}
-        selection={selection}
-        role="table"
-        className="table-example"
-        containerClassName="h-scroll-auto"
-      />
+      <ConditionalChildren renderChildren={documents.length > 0}>
+        <ButtonGroup>
+          <Button danger text="Delete all" onClick={deleteDocuments} />
+        </ButtonGroup>
+        <Table
+          ariaLabel="Basic Table"
+          columns={columns}
+          itemProvider={provider}
+          selection={selection}
+          role="table"
+          className="table-example"
+          containerClassName="h-scroll-auto"
+        />
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={documents.length === 0}>
+        <ZeroData imageAltText="" primaryText="No orphaned criteria details" />
+      </ConditionalChildren>
       <ConditionalChildren renderChildren={showDelete}>
         <Dialog
           lightDismiss={false}
