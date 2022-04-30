@@ -9,8 +9,8 @@
   "version": "0.0.15",
   "description": "An extension to manage acceptance criterias",
   "categories": ["Azure Boards"],
-  "demands": ["api-version/5.1"],
-  "tags": ["acceptance criterias"],
+  "demands": ["api-version/7.1"],
+  "tags": ["Acceptance Criterias", "QA", "Criterias", "Requirements", "Checklist", "Scenario"],
   "scopes": ["vso.graph", "vso.work", "vso.project"],
   "icons": {
     "default": "extension-icon.png"

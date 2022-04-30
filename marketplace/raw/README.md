@@ -8,7 +8,7 @@
   <p align="center">
 Better management of acceptance criterias
     <br />
-    <a href="https://github.com/joachimdalen/azdevops-acceptance-criterias"><strong>Explore the docs »</strong></a>
+    <a href="https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://marketplace.visualstudio.com/items?itemName=joachimdalen.acceptance-criterias">View Extension</a>
@@ -21,9 +21,24 @@ Better management of acceptance criterias
   </p>
 </div>
 
+![work-hub-preview](marketplace/docs/images/work-hub-preview.png)
+
 ## Features
 
-- Some feature
+- Several criteria types
+  - Scenario based
+  - Text based
+  - Checklist based
+- Approval and rejection flows
+- Hub for processing criterias
+
+## ⚠️ Preview
+
+This extension is in preview. Please report any issue on [GitHub](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues)
+
+## Getting started and documentation
+
+Please see the full [documentation here](https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias)
 
 ## Contact
 
