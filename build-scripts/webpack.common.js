@@ -75,7 +75,6 @@ module.exports = {
   plugins: [
     new ScriptTags(),
     new EnvironmentPlugin({
-      ...getModuleVersions(modules),
       ...getExtensionVersion()
     })
   ]
