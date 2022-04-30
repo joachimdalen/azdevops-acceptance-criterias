@@ -9,7 +9,7 @@
   "description": "An extension to manage acceptance criterias",
   "categories": ["Azure Boards"],
   "demands": ["api-version/5.1"],
-  "tags": ["acceptance criterias", "qa"],
+  "tags": ["Acceptance Criterias", "QA", "Criterias", "Requirements", "Checklist", "Scenario"],
   "galleryFlags": ["Preview"],
   "scopes": ["vso.graph", "vso.work", "vso.project"],
   "icons": {
@@ -59,8 +59,7 @@
   "screenshots": [
     { "path": "marketplace/docs/images/work-hub-preview.png" },
     { "path": "marketplace/docs/images/work-item-preview.png" },
-    { "path": "marketplace/docs/images/panel-preview.png" },
-    { "path": "marketplace/docs/images/panel-edit.png" }
+    { "path": "marketplace/docs/images/panel-preview.png" }
   ],
   "contributions": [
     {

@@ -52,7 +52,11 @@
       "addressable": true
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    { "path": "marketplace/docs/images/work-hub-preview.png" },
+    { "path": "marketplace/docs/images/work-item-preview.png" },
+    { "path": "marketplace/docs/images/panel-preview.png" }
+  ],
   "contributions": [
     {
       "id": "criteria-panel",
