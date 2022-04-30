@@ -1,6 +1,6 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { ObservableLike } from 'azure-devops-ui/Core/Observable';
+import { ObservableLike, ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnFill, ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Toggle } from 'azure-devops-ui/Toggle';
@@ -51,51 +51,6 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
   rawCriteria?: IAcceptanceCriteria;
 }
 
-const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
-  id: 'id',
-  name: 'ID',
-  renderCell: renderTreeCell,
-  minWidth: 100,
-  width: -100
-};
-const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
-  id: 'state',
-  minWidth: 200,
-  name: 'State',
-  renderCell: (
-    rowIndex: number,
-    columnIndex: number,
-    treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
-    treeItem: ITreeItemEx<IWorkItemCriteriaCell>
-  ) => {
-    const underlyingItem = treeItem.underlyingItem;
-    const data = ObservableLike.getValue(underlyingItem.data);
-    const treeCell = data && data[treeColumn.id];
-    // Do not include padding if the table cell has an href
-    const hasLink = !!(
-      treeCell &&
-      typeof treeCell !== 'string' &&
-      typeof treeCell !== 'number' &&
-      treeCell.href
-    );
-
-    const defaultCell = (
-      <SimpleTableCell
-        key={`${columnIndex}-${data.id}`}
-        className={treeColumn.className}
-        columnIndex={columnIndex}
-        contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
-        tableColumn={treeColumn}
-      >
-        {data.state && <StatusTag state={data.state} />}
-      </SimpleTableCell>
-    );
-
-    return defaultCell;
-  },
-  width: -100
-};
-
 const CriteriaView = ({
   criteria,
   onApprove,
@@ -124,6 +79,7 @@ const CriteriaView = ({
 
     return new TreeItemProvider<IWorkItemCriteriaCell>(rootItems);
   }, [criteria]);
+
   const moreColumn = new ColumnMore((listItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
     return {
       id: 'sub-menu',
@@ -152,11 +108,59 @@ const CriteriaView = ({
       ]
     };
   });
+  const idCell: ITreeColumn<IWorkItemCriteriaCell> = {
+    id: 'id',
+    name: 'ID',
+    renderCell: renderTreeCell,
+    minWidth: 50,
+    width: new ObservableValue(-100),
+    onSize: onSize,
+    
+  };
+  const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
+    id: 'state',
+    minWidth: 200,
+    name: 'State',
+    width: new ObservableValue(-100),
+    onSize: onSize,
+    renderCell: (
+      rowIndex: number,
+      columnIndex: number,
+      treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
+      treeItem: ITreeItemEx<IWorkItemCriteriaCell>
+    ) => {
+      const underlyingItem = treeItem.underlyingItem;
+      const data = ObservableLike.getValue(underlyingItem.data);
+      const treeCell = data && data[treeColumn.id];
+      // Do not include padding if the table cell has an href
+      const hasLink = !!(
+        treeCell &&
+        typeof treeCell !== 'string' &&
+        typeof treeCell !== 'number' &&
+        treeCell.href
+      );
+
+      const defaultCell = (
+        <SimpleTableCell
+          key={`${columnIndex}-${data.id}`}
+          className={treeColumn.className}
+          columnIndex={columnIndex}
+          contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
+          tableColumn={treeColumn}
+        >
+          {data.state && <StatusTag state={data.state} />}
+        </SimpleTableCell>
+      );
+
+      return defaultCell;
+    }
+  };
   const titleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'title',
     minWidth: 300,
-    width: -100,
     name: 'Title',
+    width: new ObservableValue(-100),
+    onSize: onSize,
     renderCell: (
       rowIndex: number,
       columnIndex: number,
@@ -208,7 +212,8 @@ const CriteriaView = ({
   };
   const approverCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'requiredApprover',
-    width: -100,
+    width: new ObservableValue(-100),
+    onSize: onSize,
     name: 'Required Approver',
     renderCell: (
       rowIndex: number,
@@ -244,7 +249,8 @@ const CriteriaView = ({
   const toggleCell: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'toggle',
     minWidth: 50,
-    width: 100,
+    width: new ObservableValue(100),
+    onSize: onSize,
     name: 'Completed',
     renderCell: (
       rowIndex: number,
@@ -287,18 +293,24 @@ const CriteriaView = ({
     }
   };
 
+  const columns = [
+    //toggleCell,
+    idCell,
+    titleCell,
+    criteriaState,
+    approverCell,
+    ColumnFill,
+    moreColumn as any
+  ];
+
+  function onSize(event: MouseEvent | KeyboardEvent, index: number, width: number) {
+    (columns[index].width as ObservableValue<number>).value = width;
+  }
+
   return (
     <Tree<IWorkItemCriteriaCell>
       ariaLabel="Basic tree"
-      columns={[
-        //toggleCell,
-        idCell,
-        titleCell,
-        criteriaState,
-        approverCell,
-        ColumnFill,
-        moreColumn as any
-      ]}
+      columns={columns}
       itemProvider={treeProvider as any}
       onToggle={(event: any, treeItem: ITreeItemEx<IWorkItemCriteriaCell>) => {
         treeProvider.toggle(treeItem.underlyingItem);
