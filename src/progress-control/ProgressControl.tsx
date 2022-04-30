@@ -43,7 +43,6 @@ const ProgressControl = (): React.ReactElement => {
           // }
           const res = await progressControlService.getWorkItemIds(workItemLoadedArgs.id);
           const data = await progressControlService.getCriteriaData(res);
-          console.log(data);
         } catch (error) {
           console.error(error);
         }
@@ -59,7 +58,7 @@ const ProgressControl = (): React.ReactElement => {
           loaded: false,
           applyTheme: true
         });
-        WebLogger.information('Loading rule presets panel...');
+        WebLogger.information('Loading progress control...');
         await DevOps.ready();
 
         DevOps.register(DevOps.getContributionId(), provider);
@@ -69,7 +68,7 @@ const ProgressControl = (): React.ReactElement => {
         await DevOps.notifyLoadSucceeded();
         DevOps.resize();
       } catch (error) {
-        WebLogger.error('Failed to get project configuration', error);
+        WebLogger.error('Failed to load', error);
       } finally {
         setLoading(false);
         DevOps.resize(undefined, 40);

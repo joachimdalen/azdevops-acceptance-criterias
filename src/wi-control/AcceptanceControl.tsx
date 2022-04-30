@@ -88,7 +88,6 @@ const AcceptanceControl = (): React.ReactElement => {
         if (id !== undefined && id !== 0) {
           await criteriaService.load(data => {
             if (data.length > 0) {
-              WebLogger.trace('Setting data', data);
               setCriteriaDocument(data[0]);
             } else {
               setCriteriaDocument(undefined);
@@ -107,6 +106,7 @@ const AcceptanceControl = (): React.ReactElement => {
         await DevOps.notifyLoadSucceeded();
         setLoading(false);
         if (window.location.search.indexOf('isControl=true') >= 0) {
+          console.log('Refreshing...');
           DevOps.resize();
         }
       }
@@ -114,34 +114,6 @@ const AcceptanceControl = (): React.ReactElement => {
 
     initModule();
   }, []);
-
-  const showDocumentOutdated = async () => {
-    const confirmConfig: IConfirmationConfig = {
-      cancelButton: {
-        text: 'Discard changes',
-        danger: true
-      },
-      confirmButton: {
-        text: 'Force update',
-        primary: true
-      },
-      messageBar: {
-        severity: MessageBarSeverity.Error
-      },
-      messageBarContent: 'Force updating might cause data loss.',
-      content: [
-        'The criteria is outdated and failed to update. This can be caused by a different user updating the document while you were making your changes.',
-        'You can chose to discard or force update.'
-      ]
-    };
-    await devOpsService.showDialog<ActionResult<boolean>, DialogIds>(DialogIds.ConfirmationDialog, {
-      title: 'Criteria outdated',
-      onClose: async result => {
-        console.log('dd');
-      },
-      configuration: confirmConfig
-    });
-  };
 
   const showPanel = async (
     criteria?: IAcceptanceCriteria,

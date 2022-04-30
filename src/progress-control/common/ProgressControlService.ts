@@ -58,7 +58,6 @@ MODE (Recursive)
     const client = getClient(WorkItemTrackingRestClient);
     const types = await client.queryByWiql({ query: query }, project?.name);
 
-    console.log(types);
     return types?.workItemRelations?.map(x => x.target?.id) || [];
   }
 }

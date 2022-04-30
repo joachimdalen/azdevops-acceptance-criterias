@@ -141,8 +141,6 @@ const WorkHub = (): JSX.Element => {
           } else {
             setVisibleDocuments(data);
           }
-
-          WebLogger.information('Set', data);
         });
 
         toggleLoadingData(false);
@@ -211,8 +209,6 @@ const WorkHub = (): JSX.Element => {
 
     return mp;
   }, [workItems]);
-
-  console.log(wiStates);
 
   const innerFilter = (
     items: CriteriaDocument[],

@@ -86,7 +86,6 @@ const AdminConfigurationTab = (): React.ReactElement => {
   useEffect(() => {
     async function init() {
       const loadedSetting = await storageService.getSettings();
-      console.log(loadedSetting);
       setSettings(loadedSetting);
     }
 

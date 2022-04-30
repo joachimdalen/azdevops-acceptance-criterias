@@ -56,7 +56,6 @@ const CriteriaPanel = (): React.ReactElement => {
   const [criteriaService, storageService] = useMemo(
     () => [
       new CriteriaService(error => {
-        console.log('Setting error...');
         setIsError(true);
       }),
       new StorageService()
@@ -160,7 +159,6 @@ const CriteriaPanel = (): React.ReactElement => {
             fetchedSettings.limitAllowedCriteriaTypes &&
             fetchedSettings.allowedCriteriaTypes.length > 0
           ) {
-            console.log(fetchedSettings.allowedCriteriaTypes);
             dispatch({ type: 'SET_TYPE', data: fetchedSettings.allowedCriteriaTypes[0] });
           }
 
@@ -186,7 +184,7 @@ const CriteriaPanel = (): React.ReactElement => {
         await DevOps.notifyLoadSucceeded();
         DevOps.resize();
       } catch (error) {
-        WebLogger.error('Failed to get project configuration', error);
+        WebLogger.error('Load failed', error);
       } finally {
         setLoading(false);
       }
@@ -261,7 +259,7 @@ const CriteriaPanel = (): React.ReactElement => {
           const data = parseValidationError(error);
           setErrors(data);
         } else {
-          console.log('not err', error);
+          console.error(error);
         }
       }
     }
