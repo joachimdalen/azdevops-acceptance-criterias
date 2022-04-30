@@ -43,7 +43,7 @@ const AdminPage = (): React.ReactElement => {
           tabSize={TabSize.Compact}
         >
           <Tab name="Configuration" id="configuration" />
-          <Tab name="Areas" id="areas" />
+          {/* <Tab name="Areas" id="areas" /> */}
           <Tab name="Orphaned Criterias" id="orphaned" />
         </TabBar>
 
@@ -51,9 +51,9 @@ const AdminPage = (): React.ReactElement => {
           <ConditionalChildren renderChildren={selectedTab === 'configuration'}>
             <AdminConfigurationTab />
           </ConditionalChildren>
-          <ConditionalChildren renderChildren={selectedTab === 'areas'}>
+          {/* <ConditionalChildren renderChildren={selectedTab === 'areas'}>
             <DocumentTab />
-          </ConditionalChildren>
+          </ConditionalChildren> */}
           <ConditionalChildren renderChildren={selectedTab === 'orphaned'}>
             <OrphanedDocumentsTab />
           </ConditionalChildren>

@@ -23,6 +23,20 @@ export interface IAcceptanceCriteria {
 
 export type CriteriaTypes = 'scenario' | 'text' | 'checklist';
 
+export interface CriteriaIconMapping {
+  iconName: string;
+  color: string;
+}
+
+export const criteriaIcons: Map<CriteriaTypes, CriteriaIconMapping> = new Map<
+  CriteriaTypes,
+  CriteriaIconMapping
+>([
+  ['text', { iconName: 'icon_sticky_note', color: 'e6df5a' }],
+  ['checklist', { iconName: 'icon_check_box', color: '49b84b' }],
+  ['scenario', { iconName: 'icon_chat_bubble', color: '735ae6' }]
+]);
+
 export interface CriteriaDetailDocument {
   id: string;
   processed?: IAcceptanceCriteriaProcess;
