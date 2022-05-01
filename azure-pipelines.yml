@@ -60,7 +60,7 @@ stages:
       - template: .ci/publish-extension.template.yml
         parameters:
           pipelineEnv: acceptance-criterias-dev-env
-          extensionVisibility: private
+          extensionVisibility: private_preview
 
   - stage: package_qa
     displayName: '[QA] Package'
@@ -85,7 +85,7 @@ stages:
       - template: .ci/publish-extension.template.yml
         parameters:
           pipelineEnv: acceptance-criterias-qa-env
-          extensionVisibility: private
+          extensionVisibility: private_preview
 
   - stage: package_prod
     displayName: '[PROD] Package'

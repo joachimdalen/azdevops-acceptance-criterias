@@ -26,6 +26,47 @@
     "docs": ":memo: Documentation ({{changeCount}})",
     "maint": ":hammer_and_wrench: Maintenance ({{changeCount}})"
   },
+  "sections": {
+    "summary": {
+      "title": {
+        "size": "bold",
+        "format": ":pencil2: Release summary"
+      }
+    },
+    "knownIssues": {
+      "title": {
+        "size": "bold",
+        "format": ":bulb: Known issues"
+      }
+    },
+    "breakingChanges": {
+      "title": {
+        "size": "bold",
+        "format": ":fire: BREAKING CHANGES :fire:"
+      }
+    }
+  },
+  "typeResourcePrefixMapping": {
+    "feature": {
+      "issue": "Suggested in",
+      "pullRequest": "Added in"
+    },
+    "fix": {
+      "issue": "Reported in",
+      "pullRequest": "Fixed in"
+    },
+    "docs": {
+      "issue": "Changed needed",
+      "pullRequest": "Changed in"
+    },
+    "maint": {
+      "pullRequest": "Changed in"
+    },
+    "enhancement": {
+      "issue": "Suggested in",
+      "pullRequest": "Improved in"
+    }
+  },
   "attributionTitleFormat": {
     "size": "h2",
     "format": ":star2: Contributors"
@@ -49,7 +90,7 @@
     "moduleChangesTitle": true,
     "githubIssues": false,
     "githubPullRequests": false,
-    "notes": true,
-    "summary": true
+    "sectionTitle": true,
+    "sectionContent": true
   }
 }
