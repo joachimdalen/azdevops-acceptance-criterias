@@ -1,10 +1,10 @@
-import { chunk } from '../../common/chunkUtil';
-import { capitalizeFirstLetter, getUrl, move } from '../../common/common';
 import {
   mockGetContributionId,
   mockGetProject,
   mockGetResourceAreaLocation
 } from '../../__mocks__/azure-devops-extension-sdk';
+import { chunk } from '../../common/chunkUtil';
+import { capitalizeFirstLetter, getUrl, move } from '../../common/common';
 
 describe('common', () => {
   describe('capitalizeFirstLetter', () => {

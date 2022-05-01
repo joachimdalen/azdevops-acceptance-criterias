@@ -1,4 +1,4 @@
-import { fireEvent, prettyDOM, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import CheckListCriteriaSection from '../../../criteria-panel/components/CheckListCriteriaSection';
 import { CriteriaPanelProvider } from '../../../criteria-panel/CriteriaPanelContext';
@@ -107,5 +107,69 @@ describe('CheckListCriteriaSection', () => {
 
     const text2 = screen.getByRole<HTMLInputElement>('textbox', { name: 'Some criteria...' });
     expect(text2.value).toEqual('New text');
+  });
+
+  it('should move item up when clicked', async () => {
+    render(
+      <CriteriaPanelProvider
+        defaultState={{
+          isLoading: false,
+          type: 'checklist',
+          checklist: {
+            criterias: [
+              { completed: false, id: '1234', text: 'This item' },
+              { completed: false, id: '4321', text: 'This item 2' }
+            ]
+          }
+        }}
+      >
+        <CheckListCriteriaSection errors={undefined} />
+      </CriteriaPanelProvider>
+    );
+
+    const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
+
+    expect(inputs[0].value).toEqual('This item');
+    expect(inputs[1].value).toEqual('This item 2');
+
+    const upBtn = screen.getByTestId('__bolt-4321-up');
+    fireEvent.click(upBtn);
+
+    const inputsNew = screen.getAllByRole<HTMLInputElement>('textbox');
+
+    expect(inputsNew[0].value).toEqual('This item 2');
+    expect(inputsNew[1].value).toEqual('This item');
+  });
+
+  it('should move item down when clicked', async () => {
+    render(
+      <CriteriaPanelProvider
+        defaultState={{
+          isLoading: false,
+          type: 'checklist',
+          checklist: {
+            criterias: [
+              { completed: false, id: '1234', text: 'This item' },
+              { completed: false, id: '4321', text: 'This item 2' }
+            ]
+          }
+        }}
+      >
+        <CheckListCriteriaSection errors={undefined} />
+      </CriteriaPanelProvider>
+    );
+
+    const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
+
+    expect(inputs[0].value).toEqual('This item');
+    expect(inputs[1].value).toEqual('This item 2');
+
+    const upBtn = screen.getByTestId('__bolt-1234-down');
+    fireEvent.click(upBtn);
+
+    const inputsNew = screen.getAllByRole<HTMLInputElement>('textbox');
+
+    expect(inputsNew[0].value).toEqual('This item 2');
+    expect(inputsNew[1].value).toEqual('This item');
   });
 });

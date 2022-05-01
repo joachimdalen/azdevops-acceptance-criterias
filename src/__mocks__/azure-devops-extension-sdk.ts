@@ -71,6 +71,7 @@ export const mockOpenPanel = jest.fn();
 export const mockOpenNewWindow = jest.fn();
 export const mockGetQueryParams = jest.fn().mockRejectedValue(new Error('Not implemented'));
 export const mockGetDocument = jest.fn();
+export const mockGetUser = jest.fn();
 export const mockGetResourceAreaLocation = jest
   .fn()
   .mockRejectedValue(new Error('Not implemented'));
@@ -159,6 +160,9 @@ export function notifyLoadSucceeded() {
 }
 export function getConfiguration() {
   return mockGetConfiguration();
+}
+export function getUser() {
+  return mockGetUser();
 }
 
 export function getExtensionContext(): IExtensionContext {

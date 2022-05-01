@@ -218,17 +218,17 @@ const AcceptanceControl = (): React.ReactElement => {
     );
   }
 
-  // if (isNew) {
-  //   return (
-  //     <div className="acceptance-control-container">
-  //       <ZeroData
-  //         imageAltText={''}
-  //         iconProps={{ iconName: 'Save' }}
-  //         secondaryText="Save the work item to start adding acceptance criterias"
-  //       />
-  //     </div>
-  //   );
-  // }
+  if (isNew) {
+    return (
+      <div className="acceptance-control-container">
+        <ZeroData
+          imageAltText={''}
+          iconProps={{ iconName: 'Save' }}
+          secondaryText="Save the work item to start adding acceptance criterias"
+        />
+      </div>
+    );
+  }
 
   async function onApprove(criteria: IAcceptanceCriteria, complete: boolean) {
     if (

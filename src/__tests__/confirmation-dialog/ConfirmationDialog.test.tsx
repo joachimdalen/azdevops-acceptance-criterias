@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MessageBarSeverity } from 'azure-devops-ui/MessageBar';
-import { IConfirmationConfig } from '../../common/common';
 
-import ConfirmationDialog from '../../confirmation-dialog/ConfirmationDialog';
 import {
   mockGetConfiguration,
   mockGetContributionId
 } from '../../__mocks__/azure-devops-extension-sdk';
+import { IConfirmationConfig } from '../../common/common';
+import ConfirmationDialog from '../../confirmation-dialog/ConfirmationDialog';
 
 describe('ConfirmationDialog', () => {
   it('should show error when failing to load config', async () => {

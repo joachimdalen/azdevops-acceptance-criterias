@@ -156,6 +156,7 @@ const CriteriaPanel = (): React.ReactElement => {
           const fetchedSettings = await storageService.getSettings();
 
           if (
+            fetchedSettings &&
             fetchedSettings.limitAllowedCriteriaTypes &&
             fetchedSettings.allowedCriteriaTypes.length > 0
           ) {
