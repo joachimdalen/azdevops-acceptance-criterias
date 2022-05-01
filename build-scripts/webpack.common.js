@@ -1,0 +1,107 @@
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ScriptTags = require('./webpack-script-tags-plugin');
+const { entries, modules } = require('./entry-points');
+const CopyPlugin = require('copy-webpack-plugin');
+const { EnvironmentPlugin } = require('webpack');
+const { getModuleVersions, getExtensionVersion } = require('./webpack.utils');
+
+const vendorGroups = modules.reduce(
+  (obj, item) => ({
+    ...obj,
+    [`${item.name}-vendor`]: {
+      test: /[\\/]node_modules[\\/]/,
+      name: `${item.name}.vendor`,
+      enforce: true,
+      chunks: chunk => {
+        return chunk.name === item.name;
+      }
+    }
+  }),
+  {}
+);
+
+console.log(vendorGroups);
+
+module.exports = {
+  devtool: 'inline-source-map',
+  mode: 'development',
+  entry: entries,
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js'],
+    alias: {
+      'azure-devops-extension-sdk': path.resolve('node_modules/azure-devops-extension-sdk'),
+      react: path.resolve('node_modules/react'),
+      'react-dom': path.resolve('node_modules/react-dom')
+    }
+  },
+  // stats: 'errors-only',
+  optimization: {
+    runtimeChunk: {
+      name: entrypoint => `${entrypoint.name}.runtime`
+    },
+    splitChunks: {
+      cacheGroups: vendorGroups
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader'
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          'azure-devops-ui/buildScripts/css-variables-loader',
+          'style-loader',
+          'css-loader',
+          'sass-loader'
+        ]
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.woff$/,
+        type: 'asset/resource',
+        generator: {
+          filename: '[name][ext]'
+        }
+      }
+    ]
+  },
+  plugins: [
+    new ScriptTags(),
+    new EnvironmentPlugin({
+      ...getModuleVersions(modules),
+      ...getExtensionVersion()
+    })
+  ]
+    .concat(
+      modules
+        .filter(x => x.generate)
+        .map(entry => {
+          return new HtmlWebpackPlugin({
+            meta: {
+              charset: 'UTF-8'
+            },
+            filename: entry.name + '.html',
+            inject: false,
+            templateContent: ({ htmlWebpackPlugin }) =>
+              `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="${entry.root}"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`,
+            chunks: [entry.name]
+          });
+        })
+    )
+    .concat(
+      modules
+        .filter(x => x.assets !== undefined)
+        .map(entry => {
+          return new CopyPlugin({
+            patterns: entry.assets.map(asset => ({ from: asset.source, to: asset.dest }))
+          });
+        })
+    )
+};

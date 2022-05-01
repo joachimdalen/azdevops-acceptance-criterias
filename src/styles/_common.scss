@@ -1,0 +1,91 @@
+.bg-dark {
+  background-color: $backgroundColor;
+}
+.border-bottom-light {
+  border-bottom: 1px solid $neutral-alpha-30;
+}
+.color-error {
+  color: $status-error-text;
+}
+
+.progress-bar {
+  width: 100%;
+  &-container {
+    background: rgba(var(--palette-neutral-10, 218, 218, 218), 1);
+    position: relative;
+    height: 8px;
+    display: flex;
+  }
+  &-bar {
+    background-color: var(--communication-background, rgba(0, 120, 212, 1));
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform-origin: left;
+    transform: scaleX(0);
+    width: 100%;
+  }
+  &-status-completed {
+    background-color: var(--status-success-text, rgba(127, 184, 0, 1));
+  }
+  &-status-close {
+    background-color: var(--status-warning-text, rgba(184, 94, 6, 1));
+  }
+  &-container {
+    background: rgba(var(--palette-neutral-10, 218, 218, 218), 1);
+    position: relative;
+    height: 15px;
+  }
+}
+.ac-link {
+  text-overflow: ellipsis;
+  width: 100%;
+  overflow: hidden;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+@mixin status-tag-variant($name, $color) {
+  &-#{$name} {
+    .status-tag-indicator {
+      background-color: $color;
+    }
+  }
+}
+.status-tag {
+  display: flex;
+  align-items: center;
+  text-transform: capitalize;
+  &-indicator {
+    margin-right: 4px;
+    height: 8px;
+    width: 8px;
+    border-radius: 4px;
+  }
+  @include status-tag-variant('new', #7e7e7e);
+  @include status-tag-variant('completed', #3094db);
+  @include status-tag-variant('partial', #f2d918);
+  @include status-tag-variant('awaitingapproval', #30dbb9);
+  @include status-tag-variant('approved', green);
+  @include status-tag-variant('rejected', red);
+}
+
+.zero-data-error {
+  .custom-zero-data-icon {
+    color: $status-error-text;
+    font-size: 75px;
+    line-height: 75px;
+    margin-bottom: 20px;
+  }
+}
+.no-criterias-loaded {
+  .vss-ZeroDataItem--icon-image {
+    color: $status-info-foreground;
+  }
+}
+.dark-background {
+  background-color: var(--background-color, rgba(255, 255, 255, 1));
+}

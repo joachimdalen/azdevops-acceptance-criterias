@@ -1,3 +1,11 @@
+@import 'azure-devops-ui/Core/override.css';
 @import 'azure-devops-ui/Core/_platformCommon.scss';
-@import '../styles/mixins.scss';
+@import '@joachimdalen/azdevops-ext-core/styles/mixins.scss';
+@import '../styles/criteria-list';
+@import '../styles/common';
+
 @include extension-container('admin-hub-container');
+
+.admin-container {
+  background-color: var(--background-color, rgba(255, 255, 255, 1));
+}

@@ -1,0 +1,26 @@
+@import 'azure-devops-ui/Core/override.css';
+@import 'azure-devops-ui/Core/_platformCommon.scss';
+@import '@joachimdalen/azdevops-ext-core/styles/mixins.scss';
+@import '../styles/criteria-list';
+@import '../styles/common';
+@include extension-container('wi-control-container');
+
+.add-criteria-button {
+  .ms-Icon {
+    color: rgba(var(--palette-accent2-dark, 16, 124, 16), 1);
+  }
+}
+
+.acceptance-control-container {
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.acceptance-control-loader {
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: center;
+}

@@ -1,18 +1,19 @@
-import { CommonServiceIds, IHostNavigationService } from 'azure-devops-extension-api';
-import * as DevOps from 'azure-devops-extension-sdk';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Header } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { Page } from 'azure-devops-ui/Page';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import AdminConfigurationTab from './tabs/AdminConfigurationTab';
-import AreaConfigurationTab from './tabs/AreaConfigurationTab';
+import DocumentTab from './tabs/DocumentTab';
+import OrphanedDocumentsTab from './tabs/orphaned/OrphanedDocumentsTab';
 
 const AdminPage = (): React.ReactElement => {
-  const [selectedTab, setSelectedTab] = useState<string>('areas');
+  const [devOpsService] = useMemo(() => [new DevOpsService()], []);
+  const [selectedTab, setSelectedTab] = useState<string>('configuration');
 
   const commandBarItems: IHeaderCommandBarItem[] = [
     {
@@ -20,13 +21,8 @@ const AdminPage = (): React.ReactElement => {
       text: 'Open docs',
       iconProps: { iconName: 'Help' },
       onActivate: () => {
-        DevOps.getService<IHostNavigationService>('ms.vss-features.host-navigation-service').then(
-          value => {
-            value.openNewWindow(
-              'https://github.com/joachimdalen/azdevops-acceptance-criterias',
-              ''
-            );
-          }
+        devOpsService.openLink(
+          'https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias'
         );
       }
     }
@@ -37,24 +33,31 @@ const AdminPage = (): React.ReactElement => {
       <Page className="flex-grow">
         <Header
           commandBarItems={commandBarItems}
-          title="Advanced Acceptance Criterias"
-          description="Management for Advanced Acceptance Criterias"
+          title="Acceptance Criterias"
+          description="Management for Acceptance Criterias"
         />
         <TabBar
-          className="margin-bottom-16"
+          className="margin-bottom-16 margin-top-8"
           onSelectedTabChanged={tab => setSelectedTab(tab)}
           selectedTabId={selectedTab}
-          tabSize={TabSize.Tall}
+          tabSize={TabSize.Compact}
         >
           <Tab name="Configuration" id="configuration" />
-          <Tab name="Areas" id="areas" />
+          {/* <Tab name="Areas" id="areas" /> */}
+          <Tab name="Orphaned Criterias" id="orphaned" />
         </TabBar>
-        <ConditionalChildren renderChildren={selectedTab === 'configuration'}>
-          <AdminConfigurationTab />
-        </ConditionalChildren>
-        <ConditionalChildren renderChildren={selectedTab === 'areas'}>
-          <AreaConfigurationTab />
-        </ConditionalChildren>
+
+        <Surface background={SurfaceBackground.normal}>
+          <ConditionalChildren renderChildren={selectedTab === 'configuration'}>
+            <AdminConfigurationTab />
+          </ConditionalChildren>
+          {/* <ConditionalChildren renderChildren={selectedTab === 'areas'}>
+            <DocumentTab />
+          </ConditionalChildren> */}
+          <ConditionalChildren renderChildren={selectedTab === 'orphaned'}>
+            <OrphanedDocumentsTab />
+          </ConditionalChildren>
+        </Surface>
       </Page>
     </Surface>
   );

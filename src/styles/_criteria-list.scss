@@ -1,0 +1,10 @@
+.flex-self-center {
+  align-self: center;
+}
+.acceptance-critera-title-cell {
+  display: flex;
+  .title {
+    width: 100%;
+    align-self: center;
+  }
+}

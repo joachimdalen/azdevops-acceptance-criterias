@@ -1,0 +1,123 @@
+parameters:
+  - name: taskVersion
+    displayName: 'Task Version'
+    type: string
+    default: $(Task.Extension.Version)
+  - name: deployToDev
+    displayName: 'Deploy to DEV instead of QA'
+    type: boolean
+    default: false
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - .github/*
+      - .azext/*
+      - .vscode/*
+      - .ci/*
+      - docs/*
+pr: none
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  npm_config_cache: $(Pipeline.Workspace)/.npm
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  marketplaceServiceConnection: 'marketplace-joachim-dalen'
+
+stages:
+  - stage: 'run_tests'
+    displayName: Test & Build
+    jobs:
+      - job:
+        steps:
+          - template: .ci/install.template.yml
+          - template: .ci/run-tests.template.yml
+
+  - stage: package_dev
+    displayName: '[DEV] Package'
+    dependsOn: 'run_tests'
+    condition: and(succeeded(), eq(${{ parameters.deployToDev }}, true),  eq(variables.isMain, false))
+    variables:
+      - group: 'mp-acceptance-criterias-dev'
+    jobs:
+      - template: .ci/build-extension-artifact.template.yml
+        parameters:
+          extensionEnv: dev
+          taskVersion: ${{ parameters.taskVersion }}
+          generateVersionChangelog: false
+
+  - stage: publish_dev
+    displayName: '[DEV] Publish'
+    dependsOn: 'package_dev'
+    condition: and(succeeded(), eq(${{ parameters.deployToDev }}, true),  eq(variables.isMain, false))
+    variables:
+      - group: 'mp-acceptance-criterias-dev'
+    jobs:
+      - template: .ci/publish-extension.template.yml
+        parameters:
+          pipelineEnv: acceptance-criterias-dev-env
+          extensionVisibility: private_preview
+
+  - stage: package_qa
+    displayName: '[QA] Package'
+    dependsOn: 'run_tests'
+    condition: and(succeeded(), eq(${{ parameters.deployToDev }}, false),  eq(variables.isMain, false))
+    variables:
+      - group: 'mp-acceptance-criterias-qa'
+    jobs:
+      - template: .ci/build-extension-artifact.template.yml
+        parameters:
+          extensionEnv: qa
+          taskVersion: ${{ parameters.taskVersion }}
+          generateVersionChangelog: false
+
+  - stage: publish_qa
+    displayName: '[QA] Publish'
+    dependsOn: 'package_qa'
+    condition: and(succeeded(), eq(${{ parameters.deployToDev }}, false),  eq(variables.isMain, false))
+    variables:
+      - group: 'mp-acceptance-criterias-qa'
+    jobs:
+      - template: .ci/publish-extension.template.yml
+        parameters:
+          pipelineEnv: acceptance-criterias-qa-env
+          extensionVisibility: private_preview
+
+  - stage: package_prod
+    displayName: '[PROD] Package'
+    dependsOn: 'run_tests'
+    condition: and(succeeded(), eq(variables.isMain, true))
+    variables:
+      - group: 'mp-acceptance-criterias-prod'
+    jobs:
+      - job: verify_changelog
+        steps:
+          - task: GitGuardChanges@0
+            displayName: '[PROD] Verify changelog'
+            inputs:
+              sourceCommitHash: 'tag:v*[!-qa]'
+              matchPattern: '.azext/changelog.json'
+              targetCommitHash: 'HEAD'
+              matchStrategy: 'single'
+              changed: true
+              breakOnFailure: true
+      - template: .ci/build-extension-artifact.template.yml
+        parameters:
+          extensionEnv: prod
+          taskVersion: ${{ parameters.taskVersion }}
+
+  - stage: publish_prod
+    displayName: '[PROD] Publish'
+    dependsOn: 'package_prod'
+    condition: and(succeeded(), eq(variables.isMain, true))
+    variables:
+      - group: 'mp-acceptance-criterias-prod'
+    jobs:
+      - template: .ci/publish-extension.template.yml
+        parameters:
+          pipelineEnv: acceptance-criterias-prod-env
+          extensionVisibility: public_preview
