@@ -94,17 +94,6 @@ stages:
     variables:
       - group: 'mp-acceptance-criterias-prod'
     jobs:
-      - job: verify_changelog
-        steps:
-          - task: GitGuardChanges@0
-            displayName: '[PROD] Verify changelog'
-            inputs:
-              sourceCommitHash: 'tag:v*[!-qa]'
-              matchPattern: '.azext/changelog.json'
-              targetCommitHash: 'HEAD'
-              matchStrategy: 'single'
-              changed: true
-              breakOnFailure: true
       - template: .ci/build-extension-artifact.template.yml
         parameters:
           extensionEnv: prod
