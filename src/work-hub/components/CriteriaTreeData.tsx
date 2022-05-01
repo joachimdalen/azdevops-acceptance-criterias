@@ -260,7 +260,7 @@ export const getTreeProvider = (
             workItemId: x.id,
             title: y.title,
             rowType: 'criteria',
-            type: capitalizeFirstLetter(y.type) as CriteriaTypes,
+            type: y.type,
             state: y.state,
             requiredApprover: y.requiredApprover,
             criteriaId: y.id,
