@@ -9,7 +9,8 @@
         "changes": [
           {
             "type": "fix",
-            "description": "Fix wrong title on work hub"
+            "description": "Fix wrong title on work hub",
+            "pullRequest": 14
           }
         ]
       }
