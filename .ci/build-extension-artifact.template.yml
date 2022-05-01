@@ -30,7 +30,7 @@ jobs:
           extensionId: '$(ExtensionID)'
           versionAction: 'Patch'
           outputVariable: 'Task.Extension.Version'
-          extensionVersionOverride: ${{ parameters.taskVersion }}
+          extensionVersionOverride: TASK_OVERRIDE_VERSION
       - template: install.template.yml
       - template: build.template.yml
         parameters:
