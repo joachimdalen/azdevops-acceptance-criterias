@@ -2,6 +2,13 @@
   {
     "publishDate": "2022-05-01",
     "version": "1.0.2",
+    "changes": [
+      {
+        "type": "maint",
+        "description": "Fix cyclical reference in pipeline",
+        "pullRequest": 18
+      }
+    ],
     "modules": [
       {
         "name": "work-hub",
