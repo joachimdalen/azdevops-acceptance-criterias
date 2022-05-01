@@ -46,7 +46,7 @@ This extension is in preview. Please report any issue on [GitHub](https://github
 
 ## Getting started and documentation
 
-Please see the full [documentation here](https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias)
+Please see the full [documentation here](https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias/configuration/activating)
 
 ## Contact
 
