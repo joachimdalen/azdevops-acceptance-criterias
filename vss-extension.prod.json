@@ -26,10 +26,10 @@
       "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues"
     },
     "privacypolicy": {
-      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/master/PRIVACY.md"
+      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/main/PRIVACY.md"
     },
     "license": {
-      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/master/LICENSE"
+      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/main/LICENSE"
     }
   },
   "repository": {
