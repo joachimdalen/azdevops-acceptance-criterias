@@ -1,6 +1,21 @@
 {
-  "issues": [],
+  "issues": [
+    {
+      "id": 1222231439,
+      "number": 16,
+      "submitter": "joachimdalen",
+      "title": "Criteria rows does not show icons",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/16"
+    }
+  ],
   "pullRequests": [
+    {
+      "id": 924989367,
+      "number": 17,
+      "submitter": "joachimdalen",
+      "title": "Fix criteria icons not showing",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/17"
+    },
     {
       "id": 924981366,
       "number": 14,

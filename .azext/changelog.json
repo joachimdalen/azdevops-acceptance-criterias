@@ -1,6 +1,24 @@
 [
   {
     "publishDate": "2022-05-01",
+    "version": "1.0.2",
+    "modules": [
+      {
+        "name": "work-hub",
+        "version": "1.0.2",
+        "changes": [
+          {
+            "type": "fix",
+            "description": "Fix criterias not showing their icon in the list",
+            "issue": 16,
+            "pullRequest": 17
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "publishDate": "2022-05-01",
     "version": "1.0.1",
     "modules": [
       {
