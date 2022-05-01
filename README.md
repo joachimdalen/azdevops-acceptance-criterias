@@ -11,12 +11,12 @@
   <p align="center">
     An extension to manage acceptance criterias
     <br />
-    <a href="https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/master/docs/index.md"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/main/docs/index.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://marketplace.visualstudio.com/items?itemName=joachimdalen.acceptance-criterias">View Extension</a>
     ·
-    <a href="https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/master/CHANGELOG.md">Changelog</a>
+    <a href="https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/main/CHANGELOG.md">Changelog</a>
     ·
     <a href="https://github.com/joachimdalen/azdevops-acceptance-criterias/issues">Report Bug</a>
     ·
@@ -25,7 +25,7 @@
 </div>
 
 <div align="center">
-  <img alt="Azure DevOps builds" src="https://img.shields.io/azure-devops/build/dalenapps/6531387f-baea-443c-a284-0d0e786e56c3/49?color=0078d7&label=Master%20Build&logo=azure-devops&style=flat-square">
+  <img alt="Azure DevOps builds" src="https://img.shields.io/azure-devops/build/dalenapps/6531387f-baea-443c-a284-0d0e786e56c3/49?color=0078d7&label=main%20Build&logo=azure-devops&style=flat-square">
   <img alt="Issues" src="https://img.shields.io/github/issues/joachimdalen/azdevops-acceptance-criterias.svg?style=flat-square">
   <img alt="License" src="https://img.shields.io/github/license/joachimdalen/azdevops-acceptance-criterias?style=flat-square">
 </div>
@@ -149,7 +149,7 @@ If you want to contribute code, I ask that you follow some guidelines.
   - `bugfix/` for bug fixes
   - `docs/` for documentation changes
 - If your change is related to an issue, use the id as the first part of the branch e.g `bugfix/12-fix-crash-when-updating-rule`
-- Pull requests should target the `develop` branch
+- Pull requests should target the `main` branch
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -161,9 +161,9 @@ If you want to contribute code, I ask that you follow some guidelines.
 
 ## Release and merge strategy
 
-- `master` is only deployed to `PROD` and tagged with `v<extension_version>`
-  - Pull requests are always squash merged into `master`
-  - `master` is the only branch where GitHub releases are created for
+- `main` is only deployed to `PROD` and tagged with `v<extension_version>`
+  - Pull requests are always squash merged into `main`
+  - `main` is the only branch where GitHub releases are created for
 - `feature/*` and `bugfix/*` are deployed to `QA`. For deployment to `DEV` using local assets (only manifest changes are deployed to dev), the `Deploy to DEV instead of QA` option needs to be checked when running the deployment pipeline.
 
 `QA` and `DEV` are private development and verfication environments (publications of the extensions.) Submit a new issue if you for some reason wish access to either of these.

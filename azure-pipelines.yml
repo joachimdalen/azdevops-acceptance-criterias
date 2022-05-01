@@ -11,7 +11,7 @@ parameters:
 trigger:
   branches:
     include:
-      - master
+      - main
   paths:
     exclude:
       - .github/*
