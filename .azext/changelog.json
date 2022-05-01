@@ -1,6 +1,23 @@
 [
   {
-    "publishDate": "01-05-2022",
+    "publishDate": "2022-05-01",
+    "version": "1.0.1",
+    "modules": [
+      {
+        "name": "work-hub",
+        "version": "1.0.1",
+        "changes": [
+          {
+            "type": "fix",
+            "description": "Fix wrong title on work hub",
+            "pullRequest": 14
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "publishDate": "2022-05-01",
     "version": "1.0.0",
     "sections": {
       "summary": [{ "type": "text", "content": "Initial release" }]
