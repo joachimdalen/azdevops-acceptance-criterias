@@ -30,46 +30,35 @@
   <img alt="License" src="https://img.shields.io/github/license/joachimdalen/azdevops-acceptance-criterias?style=flat-square">
 </div>
 <div align="center">
-
   <img alt="Visual Studio Marketplace Installs - Azure DevOps Extension" src="https://img.shields.io/visual-studio-marketplace/azure-devops/installs/total/joachimdalen.acceptance-criterias?label=Marketplace%20Installs&style=flat-square">
   <img alt="Visual Studio Marketplace Last Updated" src="https://img.shields.io/visual-studio-marketplace/last-updated/joachimdalen.acceptance-criterias?style=flat-square">
-<img alt="Visual Studio Marketplace Rating" src="https://img.shields.io/visual-studio-marketplace/r/joachimdalen.acceptance-criterias?style=flat-square">
+  <img alt="Visual Studio Marketplace Rating" src="https://img.shields.io/visual-studio-marketplace/r/joachimdalen.acceptance-criterias?style=flat-square">
 </div>
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#limitations">Limitations</a><li>   
-      </ul>
-    </li>
-    <li><a href="#post-install-activation">Post Install Activation</a></li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#release-and-merge-strategy">Release and merge strategy</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
-
-<!-- ABOUT THE PROJECT -->
 
 ---
 
 ## About The Project
 
-TODO
+Accepance Criterias is an extension to allow for better management of acceptance criterias in Azure DevOps.
+
+![work-hub-preview](marketplace/docs/images/work-hub-preview.png)
+
+## Features
+
+- Several criteria types
+  - Scenario based
+  - Text based
+  - Checklist based
+- Approval and rejection flows
+- Hub for processing criterias
+
+### On the roadmap
+
+- [Auto assign approver based on rules](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/8)
+- [Ability to assign tags to a criteria](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/7)
+- [Approval / Rejection comments](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4)
+- [Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
+- [Excel/CSV export](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/2)
 
 ## Getting Started
 
