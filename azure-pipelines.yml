@@ -27,7 +27,6 @@ variables:
   npm_config_cache: $(Pipeline.Workspace)/.npm
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   marketplaceServiceConnection: 'marketplace-joachim-dalen'
-  TASK_OVERRIDE_VERSION: ${{ parameters.taskVersion }}
 
 stages:
   - stage: 'run_tests'
