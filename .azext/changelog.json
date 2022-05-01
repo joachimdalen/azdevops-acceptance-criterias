@@ -10,7 +10,8 @@
           {
             "type": "fix",
             "description": "Fix criterias not showing their icon in the list",
-            "issue": 16
+            "issue": 16,
+            "pullRequest": 17
           }
         ]
       }

@@ -8,6 +8,7 @@
 
 - Fix criterias not showing their icon in the list
   - Reported in [GH#16 - Criteria rows does not show icons](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/16)
+  - Fixed in [PR#17 - Fix criteria icons not showing](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/17)
 
 ---
 
