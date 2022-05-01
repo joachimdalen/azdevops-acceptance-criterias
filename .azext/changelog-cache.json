@@ -10,6 +10,13 @@
   ],
   "pullRequests": [
     {
+      "id": 924990436,
+      "number": 18,
+      "submitter": "joachimdalen",
+      "title": "Fix cyclical reference",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/18"
+    },
+    {
       "id": 924989367,
       "number": 17,
       "submitter": "joachimdalen",

@@ -2,6 +2,13 @@
 
 ## 1.0.2 (2022-05-01)
 
+### 🛠️ Maintenance (1)
+
+- Fix cyclical reference in pipeline
+  - Changed in [PR#18 - Fix cyclical reference](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/18)
+
+## 📦 Module changes
+
 ### 🐛 Fixes (1)
 
 #### `work-hub@1.0.2`
