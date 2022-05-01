@@ -179,7 +179,7 @@
       "type": "ms.vss-web.hub-group",
       "targets": ["ms.vss-web.project-hub-groups-collection"],
       "properties": {
-        "name": "Acceptance Criterias (QA)",
+        "name": "Acceptance Criterias",
         "order": 100,
         "icon": {
           "light": "dist/assets/hub-group-icon.png",
