@@ -27,7 +27,7 @@
       "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues"
     },
     "privacypolicy": {
-      "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/main/PRIVACY.md"
+      "uri": "https://docs.devops-extensions.dev/docs/privacy"
     },
     "license": {
       "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias/blob/main/LICENSE"
@@ -163,7 +163,7 @@
         "hostScopes": ["project"],
         "links": {
           "learn": {
-            "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias#post-install-activation"
+            "uri": "https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias/configuration/activating#activating-the-work-hub-and-admin-hub"
           }
         }
       }
@@ -180,7 +180,7 @@
         "hostScopes": ["project"],
         "links": {
           "learn": {
-            "uri": "https://github.com/joachimdalen/azdevops-acceptance-criterias#post-install-activation"
+            "uri": "https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias/configuration/activating#adding-the-control-to-work-items"
           }
         }
       }
