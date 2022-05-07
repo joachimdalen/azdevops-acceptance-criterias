@@ -56,10 +56,10 @@ import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
 import { getSchema } from './CriteriaPanelData';
 
-
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
-  const [tabId, setTabId] = useState('history');
+  const [tabId, setTabId] = useState('details');
+  const [eTag, setEtag] = useState<number | undefined>();
   const [isError, setIsError] = useBooleanToggle();
   const [criteriaService, storageService, historyService] = useMemo(
     () => [
@@ -183,13 +183,15 @@ const CriteriaPanel = (): React.ReactElement => {
               const crit = doc?.criterias.find(x => x.id === config.criteriaId);
 
               if (crit) {
+                if (historyEvents === undefined || doc?.__etag !== eTag) {
+                  setEtag(doc?.__etag);
+                  const historyEvents = await historyService.getHistory(crit.id);
+                  setHistoryEvents(historyEvents);
+                }
                 setCriteriaInfo(crit, details);
                 await checkApproval(crit);
               }
             }, config.workItemId);
-
-            const historyEvents = await historyService.getHistory(config.criteriaId);
-            setHistoryEvents(historyEvents);
           }
 
           setWorkItemId(config.workItemId);
@@ -456,8 +458,12 @@ const CriteriaPanel = (): React.ReactElement => {
             selectedTabId={tabId}
             className="margin-bottom-16"
           >
-            <Tab id="details" name="Details" />
-            <Tab id="history" name="History" />
+            <Tab id="details" name="Details" iconProps={{ iconName: 'Page' }} />
+            <Tab
+              id="history"
+              name={`History (${historyEvents?.items.length})`}
+              iconProps={{ iconName: 'History' }}
+            />
           </TabBar>
         </Surface>
       </ConditionalChildren>

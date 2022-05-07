@@ -285,6 +285,26 @@ class StorageService implements IStorageService {
     }
   }
 
+  public async deleteHistory(id: string): Promise<void> {
+    try {
+      const dataService = await this.getDataService();
+      if (this._criteriaHistoryCollection === undefined) {
+        throw new Error('Failed to initialize ');
+      }
+      const dataManager = await dataService.getExtensionDataManager(
+        DevOps.getExtensionContext().id,
+        await DevOps.getAccessToken()
+      );
+      await dataManager.deleteDocument(this._criteriaHistoryCollection, id, {
+        scopeType: this.scopeType
+      });
+    } catch (error: any) {
+      if (error?.status !== 404) {
+        throw new Error(error);
+      }
+    }
+  }
+
   public async getHistory(id: string): Promise<HistoryDocument | undefined> {
     const dataService = await this.getDataService();
 

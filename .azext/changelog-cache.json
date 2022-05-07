@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1168792610,
+      "number": 3,
+      "submitter": "joachimdalen",
+      "title": "Processing history",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3"
+    },
+    {
       "id": 1222231439,
       "number": 16,
       "submitter": "joachimdalen",

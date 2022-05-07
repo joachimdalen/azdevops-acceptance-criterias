@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.1.0 (2022-05-XX)
+
+### 🐛 Fixes (1)
+
+- Fixed an issue that could cause an error to show when performing multiple processing actions without closing the panel
+
+## 📦 Module changes
+
+### 🛠️ Maintenance (2)
+
+#### `work-hub@1.0.3`
+
+- Remove unused setting from settings view
+
+#### `wi-control@1.0.1`
+
+- Remove unused code
+
+### 🚀 Features (1)
+
+#### `criteria-panel@1.1.0`
+
+- Added processing history
+  - Suggested in [GH#3 - Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
+
+---
+
 ## 1.0.2 (2022-05-01)
 
 ### 🛠️ Maintenance (1)

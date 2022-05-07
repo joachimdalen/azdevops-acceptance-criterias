@@ -147,7 +147,6 @@ class CriteriaService {
     complete: boolean
   ): Promise<{ details: CriteriaDetailDocument; criteria?: IAcceptanceCriteria } | undefined> {
     try {
-      const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
       const details: CriteriaDetailDocument = (await this.getCriteriaDetails(criteriaId)) || {
         id: criteriaId
       };
@@ -155,27 +154,10 @@ class CriteriaService {
       const itemIndex = details.checklist?.criterias?.findIndex(x => x.id === checkItemId);
 
       if (details.checklist?.criterias !== undefined && itemIndex !== undefined && itemIndex > -1) {
-        const preEditComplete = details.checklist.criterias.every(x => x.completed);
         const newItem = { ...details.checklist.criterias[itemIndex] };
         newItem.completed = complete;
         details.checklist.criterias[itemIndex] = newItem;
         const updated = await this._dataStore.setCriteriaDetailsDocument(details);
-        const isAllCompleted = details.checklist.criterias.every(x => x.completed);
-        if (doc !== undefined && (isAllCompleted || preEditComplete)) {
-          const newDoc = { ...doc };
-          const criteria = newDoc.criterias.find(x => x.id === criteriaId);
-          if (criteria !== undefined) {
-            const updt = this.setCriteriaItems(criteria, updated);
-            if (updt.criteria && updt.details) {
-              this.update(doc, updt.criteria, updt.details);
-
-              return {
-                details: updt.details,
-                criteria: updt.criteria
-              };
-            }
-          }
-        }
 
         return {
           details: updated
@@ -317,8 +299,15 @@ class CriteriaService {
     }
 
     const stateDoc = this.setFullState(newDocument);
-    await this._dataStore.setCriteriaDocument(stateDoc);
+    const updated = await this._dataStore.setCriteriaDocument(stateDoc);
     const updatedDetails = await this._dataStore.setCriteriaDetailsDocument(details);
+
+    const docIndex = this._data.findIndex(x => x.id === stateDoc.id);
+
+    if (docIndex > -1) {
+      this._data[docIndex] = updated;
+    }
+
     return {
       criteria: criteria,
       details: updatedDetails

@@ -1,5 +1,48 @@
 [
   {
+    "publishDate": "2022-05-XX",
+    "version": "1.1.0",
+    "changes": [
+      {
+        "type": "fix",
+        "description": "Fixed an issue that could cause an error to show when performing multiple processing actions without closing the panel"
+      }
+    ],
+    "modules": [
+      {
+        "name": "work-hub",
+        "version": "1.0.3",
+        "changes": [
+          {
+            "type": "maint",
+            "description": "Remove unused setting from settings view"
+          }
+        ]
+      },
+      {
+        "name": "wi-control",
+        "version": "1.0.1",
+        "changes": [
+          {
+            "type": "maint",
+            "description": "Remove unused code"
+          }
+        ]
+      },
+      {
+        "name": "criteria-panel",
+        "version": "1.1.0",
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Added processing history",
+            "issue": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
     "publishDate": "2022-05-01",
     "version": "1.0.2",
     "changes": [

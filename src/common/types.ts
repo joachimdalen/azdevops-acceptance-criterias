@@ -163,19 +163,19 @@ export const historyEventProperties: Map<HistoryEvent, EventProperties> = new Ma
 >([
   [
     HistoryEvent.Completed,
-    { icon: 'CheckMark', iconColor: 'text-blue', title: 'Completed criteria' }
+    { icon: 'SkypeCircleCheck', iconColor: 'text-blue', title: 'Completed criteria' }
   ],
-  [
-    HistoryEvent.ReOpened,
-    { icon: 'Refresh', iconColor: 'text-purple', title: 'Reset back to new' }
-  ],
+  [HistoryEvent.ReOpened, { icon: 'CirclePlus', iconColor: 'text-blue', title: 'Reset back to new' }],
   [
     HistoryEvent.Approved,
     { icon: 'CheckMark', iconColor: 'text-green', title: 'Approved criteria' }
   ],
   [
     HistoryEvent.ReApprove,
-    { icon: 'CheckMark', iconColor: 'text-green', title: 'Sent to re approval' }
+    { icon: 'Refresh', iconColor: 'text-orange', title: 'Sent to re approval' }
   ],
-  [HistoryEvent.Rejected, { icon: 'Cancel', iconColor: 'text-red', title: 'Rejected criteria' }]
+  [
+    HistoryEvent.Rejected,
+    { icon: 'StatusErrorFull', iconColor: 'text-red', title: 'Rejected criteria' }
+  ]
 ]);
