@@ -8,21 +8,31 @@ import {
   CriteriaDetailDocument,
   CriteriaDocument,
   CriteriaPanelConfig,
-  FullCriteriaStatus
+  FullCriteriaStatus,
+  HistoryDocument
 } from '../../common/types';
 import CriteriaPanel from '../../criteria-panel/CriteriaPanel';
 import { CriteriaPanelProvider } from '../../criteria-panel/CriteriaPanelContext';
 import { getApprover, getTextCriteria } from '../../testdata';
+import CriteriaHistoryService from '../../common/services/CriteriaHistoryService';
 
 type CpCon = (CriteriaPanelConfig & { panel: any }) | undefined;
+
+const history: HistoryDocument = {
+  __etag: 1,
+  id: 'AC-1-2',
+  items: []
+};
 
 describe('CriteriaPanel', () => {
   const getSettingsSpy = jest.spyOn(StorageService.prototype, 'getSettings');
   const getCriteriaDetailsSpy = jest.spyOn(StorageService.prototype, 'getCriteriaDetail');
   const getCriteriaSpy = jest.spyOn(StorageService.prototype, 'getCriteriasForWorkItem');
+  const getHistorySpy = jest.spyOn(CriteriaHistoryService.prototype, 'getHistory');
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getHistorySpy.mockReset();
   });
 
   it('should render default edit mode', async () => {
@@ -33,6 +43,7 @@ describe('CriteriaPanel', () => {
     };
 
     mockGetConfiguration.mockReturnValue(config);
+    getHistorySpy.mockResolvedValue(history);
     getSettingsSpy.mockResolvedValue({
       id: 'Global',
       limitAllowedCriteriaTypes: false,
@@ -61,8 +72,8 @@ describe('CriteriaPanel', () => {
     };
     const { criteria, details } = getTextCriteria(
       '1',
-      FullCriteriaStatus.New,
-      AcceptanceCriteriaState.New,
+      FullCriteriaStatus.Approved,
+      AcceptanceCriteriaState.Approved,
       '1'
     );
 
@@ -76,6 +87,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -85,6 +97,7 @@ describe('CriteriaPanel', () => {
 
     await waitFor(() => screen.findAllByText(/This is the content/));
   });
+
   it('should render complete container', async () => {
     const config: CpCon = {
       panel: {
@@ -111,6 +124,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -145,6 +159,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -180,6 +195,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -216,6 +232,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>

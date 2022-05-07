@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
+import { ProcessEvent } from '../../../common/types';
 import CompletedProcessContainer from '../../../criteria-panel/components/CompletedProcessContainer';
 
 describe('CompletedProcessContainer', () => {
@@ -21,6 +22,6 @@ describe('CompletedProcessContainer', () => {
     const reset = screen.getByRole('button');
     fireEvent.click(reset);
 
-    expect(process).toHaveBeenCalledWith('1', 'new');
+    expect(process).toHaveBeenCalledWith('1', ProcessEvent.ResetToNew);
   });
 });

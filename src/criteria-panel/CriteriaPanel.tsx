@@ -183,7 +183,7 @@ const CriteriaPanel = (): React.ReactElement => {
               const crit = doc?.criterias.find(x => x.id === config.criteriaId);
 
               if (crit) {
-                if (historyEvents === undefined || doc?.__etag !== eTag) {
+                if ((historyEvents === undefined || doc?.__etag !== eTag) && isReadOnly) {
                   setEtag(doc?.__etag);
                   const historyEvents = await historyService.getHistory(crit.id);
                   setHistoryEvents(historyEvents);
