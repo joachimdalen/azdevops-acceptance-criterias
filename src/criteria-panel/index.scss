@@ -9,8 +9,21 @@
   top: 0;
   z-index: 9999;
 }
-.checklist {
+.checklist,
+.historylist {
   .bolt-list-cell {
     white-space: initial;
   }
+}
+.text-green {
+  color: $status-success-foreground;
+}
+.text-red {
+  color: $status-error-text;
+}
+.text-blue {
+  color: $status-info-foreground;
+}
+.text-purple {
+  color: purple;
 }

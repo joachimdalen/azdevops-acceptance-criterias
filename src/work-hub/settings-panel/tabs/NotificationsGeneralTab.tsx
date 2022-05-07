@@ -8,9 +8,6 @@ const NotificationsGeneralTab = (): JSX.Element => {
   const [noWorkItem, setNoWorkItem] = useState(
     getLocalItem(LocalStorageKeys.OpenWorkItem) || false
   );
-  const [noUndoComplete, setNoUndoComplete] = useState(
-    getLocalItem(LocalStorageKeys.UndoCompleted) || false
-  );
 
   return (
     <div className="padding-16 flex-grow rhythm-vertical-16">
@@ -26,21 +23,6 @@ const NotificationsGeneralTab = (): JSX.Element => {
           onChange={(_, c) => {
             setLocalItem(LocalStorageKeys.OpenWorkItem, c);
             setNoWorkItem(c);
-          }}
-        />
-      </SettingContainer>
-      <SettingContainer
-        title="Do not show undo completed"
-        description="Do not show the 'Undo completed criteria' warning"
-        browserLocal
-      >
-        <Toggle
-          offText={'Off'}
-          onText={'On'}
-          checked={noUndoComplete}
-          onChange={(_, c) => {
-            setLocalItem(LocalStorageKeys.UndoCompleted, c);
-            setNoUndoComplete(c);
           }}
         />
       </SettingContainer>

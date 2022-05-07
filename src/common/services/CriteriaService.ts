@@ -1,7 +1,7 @@
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { getClient } from 'azure-devops-extension-api';
-import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
+import { CoreRestClient, Process, WebApiTeam } from 'azure-devops-extension-api/Core';
 import { GraphMembership, GraphRestClient } from 'azure-devops-extension-api/Graph';
 import {
   WorkItemQueryResult,
@@ -16,8 +16,12 @@ import {
   CriteriaDocument,
   CriteriaPanelConfig,
   FullCriteriaStatus,
-  IAcceptanceCriteria
+  HistoryEvent,
+  HistoryItem,
+  IAcceptanceCriteria,
+  ProcessEvent
 } from '../types';
+import CriteriaHistoryService from './CriteriaHistoryService';
 import { IStorageService, StorageService } from './StorageService';
 
 type CriteriaServiceOnChange = (data: CriteriaDocument[]) => void;
@@ -34,14 +38,20 @@ type CriteriaServiceOnError = (error: CriteriaError) => void;
 
 class CriteriaService {
   private readonly _dataStore: IStorageService;
+  private readonly _historyService: CriteriaHistoryService;
   private _isInitialized = false;
   private _data: CriteriaDocument[];
   private _changeHandler?: CriteriaServiceOnChange;
   private _devOpsService: DevOpsService;
   private _errorHandler?: CriteriaServiceOnError;
 
-  constructor(onError?: CriteriaServiceOnError, dataStore?: IStorageService) {
+  constructor(
+    onError?: CriteriaServiceOnError,
+    dataStore?: IStorageService,
+    historyService?: CriteriaHistoryService
+  ) {
     this._dataStore = dataStore || new StorageService();
+    this._historyService = historyService || new CriteriaHistoryService();
     this._devOpsService = new DevOpsService();
     this._data = [];
     this._errorHandler = onError;
@@ -217,7 +227,7 @@ class CriteriaService {
   public async processCriteria(
     workItemId: string,
     id: string,
-    approved: boolean
+    action: ProcessEvent
   ): Promise<{ criteria: IAcceptanceCriteria; details: CriteriaDetailDocument } | undefined> {
     try {
       const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
@@ -240,11 +250,16 @@ class CriteriaService {
             };
           }
 
-          criteria.state = approved
-            ? AcceptanceCriteriaState.Approved
-            : AcceptanceCriteriaState.Rejected;
+          criteria.state =
+            action === ProcessEvent.Approve
+              ? AcceptanceCriteriaState.Approved
+              : AcceptanceCriteriaState.Rejected;
 
           const res = await this.update(doc, criteria, details);
+
+          const historyEvent: HistoryItem = this._historyService.getProcessEvent(action, approver);
+          await this._historyService.createOrUpdate(id, historyEvent);
+
           return res;
         }
       }
@@ -257,7 +272,7 @@ class CriteriaService {
 
   public async toggleCompletion(
     id: string,
-    reApprove?: boolean
+    action: ProcessEvent
   ): Promise<CriteriaDocument | undefined> {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
     try {
@@ -267,13 +282,18 @@ class CriteriaService {
         const { criteria: crit, details: det } = this.setCriteriaItems(
           criteria,
           details,
-          reApprove
+          action === ProcessEvent.ResubmitForApproval
         );
         if (crit) {
           const updated = await this.createOrUpdate(doc.id, crit, true);
           if (det) {
             await this._dataStore.setCriteriaDetailsDocument(det);
           }
+
+          const approver = await getLoggedInUser();
+          const historyEvent: HistoryItem = this._historyService.getProcessEvent(action, approver);
+          await this._historyService.createOrUpdate(id, historyEvent);
+
           return updated;
         }
       }

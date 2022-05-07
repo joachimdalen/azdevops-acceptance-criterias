@@ -123,3 +123,59 @@ export interface GlobalSettingsDocument {
   allowedCriteriaTypes: CriteriaTypes[];
   requireApprovers: boolean;
 }
+export interface HistoryDocument {
+  readonly id: string;
+  readonly __etag?: number;
+  items: HistoryItem[];
+}
+
+export enum ProcessEvent {
+  Approve = 'approve',
+  Reject = 'reject',
+  Complete = 'complete',
+  ResetToNew = 'reset-to-new',
+  ResubmitForApproval = 'resubmit-for-approval'
+}
+
+export enum HistoryEvent {
+  Completed = 'completed',
+  ReOpened = 'reopened',
+  Approved = 'approved',
+  Rejected = 'rejected',
+  ReApprove = 'reapprove'
+}
+
+export interface HistoryItem {
+  event: HistoryEvent;
+  actor?: IInternalIdentity;
+  date: Date;
+  properties?: { [key: string]: string };
+}
+
+export interface EventProperties {
+  icon: string;
+  iconColor?: string;
+  title: string;
+}
+export const historyEventProperties: Map<HistoryEvent, EventProperties> = new Map<
+  HistoryEvent,
+  EventProperties
+>([
+  [
+    HistoryEvent.Completed,
+    { icon: 'CheckMark', iconColor: 'text-blue', title: 'Completed criteria' }
+  ],
+  [
+    HistoryEvent.ReOpened,
+    { icon: 'Refresh', iconColor: 'text-purple', title: 'Reset back to new' }
+  ],
+  [
+    HistoryEvent.Approved,
+    { icon: 'CheckMark', iconColor: 'text-green', title: 'Approved criteria' }
+  ],
+  [
+    HistoryEvent.ReApprove,
+    { icon: 'CheckMark', iconColor: 'text-green', title: 'Sent to re approval' }
+  ],
+  [HistoryEvent.Rejected, { icon: 'Cancel', iconColor: 'text-red', title: 'Rejected criteria' }]
+]);
