@@ -183,7 +183,7 @@ const CriteriaPanel = (): React.ReactElement => {
               const crit = doc?.criterias.find(x => x.id === config.criteriaId);
 
               if (crit) {
-                if ((historyEvents === undefined || doc?.__etag !== eTag) && isReadOnly) {
+                if ((historyEvents === undefined || doc?.__etag !== eTag) && config.isReadOnly) {
                   setEtag(doc?.__etag);
                   const historyEvents = await historyService.getHistory(crit.id);
                   setHistoryEvents(historyEvents);
@@ -449,7 +449,7 @@ const CriteriaPanel = (): React.ReactElement => {
       moduleVersion={process.env.CRITERIA_PANEL_VERSION}
     >
       <ConditionalChildren
-        renderChildren={historyEvents !== undefined && historyEvents.items.length > 0}
+        renderChildren={historyEvents !== undefined && historyEvents.items.length > 0 && isReadOnly}
       >
         <Surface background={SurfaceBackground.callout}>
           <TabBar
