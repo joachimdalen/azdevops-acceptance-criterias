@@ -482,7 +482,8 @@ const CriteriaPanel = (): React.ReactElement => {
             <Tab id="details" name="Details" iconProps={{ iconName: 'Page' }} />
             <Tab
               id="history"
-              name={`History (${historyEvents?.items.length})`}
+              name="History"
+              badgeCount={historyEvents?.items.length}
               iconProps={{ iconName: 'History' }}
             />
           </TabBar>
