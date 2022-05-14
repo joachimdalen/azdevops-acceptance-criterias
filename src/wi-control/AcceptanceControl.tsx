@@ -30,11 +30,7 @@ import {
   setLocalItem
 } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
-import {
-  CriteriaDocument,
-  CriteriaPanelConfig,
-  IAcceptanceCriteria
-} from '../common/types';
+import { CriteriaDocument, CriteriaPanelConfig, IAcceptanceCriteria } from '../common/types';
 import CriteriaView from './components/CriteriaView';
 
 const AcceptanceControl = (): React.ReactElement => {
@@ -141,6 +137,7 @@ const AcceptanceControl = (): React.ReactElement => {
                 id.toString(),
                 result.data.criteria,
                 true,
+                false,
                 result.data.details
               );
             }

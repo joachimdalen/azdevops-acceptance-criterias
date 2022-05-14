@@ -35,6 +35,7 @@ import { StorageService } from '../common/services/StorageService';
 import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
+  CriteriaDocument,
   CriteriaPanelConfig,
   CriteriaTypes,
   GlobalSettingsDocument,
@@ -111,27 +112,29 @@ const CriteriaPanel = (): React.ReactElement => {
     ];
   }, [settings]);
 
-  function setCriteriaInfo(crit: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
+  function setCriteriaInfo(crit: IAcceptanceCriteria, passedDetails?: CriteriaDetailDocument) {
     const getData = () => {
       switch (crit.type) {
         case 'text':
-          return details?.text;
+          return passedDetails?.text;
         case 'scenario':
-          return details?.scenario;
+          return passedDetails?.scenario;
         case 'checklist':
-          return details?.checklist;
+          return passedDetails?.checklist;
       }
     };
     dispatch({ type: 'SET_TYPE', data: crit.type });
     setIdentity(crit.requiredApprover);
     setTitle(crit.title);
     setCriteria(crit);
-    dispatch({
-      type: 'SET_CRITERIA',
-      data: getData()
-    });
-    setDetails(details);
-    setDetailsError(details === undefined);
+    if (passedDetails !== undefined) {
+      dispatch({
+        type: 'SET_CRITERIA',
+        data: getData()
+      });
+      setDetails(passedDetails);
+      setDetailsError(passedDetails === undefined && details === undefined);
+    }
 
     if (
       crit.state === AcceptanceCriteriaState.Approved ||
@@ -176,22 +179,42 @@ const CriteriaPanel = (): React.ReactElement => {
           setSettings(fetchedSettings);
 
           if (config.criteriaId && config.workItemId) {
-            const details = await criteriaService.getCriteriaDetails(config.criteriaId);
+            const loadedDetails = await criteriaService.getCriteriaDetails(config.criteriaId);
 
-            await criteriaService.load(async data => {
-              const doc = data.find(x => x.criterias.find(y => y.id === config.criteriaId));
-              const crit = doc?.criterias.find(x => x.id === config.criteriaId);
+            await criteriaService.load(
+              async (
+                data: CriteriaDocument[],
+                dataChange: boolean,
+                historyChange: boolean,
+                isLoad: boolean
+              ) => {
+                console.log(data, dataChange, historyChange);
+                if (dataChange === false && historyChange === false) return;
 
-              if (crit) {
-                if ((historyEvents === undefined || doc?.__etag !== eTag) && config.isReadOnly) {
-                  setEtag(doc?.__etag);
-                  const historyEvents = await historyService.getHistory(crit.id);
-                  setHistoryEvents(historyEvents);
+                const doc = data.find(x => x.criterias.find(y => y.id === config.criteriaId));
+                const crit = doc?.criterias.find(x => x.id === config.criteriaId);
+
+                if (crit) {
+                  if (dataChange) {
+                    console.log(details, loadedDetails);
+                    setCriteriaInfo(crit, isLoad ? loadedDetails : undefined);
+                    await checkApproval(crit);
+                  }
+
+                  if (
+                    (historyEvents === undefined || doc?.__etag !== eTag) &&
+                    doc?.__etag !== 1 &&
+                    config.isReadOnly &&
+                    historyChange
+                  ) {
+                    setEtag(doc?.__etag);
+                    const historyEvents = await historyService.getHistory(crit.id);
+                    setHistoryEvents(historyEvents);
+                  }
                 }
-                setCriteriaInfo(crit, details);
-                await checkApproval(crit);
-              }
-            }, config.workItemId);
+              },
+              config.workItemId
+            );
           }
 
           setWorkItemId(config.workItemId);
@@ -329,6 +352,7 @@ const CriteriaPanel = (): React.ReactElement => {
         complete
       );
       if (result !== undefined) {
+        console.log('processCheckListCriteria', result.details);
         setDetails(result.details);
         if (result.criteria) {
           setCriteria(result.criteria);

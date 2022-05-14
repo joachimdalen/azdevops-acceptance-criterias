@@ -24,7 +24,12 @@ import {
 import CriteriaHistoryService from './CriteriaHistoryService';
 import { IStorageService, StorageService } from './StorageService';
 
-type CriteriaServiceOnChange = (data: CriteriaDocument[]) => void;
+type CriteriaServiceOnChange = (
+  data: CriteriaDocument[],
+  dataChange: boolean,
+  historyChange: boolean,
+  isLoad: boolean
+) => void;
 enum CriteriaErrorCode {
   InvalidDocumentVersionException = 0,
   Failed = 1
@@ -88,13 +93,13 @@ class CriteriaService {
       this._changeHandler = onDataChanged;
     }
 
-    this.emitChange();
+    this.emitChange(true, true, true);
     return { success: true, data: this._data };
   }
 
-  private emitChange() {
+  private emitChange(dataChange: boolean, historyChange: boolean, isLoad = false) {
     if (this._changeHandler) {
-      this._changeHandler(this._data);
+      this._changeHandler(this._data, dataChange, historyChange, isLoad);
     }
   }
   public async getCriteriaDetails(id: string): Promise<CriteriaDetailDocument | undefined> {
@@ -125,15 +130,17 @@ class CriteriaService {
           const newData = this._data.filter(x => x.id !== doc.id);
           await this._dataStore.deleteCriteriaDocument(doc.id);
           await this._dataStore.deleteCriteriaDetilsDocument(id);
+          await this._dataStore.deleteHistoryDocument(id);
           this._data = newData;
-          this.emitChange();
+          this.emitChange(true, false);
           return undefined;
         } else {
           const existingDocumentIndex = this._data.findIndex(x => x.id === doc.id);
           const updated = await this._dataStore.setCriteriaDocument(newDoc);
           await this._dataStore.deleteCriteriaDetilsDocument(id);
+          await this._dataStore.deleteHistoryDocument(id);
           this._data[existingDocumentIndex] = updated;
-          this.emitChange();
+          this.emitChange(true, false);
           return updated;
         }
       }
@@ -241,7 +248,7 @@ class CriteriaService {
 
           const historyEvent: HistoryItem = this._historyService.getProcessEvent(action, approver);
           await this._historyService.createOrUpdate(id, historyEvent);
-
+          this.emitChange(false, true);
           return res;
         }
       }
@@ -275,7 +282,7 @@ class CriteriaService {
           const approver = await getLoggedInUser();
           const historyEvent: HistoryItem = this._historyService.getProcessEvent(action, approver);
           await this._historyService.createOrUpdate(id, historyEvent);
-
+          this.emitChange(false, true);
           return updated;
         }
       }
@@ -317,7 +324,8 @@ class CriteriaService {
   public async createOrUpdate(
     workItemId: string,
     criteria: IAcceptanceCriteria,
-    shouldEmit = false,
+    shouldEmitData = false,
+    shouldEmitHistory = false,
     details?: CriteriaDetailDocument
   ): Promise<CriteriaDocument | undefined> {
     const existingDocumentIndex = this._data.findIndex(x => x.id === workItemId);
@@ -343,8 +351,8 @@ class CriteriaService {
           id: `AC-${workItemId}-1`
         });
       }
-      if (shouldEmit) {
-        this.emitChange();
+      if (shouldEmitData || shouldEmitHistory) {
+        this.emitChange(shouldEmitData, shouldEmitHistory);
       }
       return created;
     } else {
@@ -377,8 +385,8 @@ class CriteriaService {
       newDocuments[existingDocumentIndex] = updated;
       this._data = newDocuments;
 
-      if (shouldEmit) {
-        this.emitChange();
+      if (shouldEmitData || shouldEmitHistory) {
+        this.emitChange(shouldEmitData, shouldEmitHistory);
       }
       return updated;
     }

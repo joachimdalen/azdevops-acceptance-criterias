@@ -29,6 +29,7 @@ export interface IStorageService {
   getCriteriaDetail(id: string): Promise<CriteriaDetailDocument | undefined>;
   setCriteriaDetailsDocument(data: CriteriaDetailDocument): Promise<CriteriaDetailDocument>;
   deleteCriteriaDetilsDocument(id: string): Promise<void>;
+  deleteHistoryDocument(id: string): Promise<void>;
   resetSettings(): Promise<void>;
   getHistory(id: string): Promise<HistoryDocument | undefined>;
   setHistory(data: HistoryDocument): Promise<HistoryDocument>;
@@ -284,8 +285,7 @@ class StorageService implements IStorageService {
       }
     }
   }
-
-  public async deleteHistory(id: string): Promise<void> {
+  public async deleteHistoryDocument(id: string): Promise<void> {
     try {
       const dataService = await this.getDataService();
       if (this._criteriaHistoryCollection === undefined) {
