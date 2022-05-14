@@ -22,7 +22,7 @@ const AdminPage = (): React.ReactElement => {
       iconProps: { iconName: 'Help' },
       onActivate: () => {
         devOpsService.openLink(
-          'https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias'
+          'https://devops-extensions.dev/docs/extensions/acceptance-criterias'
         );
       }
     }
