@@ -614,7 +614,10 @@ const CriteriaPanel = (): React.ReactElement => {
                 >
                   {details?.checklist && (
                     <ChecklistCriteriaViewSection
-                      isCompleted={isCompleted(criteria)}
+                      isCompleted={
+                        isCompleted(criteria) ||
+                        criteria.state === AcceptanceCriteriaState.AwaitingApproval
+                      }
                       details={details}
                       processItem={processCheckListCriteria}
                     />
