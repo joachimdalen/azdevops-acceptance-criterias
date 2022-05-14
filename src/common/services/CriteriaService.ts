@@ -197,6 +197,7 @@ class CriteriaService {
           criteria.state = AcceptanceCriteriaState.New;
         }
         details.processed = undefined;
+        details.latestComment = undefined;
       } else {
         if (criteria.requiredApprover) {
           criteria.state = AcceptanceCriteriaState.AwaitingApproval;
@@ -216,7 +217,8 @@ class CriteriaService {
   public async processCriteria(
     workItemId: string,
     id: string,
-    action: ProcessEvent
+    action: ProcessEvent,
+    comment?: string
   ): Promise<{ criteria: IAcceptanceCriteria; details: CriteriaDetailDocument } | undefined> {
     try {
       const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
@@ -238,7 +240,7 @@ class CriteriaService {
               processedBy: approver
             };
           }
-
+          details.latestComment = comment;
           criteria.state =
             action === ProcessEvent.Approve
               ? AcceptanceCriteriaState.Approved
@@ -246,7 +248,11 @@ class CriteriaService {
 
           const res = await this.update(doc, criteria, details);
 
-          const historyEvent: HistoryItem = this._historyService.getProcessEvent(action, approver);
+          const historyEvent: HistoryItem = this._historyService.getProcessEvent(
+            action,
+            approver,
+            comment
+          );
           await this._historyService.createOrUpdate(id, historyEvent);
           this.emitChange(false, true);
           return res;
