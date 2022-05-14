@@ -8,7 +8,7 @@
   <p align="center">
 Better management of acceptance criterias
     <br />
-    <a href="https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias"><strong>Explore the docs »</strong></a>
+    <a href="https://devops-extensions.dev/docs/extensions/acceptance-criterias"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://marketplace.visualstudio.com/items?itemName=joachimdalen.acceptance-criterias">View Extension</a>
@@ -46,7 +46,7 @@ This extension is in preview. Please report any issue on [GitHub](https://github
 
 ## Getting started and documentation
 
-Please see the full [documentation here](https://docs.devops-extensions.dev/docs/extensions/acceptance-criterias/configuration/activating)
+Please see the full [documentation here](https://devops-extensions.dev/docs/extensions/acceptance-criterias/configuration/activating)
 
 ## Contact
 
