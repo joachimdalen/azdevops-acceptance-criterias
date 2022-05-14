@@ -188,7 +188,6 @@ const CriteriaPanel = (): React.ReactElement => {
                 historyChange: boolean,
                 isLoad: boolean
               ) => {
-                console.log(data, dataChange, historyChange);
                 if (dataChange === false && historyChange === false) return;
 
                 const doc = data.find(x => x.criterias.find(y => y.id === config.criteriaId));
@@ -196,7 +195,6 @@ const CriteriaPanel = (): React.ReactElement => {
 
                 if (crit) {
                   if (dataChange) {
-                    console.log(details, loadedDetails);
                     setCriteriaInfo(crit, isLoad ? loadedDetails : undefined);
                     await checkApproval(crit);
                   }
@@ -352,7 +350,6 @@ const CriteriaPanel = (): React.ReactElement => {
         complete
       );
       if (result !== undefined) {
-        console.log('processCheckListCriteria', result.details);
         setDetails(result.details);
         if (result.criteria) {
           setCriteria(result.criteria);
