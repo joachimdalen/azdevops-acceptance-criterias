@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1168792610,
+      "number": 3,
+      "submitter": "joachimdalen",
+      "title": "Processing history",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3"
+    },
+    {
       "id": 1222231439,
       "number": 16,
       "submitter": "joachimdalen",
@@ -9,6 +16,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 930221978,
+      "number": 19,
+      "submitter": "joachimdalen",
+      "title": "Refactor and introduce base history",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19"
+    },
     {
       "id": 924990436,
       "number": 18,

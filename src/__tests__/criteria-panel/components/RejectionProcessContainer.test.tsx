@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
+import { ProcessEvent } from '../../../common/types';
 import RejectionProcessContainer from '../../../criteria-panel/components/RejectionProcessContainer';
 
 describe('RejectionProcessContainer', () => {
@@ -14,7 +15,7 @@ describe('RejectionProcessContainer', () => {
     fireEvent.click(setNew);
     fireEvent.click(save);
 
-    expect(process).toHaveBeenCalledWith('1234', 'new');
+    expect(process).toHaveBeenCalledWith('1234', ProcessEvent.ResetToNew);
   });
   it('should resubmit for approval when selected', async () => {
     const process = jest.fn();
@@ -27,6 +28,6 @@ describe('RejectionProcessContainer', () => {
     fireEvent.click(resubmit);
     fireEvent.click(save);
 
-    expect(process).toHaveBeenCalledWith('1234', 'resubmit');
+    expect(process).toHaveBeenCalledWith('1234', ProcessEvent.ResubmitForApproval);
   });
 });

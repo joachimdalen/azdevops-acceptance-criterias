@@ -5,9 +5,11 @@ import {
   RadioButtonGroupDirection
 } from 'azure-devops-ui/RadioButton';
 import { useState } from 'react';
+
+import { ProcessEvent } from '../../common/types';
 interface ProcessingContainerProps {
   criteriaId: string;
-  processCriteria: (id: string, approve: boolean) => Promise<void>;
+  processCriteria: (id: string, action: ProcessEvent) => Promise<void>;
 }
 
 const ProcessingContainer = ({
@@ -38,7 +40,10 @@ const ProcessingContainer = ({
           primary
           iconProps={{ iconName: 'Save' }}
           onClick={async () => {
-            await processCriteria(criteriaId, selected === 'approve');
+            await processCriteria(
+              criteriaId,
+              selected === 'approve' ? ProcessEvent.Approve : ProcessEvent.Reject
+            );
           }}
         />
       </div>

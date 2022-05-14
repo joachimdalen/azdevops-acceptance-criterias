@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
+import { ProcessEvent } from '../../../common/types';
 import ProcessingContainer from '../../../criteria-panel/components/ProcessingContainer';
 
 describe('ProcessingContainer', () => {
@@ -14,7 +15,7 @@ describe('ProcessingContainer', () => {
     fireEvent.click(approve);
     fireEvent.click(save);
 
-    expect(process).toHaveBeenCalledWith('1234', true);
+    expect(process).toHaveBeenCalledWith('1234', ProcessEvent.Approve);
   });
   it('should reject when selected', async () => {
     const process = jest.fn();
@@ -27,6 +28,6 @@ describe('ProcessingContainer', () => {
     fireEvent.click(reject);
     fireEvent.click(save);
 
-    expect(process).toHaveBeenCalledWith('1234', false);
+    expect(process).toHaveBeenCalledWith('1234', ProcessEvent.Reject);
   });
 });

@@ -6,9 +6,11 @@ import {
 } from 'azure-devops-ui/RadioButton';
 import { useState } from 'react';
 
+import { ProcessEvent } from '../../common/types';
+
 interface RejectionProcessContainerProps {
   criteriaId: string;
-  onProcess: (criteriaId: string, action: string) => Promise<void>;
+  onProcess: (criteriaId: string, action: ProcessEvent) => Promise<void>;
 }
 
 const RejectionProcessContainer = ({
@@ -38,7 +40,12 @@ const RejectionProcessContainer = ({
           primary
           disabled={selected === 'dummy'}
           iconProps={{ iconName: 'Save' }}
-          onClick={() => onProcess(criteriaId, selected)}
+          onClick={() =>
+            onProcess(
+              criteriaId,
+              selected === 'new' ? ProcessEvent.ResetToNew : ProcessEvent.ResubmitForApproval
+            )
+          }
         />
       </div>
     </div>

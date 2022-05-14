@@ -1,5 +1,73 @@
 [
   {
+    "publishDate": "2022-05-XX",
+    "version": "1.1.0",
+    "changes": [
+      {
+        "type": "fix",
+        "description": "Fixed an issue that could cause an error to show when performing multiple processing actions without closing the panel",
+        "pullRequest": 19
+      }
+    ],
+    "modules": [
+      {
+        "name": "work-hub",
+        "version": "1.0.3",
+        "changes": [
+          {
+            "type": "maint",
+            "description": "Remove unused setting from settings view",
+            "pullRequest": 19
+          }
+        ]
+      },
+      {
+        "name": "wi-control",
+        "version": "1.0.1",
+        "changes": [
+          {
+            "type": "maint",
+            "description": "Remove unused code",
+            "pullRequest": 19
+          }
+        ]
+      },
+      {
+        "name": "criteria-panel",
+        "version": "1.1.0",
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Added processing history",
+            "pullRequest": 19,
+            "issue": 3
+          },
+          {
+            "type": "fix",
+            "description": "Fixed an issue where you could uncheck chacklist items while waiting for approval",
+            "pullRequest": 19
+          },
+          {
+            "type": "fix",
+            "description": "Fixed an issue where the checklist would be out of sync when performing multiple processing actions without closing the panel",
+            "pullRequest": 19
+          }
+        ]
+      },
+      {
+        "name": "admin-hub",
+        "version": "1.0.1",
+        "changes": [
+          {
+            "type": "docs",
+            "description": "Update documentation url",
+            "pullRequest": 19
+          }
+        ]
+      }
+    ]
+  },
+  {
     "publishDate": "2022-05-01",
     "version": "1.0.2",
     "changes": [

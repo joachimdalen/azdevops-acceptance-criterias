@@ -1,9 +1,7 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
-import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { ObservableLike, ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { MenuItemType } from 'azure-devops-ui/Menu';
 import { ColumnFill, ColumnMore, SimpleTableCell } from 'azure-devops-ui/Table';
-import { Toggle } from 'azure-devops-ui/Toggle';
 import { Tooltip } from 'azure-devops-ui/TooltipEx';
 import { ITreeColumn, renderTreeCell, Tree } from 'azure-devops-ui/TreeEx';
 import {
@@ -30,7 +28,6 @@ import {
 
 interface CriteriaViewProps {
   criteria?: CriteriaDocument;
-  onApprove: (criteria: IAcceptanceCriteria, complete: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onEdit: (criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) => Promise<void>;
 }
@@ -51,12 +48,7 @@ interface IWorkItemCriteriaCell extends IExtendedTableCell {
   rawCriteria?: IAcceptanceCriteria;
 }
 
-const CriteriaView = ({
-  criteria,
-  onApprove,
-  onDelete,
-  onEdit
-}: CriteriaViewProps): JSX.Element => {
+const CriteriaView = ({ criteria, onDelete, onEdit }: CriteriaViewProps): JSX.Element => {
   const treeProvider: ITreeItemProvider<IWorkItemCriteriaCell> = useMemo(() => {
     const rootItems: ITreeItem<IWorkItemCriteriaCell>[] = (criteria?.criterias || []).map(x => {
       const it: ITreeItem<IWorkItemCriteriaCell> = {
@@ -114,8 +106,7 @@ const CriteriaView = ({
     renderCell: renderTreeCell,
     minWidth: 50,
     width: new ObservableValue(-100),
-    onSize: onSize,
-    
+    onSize: onSize
   };
   const criteriaState: ITreeColumn<IWorkItemCriteriaCell> = {
     id: 'state',
@@ -241,53 +232,6 @@ const CriteriaView = ({
           tableColumn={treeColumn}
         >
           <ApproverDisplay approver={data?.requiredApprover} />
-        </SimpleTableCell>
-      );
-    }
-  };
-
-  const toggleCell: ITreeColumn<IWorkItemCriteriaCell> = {
-    id: 'toggle',
-    minWidth: 50,
-    width: new ObservableValue(100),
-    onSize: onSize,
-    name: 'Completed',
-    renderCell: (
-      rowIndex: number,
-      columnIndex: number,
-      treeColumn: ITreeColumn<IWorkItemCriteriaCell>,
-      treeItem: ITreeItemEx<IWorkItemCriteriaCell>
-    ) => {
-      const underlyingItem = treeItem.underlyingItem;
-      const data = ObservableLike.getValue(underlyingItem.data);
-      const treeCell = data && data[treeColumn.id];
-      // Do not include padding if the table cell has an href
-      const hasLink = !!(
-        treeCell &&
-        typeof treeCell !== 'string' &&
-        typeof treeCell !== 'number' &&
-        treeCell.href
-      );
-      // const approver = identities.get(data.requiredApprover);
-      return (
-        <SimpleTableCell
-          key={`${columnIndex}-${data.id}`}
-          className={treeColumn.className}
-          columnIndex={columnIndex}
-          contentClassName={hasLink ? 'bolt-table-cell-content-with-link' : undefined}
-          tableColumn={treeColumn}
-        >
-          <ConditionalChildren renderChildren={data.type !== 'checklist'}>
-            <Toggle
-              checked={data?.state !== AcceptanceCriteriaState.New}
-              onChange={(e, checked: boolean) => {
-                if (data.rawCriteria) {
-                  onApprove(data.rawCriteria, checked);
-                }
-                e.preventDefault();
-              }}
-            />
-          </ConditionalChildren>
         </SimpleTableCell>
       );
     }

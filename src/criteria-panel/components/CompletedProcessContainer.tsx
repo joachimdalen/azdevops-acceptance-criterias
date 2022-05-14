@@ -1,14 +1,10 @@
 import { Button } from 'azure-devops-ui/Button';
-import {
-  RadioButton,
-  RadioButtonGroup,
-  RadioButtonGroupDirection
-} from 'azure-devops-ui/RadioButton';
-import { useState } from 'react';
+
+import { ProcessEvent } from '../../common/types';
 
 interface CompletedProcessContainerProps {
   criteriaId: string;
-  onProcess: (criteriaId: string, action: string) => Promise<void>;
+  onProcess: (criteriaId: string, action: ProcessEvent) => Promise<void>;
 }
 
 const CompletedProcessContainer = ({
@@ -26,7 +22,7 @@ const CompletedProcessContainer = ({
           text="Reset to new"
           primary
           iconProps={{ iconName: 'Save' }}
-          onClick={() => onProcess(criteriaId, 'new')}
+          onClick={() => onProcess(criteriaId, ProcessEvent.ResetToNew)}
         />
       </div>
     </div>

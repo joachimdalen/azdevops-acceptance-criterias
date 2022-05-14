@@ -1,7 +1,7 @@
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { getClient } from 'azure-devops-extension-api';
-import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
+import { CoreRestClient, Process, WebApiTeam } from 'azure-devops-extension-api/Core';
 import { GraphMembership, GraphRestClient } from 'azure-devops-extension-api/Graph';
 import {
   WorkItemQueryResult,
@@ -16,11 +16,20 @@ import {
   CriteriaDocument,
   CriteriaPanelConfig,
   FullCriteriaStatus,
-  IAcceptanceCriteria
+  HistoryEvent,
+  HistoryItem,
+  IAcceptanceCriteria,
+  ProcessEvent
 } from '../types';
+import CriteriaHistoryService from './CriteriaHistoryService';
 import { IStorageService, StorageService } from './StorageService';
 
-type CriteriaServiceOnChange = (data: CriteriaDocument[]) => void;
+type CriteriaServiceOnChange = (
+  data: CriteriaDocument[],
+  dataChange: boolean,
+  historyChange: boolean,
+  isLoad: boolean
+) => void;
 enum CriteriaErrorCode {
   InvalidDocumentVersionException = 0,
   Failed = 1
@@ -34,14 +43,20 @@ type CriteriaServiceOnError = (error: CriteriaError) => void;
 
 class CriteriaService {
   private readonly _dataStore: IStorageService;
+  private readonly _historyService: CriteriaHistoryService;
   private _isInitialized = false;
   private _data: CriteriaDocument[];
   private _changeHandler?: CriteriaServiceOnChange;
   private _devOpsService: DevOpsService;
   private _errorHandler?: CriteriaServiceOnError;
 
-  constructor(onError?: CriteriaServiceOnError, dataStore?: IStorageService) {
+  constructor(
+    onError?: CriteriaServiceOnError,
+    dataStore?: IStorageService,
+    historyService?: CriteriaHistoryService
+  ) {
     this._dataStore = dataStore || new StorageService();
+    this._historyService = historyService || new CriteriaHistoryService();
     this._devOpsService = new DevOpsService();
     this._data = [];
     this._errorHandler = onError;
@@ -78,13 +93,13 @@ class CriteriaService {
       this._changeHandler = onDataChanged;
     }
 
-    this.emitChange();
+    this.emitChange(true, true, true);
     return { success: true, data: this._data };
   }
 
-  private emitChange() {
+  private emitChange(dataChange: boolean, historyChange: boolean, isLoad = false) {
     if (this._changeHandler) {
-      this._changeHandler(this._data);
+      this._changeHandler(this._data, dataChange, historyChange, isLoad);
     }
   }
   public async getCriteriaDetails(id: string): Promise<CriteriaDetailDocument | undefined> {
@@ -115,15 +130,17 @@ class CriteriaService {
           const newData = this._data.filter(x => x.id !== doc.id);
           await this._dataStore.deleteCriteriaDocument(doc.id);
           await this._dataStore.deleteCriteriaDetilsDocument(id);
+          await this._dataStore.deleteHistoryDocument(id);
           this._data = newData;
-          this.emitChange();
+          this.emitChange(true, false);
           return undefined;
         } else {
           const existingDocumentIndex = this._data.findIndex(x => x.id === doc.id);
           const updated = await this._dataStore.setCriteriaDocument(newDoc);
           await this._dataStore.deleteCriteriaDetilsDocument(id);
+          await this._dataStore.deleteHistoryDocument(id);
           this._data[existingDocumentIndex] = updated;
-          this.emitChange();
+          this.emitChange(true, false);
           return updated;
         }
       }
@@ -137,7 +154,6 @@ class CriteriaService {
     complete: boolean
   ): Promise<{ details: CriteriaDetailDocument; criteria?: IAcceptanceCriteria } | undefined> {
     try {
-      const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
       const details: CriteriaDetailDocument = (await this.getCriteriaDetails(criteriaId)) || {
         id: criteriaId
       };
@@ -145,27 +161,10 @@ class CriteriaService {
       const itemIndex = details.checklist?.criterias?.findIndex(x => x.id === checkItemId);
 
       if (details.checklist?.criterias !== undefined && itemIndex !== undefined && itemIndex > -1) {
-        const preEditComplete = details.checklist.criterias.every(x => x.completed);
         const newItem = { ...details.checklist.criterias[itemIndex] };
         newItem.completed = complete;
         details.checklist.criterias[itemIndex] = newItem;
         const updated = await this._dataStore.setCriteriaDetailsDocument(details);
-        const isAllCompleted = details.checklist.criterias.every(x => x.completed);
-        if (doc !== undefined && (isAllCompleted || preEditComplete)) {
-          const newDoc = { ...doc };
-          const criteria = newDoc.criterias.find(x => x.id === criteriaId);
-          if (criteria !== undefined) {
-            const updt = this.setCriteriaItems(criteria, updated);
-            if (updt.criteria && updt.details) {
-              this.update(doc, updt.criteria, updt.details);
-
-              return {
-                details: updt.details,
-                criteria: updt.criteria
-              };
-            }
-          }
-        }
 
         return {
           details: updated
@@ -217,7 +216,7 @@ class CriteriaService {
   public async processCriteria(
     workItemId: string,
     id: string,
-    approved: boolean
+    action: ProcessEvent
   ): Promise<{ criteria: IAcceptanceCriteria; details: CriteriaDetailDocument } | undefined> {
     try {
       const doc = await this._dataStore.getCriteriasForWorkItem(workItemId);
@@ -240,11 +239,16 @@ class CriteriaService {
             };
           }
 
-          criteria.state = approved
-            ? AcceptanceCriteriaState.Approved
-            : AcceptanceCriteriaState.Rejected;
+          criteria.state =
+            action === ProcessEvent.Approve
+              ? AcceptanceCriteriaState.Approved
+              : AcceptanceCriteriaState.Rejected;
 
           const res = await this.update(doc, criteria, details);
+
+          const historyEvent: HistoryItem = this._historyService.getProcessEvent(action, approver);
+          await this._historyService.createOrUpdate(id, historyEvent);
+          this.emitChange(false, true);
           return res;
         }
       }
@@ -257,7 +261,7 @@ class CriteriaService {
 
   public async toggleCompletion(
     id: string,
-    reApprove?: boolean
+    action: ProcessEvent
   ): Promise<CriteriaDocument | undefined> {
     const doc = this._data.find(x => x.criterias.some(y => y.id === id));
     try {
@@ -267,13 +271,18 @@ class CriteriaService {
         const { criteria: crit, details: det } = this.setCriteriaItems(
           criteria,
           details,
-          reApprove
+          action === ProcessEvent.ResubmitForApproval
         );
         if (crit) {
           const updated = await this.createOrUpdate(doc.id, crit, true);
           if (det) {
             await this._dataStore.setCriteriaDetailsDocument(det);
           }
+
+          const approver = await getLoggedInUser();
+          const historyEvent: HistoryItem = this._historyService.getProcessEvent(action, approver);
+          await this._historyService.createOrUpdate(id, historyEvent);
+          this.emitChange(false, true);
           return updated;
         }
       }
@@ -297,8 +306,15 @@ class CriteriaService {
     }
 
     const stateDoc = this.setFullState(newDocument);
-    await this._dataStore.setCriteriaDocument(stateDoc);
+    const updated = await this._dataStore.setCriteriaDocument(stateDoc);
     const updatedDetails = await this._dataStore.setCriteriaDetailsDocument(details);
+
+    const docIndex = this._data.findIndex(x => x.id === stateDoc.id);
+
+    if (docIndex > -1) {
+      this._data[docIndex] = updated;
+    }
+
     return {
       criteria: criteria,
       details: updatedDetails
@@ -308,7 +324,8 @@ class CriteriaService {
   public async createOrUpdate(
     workItemId: string,
     criteria: IAcceptanceCriteria,
-    shouldEmit = false,
+    shouldEmitData = false,
+    shouldEmitHistory = false,
     details?: CriteriaDetailDocument
   ): Promise<CriteriaDocument | undefined> {
     const existingDocumentIndex = this._data.findIndex(x => x.id === workItemId);
@@ -334,8 +351,8 @@ class CriteriaService {
           id: `AC-${workItemId}-1`
         });
       }
-      if (shouldEmit) {
-        this.emitChange();
+      if (shouldEmitData || shouldEmitHistory) {
+        this.emitChange(shouldEmitData, shouldEmitHistory);
       }
       return created;
     } else {
@@ -368,8 +385,8 @@ class CriteriaService {
       newDocuments[existingDocumentIndex] = updated;
       this._data = newDocuments;
 
-      if (shouldEmit) {
-        this.emitChange();
+      if (shouldEmitData || shouldEmitHistory) {
+        this.emitChange(shouldEmitData, shouldEmitHistory);
       }
       return updated;
     }

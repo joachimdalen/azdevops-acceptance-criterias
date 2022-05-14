@@ -15,7 +15,9 @@ import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
+import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { ITableColumn, SimpleTableCell } from 'azure-devops-ui/Table';
+import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
 import * as yup from 'yup';
@@ -27,19 +29,24 @@ import StatusTag from '../common/components/StatusTag';
 import { isCompleted, isProcessed } from '../common/criteriaUtils';
 import { getCombined, hasError, parseValidationError } from '../common/errorUtils';
 import { LocalStorageRawKeys } from '../common/localStorage';
+import CriteriaHistoryService from '../common/services/CriteriaHistoryService';
 import CriteriaService from '../common/services/CriteriaService';
 import { StorageService } from '../common/services/StorageService';
 import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
+  CriteriaDocument,
   CriteriaPanelConfig,
   CriteriaTypes,
   GlobalSettingsDocument,
-  IAcceptanceCriteria
+  HistoryDocument,
+  IAcceptanceCriteria,
+  ProcessEvent
 } from '../common/types';
 import CheckListCriteriaSection from './components/CheckListCriteriaSection';
 import CompletedProcessContainer from './components/CompletedProcessContainer';
 import CompletionContainer from './components/CompletionContainer';
+import HistoryList from './components/HistoryList';
 import ProcessingContainer from './components/ProcessingContainer';
 import RejectionProcessContainer from './components/RejectionProcessContainer';
 import ScenarioCriteria from './components/ScenarioCriteriaSection';
@@ -52,13 +59,16 @@ import { getSchema } from './CriteriaPanelData';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
+  const [tabId, setTabId] = useState('details');
+  const [eTag, setEtag] = useState<number | undefined>();
   const [isError, setIsError] = useBooleanToggle();
-  const [criteriaService, storageService] = useMemo(
+  const [criteriaService, storageService, historyService] = useMemo(
     () => [
       new CriteriaService(error => {
         setIsError(true);
       }),
-      new StorageService()
+      new StorageService(),
+      new CriteriaHistoryService()
     ],
     []
   );
@@ -72,6 +82,7 @@ const CriteriaPanel = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
   const [workItemId, setWorkItemId] = useState<string | undefined>();
   const [settings, setSettings] = useState<GlobalSettingsDocument>();
+  const [historyEvents, setHistoryEvents] = useState<HistoryDocument>();
   const [wasChanged, toggleWasChanged] = useBooleanToggle();
   const [editAfterComplete, toggleEditAfterComplete] = useBooleanToggle();
   const [detailsError, setDetailsError] = useState<boolean>(false);
@@ -101,27 +112,29 @@ const CriteriaPanel = (): React.ReactElement => {
     ];
   }, [settings]);
 
-  function setCriteriaInfo(crit: IAcceptanceCriteria, details?: CriteriaDetailDocument) {
+  function setCriteriaInfo(crit: IAcceptanceCriteria, passedDetails?: CriteriaDetailDocument) {
     const getData = () => {
       switch (crit.type) {
         case 'text':
-          return details?.text;
+          return passedDetails?.text;
         case 'scenario':
-          return details?.scenario;
+          return passedDetails?.scenario;
         case 'checklist':
-          return details?.checklist;
+          return passedDetails?.checklist;
       }
     };
     dispatch({ type: 'SET_TYPE', data: crit.type });
     setIdentity(crit.requiredApprover);
     setTitle(crit.title);
     setCriteria(crit);
-    dispatch({
-      type: 'SET_CRITERIA',
-      data: getData()
-    });
-    setDetails(details);
-    setDetailsError(details === undefined);
+    if (passedDetails !== undefined) {
+      dispatch({
+        type: 'SET_CRITERIA',
+        data: getData()
+      });
+      setDetails(passedDetails);
+      setDetailsError(passedDetails === undefined && details === undefined);
+    }
 
     if (
       crit.state === AcceptanceCriteriaState.Approved ||
@@ -166,17 +179,40 @@ const CriteriaPanel = (): React.ReactElement => {
           setSettings(fetchedSettings);
 
           if (config.criteriaId && config.workItemId) {
-            const details = await criteriaService.getCriteriaDetails(config.criteriaId);
+            const loadedDetails = await criteriaService.getCriteriaDetails(config.criteriaId);
 
-            await criteriaService.load(async data => {
-              const doc = data.find(x => x.criterias.find(y => y.id === config.criteriaId));
-              const crit = doc?.criterias.find(x => x.id === config.criteriaId);
+            await criteriaService.load(
+              async (
+                data: CriteriaDocument[],
+                dataChange: boolean,
+                historyChange: boolean,
+                isLoad: boolean
+              ) => {
+                if (dataChange === false && historyChange === false) return;
 
-              if (crit) {
-                setCriteriaInfo(crit, details);
-                await checkApproval(crit);
-              }
-            }, config.workItemId);
+                const doc = data.find(x => x.criterias.find(y => y.id === config.criteriaId));
+                const crit = doc?.criterias.find(x => x.id === config.criteriaId);
+
+                if (crit) {
+                  if (dataChange) {
+                    setCriteriaInfo(crit, isLoad ? loadedDetails : undefined);
+                    await checkApproval(crit);
+                  }
+
+                  if (
+                    (historyEvents === undefined || doc?.__etag !== eTag) &&
+                    doc?.__etag !== 1 &&
+                    config.isReadOnly &&
+                    historyChange
+                  ) {
+                    setEtag(doc?.__etag);
+                    const historyEvents = await historyService.getHistory(crit.id);
+                    setHistoryEvents(historyEvents);
+                  }
+                }
+              },
+              config.workItemId
+            );
           }
 
           setWorkItemId(config.workItemId);
@@ -293,7 +329,7 @@ const CriteriaPanel = (): React.ReactElement => {
     };
   };
 
-  async function processCriteria(id: string, approve: boolean) {
+  async function processCriteria(id: string, approve: ProcessEvent) {
     if (workItemId && parseInt(workItemId) > 0) {
       const result = await criteriaService.processCriteria(workItemId, id, approve);
       if (result !== undefined) {
@@ -433,135 +469,169 @@ const CriteriaPanel = (): React.ReactElement => {
       showVersion={!isReadOnly}
       moduleVersion={process.env.CRITERIA_PANEL_VERSION}
     >
-      <ConditionalChildren renderChildren={!loading}>
-        <ConditionalChildren renderChildren={detailsError}>
-          <MessageCard className="margin-bottom-8" severity={MessageCardSeverity.Error}>
-            Failed to load critiera details.
-          </MessageCard>
-        </ConditionalChildren>
-        <ConditionalChildren renderChildren={isError}>
-          <MessageCard className="margin-bottom-8" severity={MessageCardSeverity.Error}>
-            An error occurred. Please refresh and try again
-          </MessageCard>
-        </ConditionalChildren>
-        <ConditionalChildren renderChildren={isReadOnly}>
-          {criteria && (
-            <>
-              <div className="rhythm-vertical-16 flex-grow border-bottom-light padding-bottom-16">
+      <ConditionalChildren
+        renderChildren={historyEvents !== undefined && historyEvents.items.length > 0 && isReadOnly}
+      >
+        <Surface background={SurfaceBackground.callout}>
+          <TabBar
+            tabSize={TabSize.Compact}
+            onSelectedTabChanged={t => setTabId(t)}
+            selectedTabId={tabId}
+            className="margin-bottom-16"
+          >
+            <Tab id="details" name="Details" iconProps={{ iconName: 'Page' }} />
+            <Tab
+              id="history"
+              name="History"
+              badgeCount={historyEvents?.items.length}
+              iconProps={{ iconName: 'History' }}
+            />
+          </TabBar>
+        </Surface>
+      </ConditionalChildren>
+
+      <ConditionalChildren
+        renderChildren={tabId === 'details' || historyEvents?.items?.length === 0}
+      >
+        <ConditionalChildren renderChildren={!loading}>
+          <ConditionalChildren renderChildren={detailsError}>
+            <MessageCard className="margin-bottom-8" severity={MessageCardSeverity.Error}>
+              Failed to load critiera details.
+            </MessageCard>
+          </ConditionalChildren>
+          <ConditionalChildren renderChildren={isError}>
+            <MessageCard className="margin-bottom-8" severity={MessageCardSeverity.Error}>
+              An error occurred. Please refresh and try again
+            </MessageCard>
+          </ConditionalChildren>
+          <ConditionalChildren renderChildren={isReadOnly}>
+            {criteria && (
+              <>
+                <div className="rhythm-vertical-16 flex-grow border-bottom-light padding-bottom-16">
+                  <ConditionalChildren
+                    renderChildren={
+                      isCompleted(criteria) &&
+                      editAfterComplete === false &&
+                      canEdit &&
+                      criteria.state !== AcceptanceCriteriaState.Rejected
+                    }
+                  >
+                    <MessageCard
+                      className="flex-self-stretch"
+                      severity={MessageCardSeverity.Info}
+                      buttonProps={[
+                        {
+                          text: 'Edit',
+                          onClick: () => {
+                            toggleEditAfterComplete();
+                            setIsReadOnly(false);
+                          }
+                        }
+                      ]}
+                    >
+                      {`This criteria has already been ${criteria.state}. You can still edit it, but it may reset history and progress.`}
+                    </MessageCard>
+                  </ConditionalChildren>
+                  <div className="flex-row rhythm-horizontal-8">
+                    <FormItem label="Required Approver" className="flex-grow">
+                      <ApproverDisplay approver={criteria?.requiredApprover} large />
+                    </FormItem>
+                    <ConditionalChildren renderChildren={isProcessed(criteria, details)}>
+                      <FormItem
+                        label={
+                          criteria.state === AcceptanceCriteriaState.Approved
+                            ? 'Approved by'
+                            : 'Rejected by'
+                        }
+                        className="flex-grow"
+                      >
+                        <ApproverDisplay approver={details?.processed?.processedBy} large />
+                      </FormItem>
+                    </ConditionalChildren>
+                    <FormItem label="State" className="flex-grow">
+                      <StatusTag state={criteria.state} />
+                    </FormItem>
+                  </div>
+                </div>
                 <ConditionalChildren
                   renderChildren={
-                    isCompleted(criteria) &&
-                    editAfterComplete === false &&
-                    canEdit &&
-                    criteria.state !== AcceptanceCriteriaState.Rejected
+                    canApprove &&
+                    workItemId !== undefined &&
+                    criteria.state === AcceptanceCriteriaState.AwaitingApproval
                   }
                 >
-                  <MessageCard
-                    className="flex-self-stretch"
-                    severity={MessageCardSeverity.Info}
-                    buttonProps={[
-                      {
-                        text: 'Edit',
-                        onClick: () => {
-                          toggleEditAfterComplete();
-                          setIsReadOnly(false);
-                        }
-                      }
-                    ]}
-                  >
-                    {`This criteria has already been ${criteria.state}. You can still edit it, but it may reset history and progress.`}
-                  </MessageCard>
+                  <ProcessingContainer processCriteria={processCriteria} criteriaId={criteria.id} />
                 </ConditionalChildren>
-                <div className="flex-row rhythm-horizontal-8">
-                  <FormItem label="Required Approver" className="flex-grow">
-                    <ApproverDisplay approver={criteria?.requiredApprover} large />
-                  </FormItem>
-                  <ConditionalChildren renderChildren={isProcessed(criteria, details)}>
-                    <FormItem
-                      label={
-                        criteria.state === AcceptanceCriteriaState.Approved
-                          ? 'Approved by'
-                          : 'Rejected by'
-                      }
-                      className="flex-grow"
-                    >
-                      <ApproverDisplay approver={details?.processed?.processedBy} large />
-                    </FormItem>
-                  </ConditionalChildren>
-                  <FormItem label="State" className="flex-grow">
-                    <StatusTag state={criteria.state} />
-                  </FormItem>
-                </div>
-              </div>
-              <ConditionalChildren
-                renderChildren={
-                  canApprove &&
-                  workItemId !== undefined &&
-                  criteria.state === AcceptanceCriteriaState.AwaitingApproval
-                }
-              >
-                <ProcessingContainer processCriteria={processCriteria} criteriaId={criteria.id} />
-              </ConditionalChildren>
-              <ConditionalChildren
-                renderChildren={criteria.state === AcceptanceCriteriaState.Rejected}
-              >
-                <RejectionProcessContainer
-                  criteriaId={criteria.id}
-                  onProcess={async (criteriaId: string, action: string) => {
-                    await criteriaService.toggleCompletion(criteriaId, action === 'resubmit');
-                  }}
-                />
-              </ConditionalChildren>
-              <ConditionalChildren
-                renderChildren={criteria.state === AcceptanceCriteriaState.Completed}
-              >
-                <CompletedProcessContainer
-                  criteriaId={criteria.id}
-                  onProcess={async (criteriaId: string, action: string) => {
-                    await criteriaService.toggleCompletion(criteriaId, action === 'resubmit');
-                  }}
-                />
-              </ConditionalChildren>
-              <ConditionalChildren
-                renderChildren={
-                  criteria.state === AcceptanceCriteriaState.New &&
-                  (criteria.type !== 'checklist' ||
-                    (criteria.type === 'checklist' &&
-                      details?.checklist?.criterias?.every(x => x.completed)))
-                }
-              >
-                <CompletionContainer
-                  criteria={criteria}
-                  onComplete={async (criteriaId: string) => {
-                    await criteriaService.toggleCompletion(criteriaId, true);
-                  }}
-                />
-              </ConditionalChildren>
-              <ConditionalChildren
-                renderChildren={criteria.type === 'scenario' && details !== undefined}
-              >
-                {details?.scenario && <ScenarioCriteriaViewSection details={details} />}
-              </ConditionalChildren>
-              <ConditionalChildren
-                renderChildren={criteria.type === 'text' && details !== undefined}
-              >
-                {details?.text && <TextCriteriaViewSection details={details} />}
-              </ConditionalChildren>
-              <ConditionalChildren
-                renderChildren={criteria.type === 'checklist' && details !== undefined}
-              >
-                {details?.checklist && (
-                  <ChecklistCriteriaViewSection
-                    isCompleted={isCompleted(criteria)}
-                    details={details}
-                    processItem={processCheckListCriteria}
+                <ConditionalChildren
+                  renderChildren={criteria.state === AcceptanceCriteriaState.Rejected}
+                >
+                  <RejectionProcessContainer
+                    criteriaId={criteria.id}
+                    onProcess={async (criteriaId: string, action: ProcessEvent) => {
+                      await criteriaService.toggleCompletion(criteriaId, action);
+                    }}
                   />
-                )}
-              </ConditionalChildren>
-            </>
-          )}
+                </ConditionalChildren>
+                <ConditionalChildren
+                  renderChildren={
+                    criteria.state === AcceptanceCriteriaState.Completed ||
+                    criteria.state === AcceptanceCriteriaState.Approved
+                  }
+                >
+                  <CompletedProcessContainer
+                    criteriaId={criteria.id}
+                    onProcess={async (criteriaId: string, action: ProcessEvent) => {
+                      await criteriaService.toggleCompletion(criteriaId, action);
+                    }}
+                  />
+                </ConditionalChildren>
+                <ConditionalChildren
+                  renderChildren={
+                    criteria.state === AcceptanceCriteriaState.New &&
+                    (criteria.type !== 'checklist' ||
+                      (criteria.type === 'checklist' &&
+                        details?.checklist?.criterias?.every(x => x.completed)))
+                  }
+                >
+                  <CompletionContainer
+                    criteria={criteria}
+                    onComplete={async (criteriaId: string) => {
+                      await criteriaService.toggleCompletion(criteriaId, ProcessEvent.Complete);
+                    }}
+                  />
+                </ConditionalChildren>
+                <ConditionalChildren
+                  renderChildren={criteria.type === 'scenario' && details !== undefined}
+                >
+                  {details?.scenario && <ScenarioCriteriaViewSection details={details} />}
+                </ConditionalChildren>
+                <ConditionalChildren
+                  renderChildren={criteria.type === 'text' && details !== undefined}
+                >
+                  {details?.text && <TextCriteriaViewSection details={details} />}
+                </ConditionalChildren>
+                <ConditionalChildren
+                  renderChildren={criteria.type === 'checklist' && details !== undefined}
+                >
+                  {details?.checklist && (
+                    <ChecklistCriteriaViewSection
+                      isCompleted={
+                        isCompleted(criteria) ||
+                        criteria.state === AcceptanceCriteriaState.AwaitingApproval
+                      }
+                      details={details}
+                      processItem={processCheckListCriteria}
+                    />
+                  )}
+                </ConditionalChildren>
+              </>
+            )}
+          </ConditionalChildren>
+          <ConditionalChildren renderChildren={!isReadOnly}>{editContent}</ConditionalChildren>
         </ConditionalChildren>
-        <ConditionalChildren renderChildren={!isReadOnly}>{editContent}</ConditionalChildren>
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={tabId === 'history' && historyEvents !== undefined}>
+        {historyEvents && <HistoryList events={historyEvents} />}
       </ConditionalChildren>
     </PanelWrapper>
   );

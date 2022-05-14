@@ -1,14 +1,15 @@
-import { prettyDOM, render, screen, waitFor } from '@testing-library/react';
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { render, screen, waitFor } from '@testing-library/react';
 
-import { mockGetDevOpsProject } from '../../__mocks__/@joachimdalen/azdevops-ext-core/DevOpsService';
 import { mockGetConfiguration, mockGetUser } from '../../__mocks__/azure-devops-extension-sdk';
+import CriteriaHistoryService from '../../common/services/CriteriaHistoryService';
 import { StorageService } from '../../common/services/StorageService';
 import {
   AcceptanceCriteriaState,
-  CriteriaDetailDocument,
-  CriteriaDocument,
   CriteriaPanelConfig,
-  FullCriteriaStatus
+  FullCriteriaStatus,
+  HistoryDocument,
+  HistoryEvent
 } from '../../common/types';
 import CriteriaPanel from '../../criteria-panel/CriteriaPanel';
 import { CriteriaPanelProvider } from '../../criteria-panel/CriteriaPanelContext';
@@ -16,13 +17,42 @@ import { getApprover, getTextCriteria } from '../../testdata';
 
 type CpCon = (CriteriaPanelConfig & { panel: any }) | undefined;
 
+const history: HistoryDocument = {
+  __etag: 1,
+  id: 'AC-1-2',
+  items: []
+};
+
+const identity: IInternalIdentity = {
+  displayName: 'Test User',
+  entityId: '1234',
+  entityType: 'User',
+  id: '54321',
+  descriptor: 'user1234',
+  image: '/image.png'
+};
+
+const historyWithContent: HistoryDocument = {
+  __etag: 1,
+  id: 'AC-1-2',
+  items: [
+    {
+      date: new Date(),
+      event: HistoryEvent.Completed,
+      actor: identity
+    }
+  ]
+};
+
 describe('CriteriaPanel', () => {
   const getSettingsSpy = jest.spyOn(StorageService.prototype, 'getSettings');
   const getCriteriaDetailsSpy = jest.spyOn(StorageService.prototype, 'getCriteriaDetail');
   const getCriteriaSpy = jest.spyOn(StorageService.prototype, 'getCriteriasForWorkItem');
+  const getHistorySpy = jest.spyOn(CriteriaHistoryService.prototype, 'getHistory');
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getHistorySpy.mockReset();
   });
 
   it('should render default edit mode', async () => {
@@ -33,6 +63,7 @@ describe('CriteriaPanel', () => {
     };
 
     mockGetConfiguration.mockReturnValue(config);
+    getHistorySpy.mockResolvedValue(history);
     getSettingsSpy.mockResolvedValue({
       id: 'Global',
       limitAllowedCriteriaTypes: false,
@@ -61,8 +92,8 @@ describe('CriteriaPanel', () => {
     };
     const { criteria, details } = getTextCriteria(
       '1',
-      FullCriteriaStatus.New,
-      AcceptanceCriteriaState.New,
+      FullCriteriaStatus.Approved,
+      AcceptanceCriteriaState.Approved,
       '1'
     );
 
@@ -76,6 +107,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -85,6 +117,7 @@ describe('CriteriaPanel', () => {
 
     await waitFor(() => screen.findAllByText(/This is the content/));
   });
+
   it('should render complete container', async () => {
     const config: CpCon = {
       panel: {
@@ -111,6 +144,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -145,6 +179,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -180,6 +215,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -216,6 +252,7 @@ describe('CriteriaPanel', () => {
       requireApprovers: false,
       __etag: -1
     });
+    getHistorySpy.mockResolvedValue(history);
 
     render(
       <CriteriaPanelProvider>
@@ -224,5 +261,42 @@ describe('CriteriaPanel', () => {
     );
 
     await waitFor(() => screen.findAllByText(/This criteria needs your attention/));
+  });
+  it('should render history tab when criteria have history', async () => {
+    const config: CpCon = {
+      panel: {
+        onClose: jest.fn()
+      },
+      workItemId: '1',
+      isReadOnly: true,
+      criteriaId: 'AC-1-1'
+    };
+    const { criteria, details } = getTextCriteria(
+      '1',
+      FullCriteriaStatus.New,
+      AcceptanceCriteriaState.AwaitingApproval,
+      '1',
+      getApprover()
+    );
+    mockGetUser.mockReturnValue(getApprover());
+    mockGetConfiguration.mockReturnValue(config);
+    getCriteriaDetailsSpy.mockResolvedValue(details);
+    getCriteriaSpy.mockResolvedValue(criteria);
+    getSettingsSpy.mockResolvedValue({
+      id: 'Global',
+      limitAllowedCriteriaTypes: false,
+      allowedCriteriaTypes: [],
+      requireApprovers: false,
+      __etag: -1
+    });
+    getHistorySpy.mockResolvedValue(historyWithContent);
+
+    render(
+      <CriteriaPanelProvider>
+        <CriteriaPanel />
+      </CriteriaPanelProvider>
+    );
+
+    await waitFor(() => screen.findAllByText(/History/));
   });
 });

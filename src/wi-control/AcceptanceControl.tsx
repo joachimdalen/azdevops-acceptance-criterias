@@ -18,7 +18,6 @@ import {
 } from 'azure-devops-extension-api/WorkItemTracking';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { MessageBarSeverity } from 'azure-devops-ui/MessageBar';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -31,12 +30,7 @@ import {
   setLocalItem
 } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
-import {
-  AcceptanceCriteriaState,
-  CriteriaDocument,
-  CriteriaPanelConfig,
-  IAcceptanceCriteria
-} from '../common/types';
+import { CriteriaDocument, CriteriaPanelConfig, IAcceptanceCriteria } from '../common/types';
 import CriteriaView from './components/CriteriaView';
 
 const AcceptanceControl = (): React.ReactElement => {
@@ -143,6 +137,7 @@ const AcceptanceControl = (): React.ReactElement => {
                 id.toString(),
                 result.data.criteria,
                 true,
+                false,
                 result.data.details
               );
             }
@@ -230,47 +225,6 @@ const AcceptanceControl = (): React.ReactElement => {
     );
   }
 
-  async function onApprove(criteria: IAcceptanceCriteria, complete: boolean) {
-    if (
-      [AcceptanceCriteriaState.Approved, AcceptanceCriteriaState.Rejected].includes(
-        criteria.state
-      ) &&
-      complete === false
-    ) {
-      if (getLocalItem<boolean>(LocalStorageKeys.UndoCompleted)) {
-        await criteriaService.toggleCompletion(criteria.id);
-      } else {
-        const config: IConfirmationConfig = {
-          cancelButton: {
-            text: 'No'
-          },
-          doNotShowAgain: true,
-          confirmButton: {
-            text: 'Yes',
-            primary: true
-          },
-          content: `This criteria has been fully processed. If you undo the completion state of this it will be reset and the criteria will need to be approved or rejected again. Proceed?`
-        };
-        await devOpsService.showDialog<ActionResult<boolean>, DialogIds>(
-          DialogIds.ConfirmationDialog,
-          {
-            title: 'Undo completed criteria?',
-            onClose: async result => {
-              if (result?.success) {
-                if (result.message === 'DO_NOT_SHOW_AGAIN') {
-                  setLocalItem(LocalStorageKeys.UndoCompleted, true);
-                }
-                await criteriaService.toggleCompletion(criteria.id);
-              }
-            },
-            configuration: config
-          }
-        );
-      }
-    } else {
-      await criteriaService.toggleCompletion(criteria.id);
-    }
-  }
   async function onDelete(id: string) {
     const config: IConfirmationConfig = {
       cancelButton: {
@@ -333,12 +287,7 @@ const AcceptanceControl = (): React.ReactElement => {
       </ConditionalChildren>
       <ConditionalChildren renderChildren={criteriaDocument !== undefined}>
         <Surface background={SurfaceBackground.neutral}>
-          <CriteriaView
-            criteria={criteriaDocument}
-            onEdit={onEdit}
-            onApprove={onApprove}
-            onDelete={onDelete}
-          />
+          <CriteriaView criteria={criteriaDocument} onEdit={onEdit} onDelete={onDelete} />
         </Surface>
       </ConditionalChildren>
     </div>
