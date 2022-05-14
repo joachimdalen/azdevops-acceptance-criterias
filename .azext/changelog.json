@@ -53,6 +53,17 @@
             "pullRequest": 19
           }
         ]
+      },
+      {
+        "name": "admin-hub",
+        "version": "1.0.1",
+        "changes": [
+          {
+            "type": "docs",
+            "description": "Update documentation url",
+            "pullRequest": 19
+          }
+        ]
       }
     ]
   },

@@ -40,6 +40,13 @@
   - Suggested in [GH#3 - Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
   - Added in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
+### 📝 Documentation (1)
+
+#### `admin-hub@1.0.1`
+
+- Update documentation url
+  - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+
 ---
 
 ## 1.0.2 (2022-05-01)
