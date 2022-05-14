@@ -44,9 +44,11 @@ const HistoryList = ({ events }: HistoryListProps): React.ReactElement => {
                 <Ago date={item.date} format={AgoFormat.Compact} />
               </span>
             </div>
-            <span className="fontSizeMS font-size-ms secondary-text">
-              {item?.properties?.comment}
-            </span>
+            {item?.properties?.comment && (
+              <span className="fontSizeMS font-size-ms secondary-text">
+                {item?.properties?.comment}
+              </span>
+            )}
           </div>
           {item.actor && (
             <div className="justify-center margin-vertical-8">
