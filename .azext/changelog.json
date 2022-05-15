@@ -43,6 +43,12 @@
             "issue": 3
           },
           {
+            "type": "feature",
+            "description": "Added processing comments",
+            "pullRequest": 21,
+            "issue": 4
+          },
+          {
             "type": "fix",
             "description": "Fixed an issue where you could uncheck chacklist items while waiting for approval",
             "pullRequest": 19

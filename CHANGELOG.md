@@ -32,13 +32,18 @@
 - Remove unused code
   - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
-### 🚀 Features (1)
+### 🚀 Features (2)
 
 #### `criteria-panel@1.1.0`
 
 - Added processing history
+
   - Suggested in [GH#3 - Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
   - Added in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+
+- Added processing comments
+  - Suggested in [GH#4 - Approval / Rejection comments](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4)
+  - Added in [PR#21 - Add processing comment](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/21)
 
 ### 📝 Documentation (1)
 
