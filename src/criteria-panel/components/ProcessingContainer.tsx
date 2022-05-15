@@ -1,4 +1,5 @@
 import { Button } from 'azure-devops-ui/Button';
+import { FormItem } from 'azure-devops-ui/FormItem';
 import {
   RadioButton,
   RadioButtonGroup,
@@ -27,15 +28,17 @@ const ProcessingContainer = ({
         This acceptance require you to process it. You can chose to <strong>Approve</strong> or{' '}
         <strong>Reject</strong> it.
       </p>
-      <div className="flex-row flex-center rhythm-horizontal-16 font-size-m">
-        <TextField
-          multiline
-          rows={2}
-          placeholder="Add a comment (optional)"
-          width={TextFieldWidth.standard}
-          value={comment}
-          onChange={(_, v) => setComment(v)}
-        />
+      <div className="flex-row flex-center rhythm-horizontal-16 font-size-m padding-top-8 separator-line-top">
+        <FormItem message="Old comments are visible in the history" >
+          <TextField
+            multiline
+            rows={2}
+            placeholder="A short reason for rejecting or approving the comment"
+            width={TextFieldWidth.standard}
+            value={comment}
+            onChange={(_, v) => setComment(v)}
+          />
+        </FormItem>
         <div className="flex-row flex-center">
           <RadioButtonGroup
             onSelect={selectedId => setSelected(selectedId)}
