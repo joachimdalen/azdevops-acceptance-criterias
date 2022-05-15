@@ -25,7 +25,7 @@ describe('ProcessingContainer', () => {
     const approve = screen.getByRole('radio', { name: 'Approve' });
 
     const comment = screen.getByPlaceholderText(
-      'A short reason for rejecting or approving the comment'
+      'A short reason for rejecting or approving the criteria'
     );
     fireEvent.change(comment, { target: { value: 'I approve this' } });
 
@@ -58,7 +58,7 @@ describe('ProcessingContainer', () => {
     const reject = screen.getByRole('radio', { name: 'Reject' });
 
     const comment = screen.getByPlaceholderText(
-      'A short reason for rejecting or approving the comment'
+      'A short reason for rejecting or approving the criteria'
     );
     fireEvent.change(comment, { target: { value: 'I reject this' } });
 

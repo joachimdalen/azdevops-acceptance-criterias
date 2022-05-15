@@ -33,7 +33,7 @@ const ProcessingContainer = ({
           <TextField
             multiline
             rows={2}
-            placeholder="A short reason for rejecting or approving the comment"
+            placeholder="A short reason for rejecting or approving the criteria"
             width={TextFieldWidth.standard}
             value={comment}
             onChange={(_, v) => setComment(v)}
