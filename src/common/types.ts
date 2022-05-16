@@ -39,6 +39,7 @@ export const criteriaIcons: Map<CriteriaTypes, CriteriaIconMapping> = new Map<
 
 export interface CriteriaDetailDocument {
   id: string;
+  latestComment?: string;
   processed?: IAcceptanceCriteriaProcess;
   scenario?: IScenario;
   text?: ITextCriteria;
@@ -165,7 +166,10 @@ export const historyEventProperties: Map<HistoryEvent, EventProperties> = new Ma
     HistoryEvent.Completed,
     { icon: 'SkypeCircleCheck', iconColor: 'text-blue', title: 'Completed criteria' }
   ],
-  [HistoryEvent.ReOpened, { icon: 'CirclePlus', iconColor: 'text-blue', title: 'Reset back to new' }],
+  [
+    HistoryEvent.ReOpened,
+    { icon: 'CirclePlus', iconColor: 'text-blue', title: 'Reset back to new' }
+  ],
   [
     HistoryEvent.Approved,
     { icon: 'CheckMark', iconColor: 'text-green', title: 'Approved criteria' }

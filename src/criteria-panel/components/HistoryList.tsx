@@ -45,7 +45,7 @@ const HistoryList = ({ events }: HistoryListProps): React.ReactElement => {
               </span>
             </div>
             {item?.properties?.comment && (
-              <span className="fontSizeMS font-size-ms secondary-text">
+              <span className="fontSizeMS font-size-ms margin-top-8 secondary-text">
                 {item?.properties?.comment}
               </span>
             )}

@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1168793478,
+      "number": 4,
+      "submitter": "joachimdalen",
+      "title": "Approval / Rejection comments",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4"
+    },
+    {
       "id": 1168792610,
       "number": 3,
       "submitter": "joachimdalen",
@@ -16,6 +23,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 936583972,
+      "number": 21,
+      "submitter": "joachimdalen",
+      "title": "Add processing comment",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/21"
+    },
     {
       "id": 930221978,
       "number": 19,

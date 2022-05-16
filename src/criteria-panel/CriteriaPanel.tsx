@@ -329,9 +329,9 @@ const CriteriaPanel = (): React.ReactElement => {
     };
   };
 
-  async function processCriteria(id: string, approve: ProcessEvent) {
+  async function processCriteria(id: string, approve: ProcessEvent, comment?: string) {
     if (workItemId && parseInt(workItemId) > 0) {
-      const result = await criteriaService.processCriteria(workItemId, id, approve);
+      const result = await criteriaService.processCriteria(workItemId, id, approve, comment);
       if (result !== undefined) {
         toggleWasChanged(true);
         setCriteriaInfo(result.criteria, result.details);
@@ -552,6 +552,13 @@ const CriteriaPanel = (): React.ReactElement => {
                       <StatusTag state={criteria.state} />
                     </FormItem>
                   </div>
+                  <ConditionalChildren
+                    renderChildren={details?.latestComment !== undefined && isCompleted(criteria)}
+                  >
+                    <FormItem label="Latest Comment" className="flex-grow">
+                      {details?.latestComment}
+                    </FormItem>
+                  </ConditionalChildren>
                 </div>
                 <ConditionalChildren
                   renderChildren={

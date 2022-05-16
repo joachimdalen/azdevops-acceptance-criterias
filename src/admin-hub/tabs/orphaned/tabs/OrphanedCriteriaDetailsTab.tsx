@@ -100,7 +100,6 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
         tableItem: OrphanedCriteriaDetail,
         ariaRowIndex?: number
       ) => {
-        console.log('rerender');
         return (
           <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn}>
             {tableItem.type === 'Unknown' ? (

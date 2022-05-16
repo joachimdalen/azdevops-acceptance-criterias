@@ -10,58 +10,92 @@ class CriteriaHistoryService {
     this._dataStore = dataStore || new StorageService();
   }
 
-  public getProcessEvent(event: ProcessEvent, actor?: IInternalIdentity): HistoryItem {
+  public getProcessEvent(
+    event: ProcessEvent,
+    actor?: IInternalIdentity,
+    comment?: string
+  ): HistoryItem {
     switch (event) {
       case ProcessEvent.Approve: {
-        return this.getApprovedEvent(actor);
+        return this.getApprovedEvent(actor, comment);
       }
       case ProcessEvent.Reject: {
-        return this.getRejectedEvent(actor);
+        return this.getRejectedEvent(actor, comment);
       }
       case ProcessEvent.Complete: {
-        return this.getCompletedEvent(actor);
+        return this.getCompletedEvent(actor, comment);
       }
       case ProcessEvent.ResetToNew: {
-        return this.getReOpenEvent(actor);
+        return this.getReOpenEvent(actor, comment);
       }
       case ProcessEvent.ResubmitForApproval: {
-        return this.getReApproveEvent(actor);
+        return this.getReApproveEvent(actor, comment);
       }
     }
   }
-  public getApprovedEvent(actor?: IInternalIdentity): HistoryItem {
+  public getApprovedEvent(actor?: IInternalIdentity, comment?: string): HistoryItem {
     return {
       event: HistoryEvent.Approved,
       date: new Date(),
-      actor: actor
+      actor: actor,
+      properties:
+        comment !== undefined
+          ? {
+              comment
+            }
+          : undefined
     };
   }
-  public getReApproveEvent(actor?: IInternalIdentity): HistoryItem {
+  public getReApproveEvent(actor?: IInternalIdentity, comment?: string): HistoryItem {
     return {
       event: HistoryEvent.ReApprove,
       date: new Date(),
-      actor: actor
+      actor: actor,
+      properties:
+        comment !== undefined
+          ? {
+              comment
+            }
+          : undefined
     };
   }
-  public getRejectedEvent(actor?: IInternalIdentity): HistoryItem {
+  public getRejectedEvent(actor?: IInternalIdentity, comment?: string): HistoryItem {
     return {
       event: HistoryEvent.Rejected,
       date: new Date(),
-      actor: actor
+      actor: actor,
+      properties:
+        comment !== undefined
+          ? {
+              comment
+            }
+          : undefined
     };
   }
-  public getCompletedEvent(actor?: IInternalIdentity): HistoryItem {
+  public getCompletedEvent(actor?: IInternalIdentity, comment?: string): HistoryItem {
     return {
       event: HistoryEvent.Completed,
       date: new Date(),
-      actor: actor
+      actor: actor,
+      properties:
+        comment !== undefined
+          ? {
+              comment
+            }
+          : undefined
     };
   }
-  public getReOpenEvent(actor?: IInternalIdentity): HistoryItem {
+  public getReOpenEvent(actor?: IInternalIdentity, comment?: string): HistoryItem {
     return {
       event: HistoryEvent.ReOpened,
       date: new Date(),
-      actor: actor
+      actor: actor,
+      properties:
+        comment !== undefined
+          ? {
+              comment
+            }
+          : undefined
     };
   }
 
