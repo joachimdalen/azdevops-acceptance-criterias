@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0 (2022-05-XX)
+## 1.1.0 (2022-05-16)
 
 ### 🐛 Fixes (1)
 
@@ -36,12 +36,12 @@
 
 #### `criteria-panel@1.1.0`
 
-- Added processing history
+- Added processing history. See [history](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing/history)
 
   - Suggested in [GH#3 - Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
   - Added in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
-- Added processing comments
+- Added processing comments. See [approvals and rejections](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing#approvals-and-rejections)
   - Suggested in [GH#4 - Approval / Rejection comments](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4)
   - Added in [PR#21 - Add processing comment](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/21)
 

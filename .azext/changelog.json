@@ -1,6 +1,6 @@
 [
   {
-    "publishDate": "2022-05-XX",
+    "publishDate": "2022-05-16",
     "version": "1.1.0",
     "changes": [
       {
@@ -38,13 +38,13 @@
         "changes": [
           {
             "type": "feature",
-            "description": "Added processing history",
+            "description": "Added processing history. See [history](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing/history)",
             "pullRequest": 19,
             "issue": 3
           },
           {
             "type": "feature",
-            "description": "Added processing comments",
+            "description": "Added processing comments. See [approvals and rejections](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing#approvals-and-rejections)",
             "pullRequest": 21,
             "issue": 4
           },
