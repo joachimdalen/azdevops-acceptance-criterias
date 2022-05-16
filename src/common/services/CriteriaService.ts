@@ -1,7 +1,7 @@
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { getClient } from 'azure-devops-extension-api';
-import { CoreRestClient, Process, WebApiTeam } from 'azure-devops-extension-api/Core';
+import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
 import { GraphMembership, GraphRestClient } from 'azure-devops-extension-api/Graph';
 import {
   WorkItemQueryResult,
@@ -16,7 +16,6 @@ import {
   CriteriaDocument,
   CriteriaPanelConfig,
   FullCriteriaStatus,
-  HistoryEvent,
   HistoryItem,
   IAcceptanceCriteria,
   ProcessEvent

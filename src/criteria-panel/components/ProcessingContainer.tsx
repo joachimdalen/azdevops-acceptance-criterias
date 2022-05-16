@@ -5,7 +5,6 @@ import {
   RadioButtonGroup,
   RadioButtonGroupDirection
 } from 'azure-devops-ui/RadioButton';
-import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useState } from 'react';
 
@@ -29,7 +28,7 @@ const ProcessingContainer = ({
         <strong>Reject</strong> it.
       </p>
       <div className="flex-row flex-center rhythm-horizontal-16 font-size-m padding-top-8 separator-line-top">
-        <FormItem message="Old comments are visible in the history" >
+        <FormItem message="Old comments are visible in the history">
           <TextField
             multiline
             rows={2}

@@ -56,7 +56,6 @@ import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewS
 import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
 import { getSchema } from './CriteriaPanelData';
-import { Icon, IconSize } from 'azure-devops-ui/Icon';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaPanelContext();
@@ -553,7 +552,9 @@ const CriteriaPanel = (): React.ReactElement => {
                       <StatusTag state={criteria.state} />
                     </FormItem>
                   </div>
-                  <ConditionalChildren renderChildren={details?.latestComment !== undefined}>
+                  <ConditionalChildren
+                    renderChildren={details?.latestComment !== undefined && isCompleted(criteria)}
+                  >
                     <FormItem label="Latest Comment" className="flex-grow">
                       {details?.latestComment}
                     </FormItem>

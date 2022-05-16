@@ -1,5 +1,4 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
-import exp from 'constants';
 
 import CriteriaHistoryService from '../../../common/services/CriteriaHistoryService';
 import { StorageService } from '../../../common/services/StorageService';
@@ -24,12 +23,6 @@ const historyWithContent: HistoryDocument = {
       actor: identity
     }
   ]
-};
-
-const history: HistoryDocument = {
-  __etag: 1,
-  id: 'AC-1-2',
-  items: []
 };
 
 describe('CriteriaHistoryService', () => {
