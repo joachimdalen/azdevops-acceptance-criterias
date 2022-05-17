@@ -5,7 +5,8 @@
     "changes": [
       {
         "type": "docs",
-        "description": "Update README with correct features"
+        "description": "Update README with correct features",
+        "pullRequest": 23
       }
     ]
   },

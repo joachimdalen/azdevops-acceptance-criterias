@@ -24,6 +24,13 @@
   ],
   "pullRequests": [
     {
+      "id": 938274034,
+      "number": 23,
+      "submitter": "joachimdalen",
+      "title": "Update readme with correct features",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/23"
+    },
+    {
       "id": 936583972,
       "number": 21,
       "submitter": "joachimdalen",
