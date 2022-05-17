@@ -51,13 +51,13 @@ Accepance Criterias is an extension to allow for better management of acceptance
   - Checklist based
 - Approval and rejection flows
 - Hub for processing criterias
+- Approval / Rejection comments
+- Processing history
 
 ### On the roadmap
 
 - [Auto assign approver based on rules](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/8)
 - [Ability to assign tags to a criteria](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/7)
-- [Approval / Rejection comments](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4)
-- [Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
 - [Excel/CSV export](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/2)
 
 ## Getting Started

@@ -23,9 +23,9 @@ Better management of acceptance criterias
 
 ![work-hub-preview](marketplace/docs/images/work-hub-preview.png)
 
-## ⚠️ Preview
+## ⚠️ Issues
 
-This extension is in preview. Please report any issue on [GitHub](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues)
+Please report any issue on [GitHub](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues)
 
 ## Features
 
@@ -35,13 +35,13 @@ This extension is in preview. Please report any issue on [GitHub](https://github
   - Checklist based
 - Approval and rejection flows
 - Hub for processing criterias
+- Approval / Rejection comments
+- Processing history
 
 ### On the roadmap
 
 - [Auto assign approver based on rules](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/8)
 - [Ability to assign tags to a criteria](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/7)
-- [Approval / Rejection comments](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4)
-- [Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
 - [Excel/CSV export](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/2)
 
 ## Getting started and documentation
