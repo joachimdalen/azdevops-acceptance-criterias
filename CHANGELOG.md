@@ -7,6 +7,12 @@
 - Update README with correct features
   - Changed in [PR#23 - Update readme with correct features](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/23)
 
+### 🛠️ Maintenance (1)
+
+- Fix ci pipeline setting the wrong extension version
+  - Scheduled in [GH#22 - Build sets the wrong extension version in scripts when setting the version manually](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/22)
+  - Changed in [PR#24 - Fix pipeline setting wrong extension version when defined manually](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/24)
+
 ---
 
 ## 1.1.0 (2022-05-16)
