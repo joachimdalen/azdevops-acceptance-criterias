@@ -7,6 +7,12 @@
         "type": "docs",
         "description": "Update README with correct features",
         "pullRequest": 23
+      },
+      {
+        "type": "maint",
+        "description": "Fix ci pipeline setting the wrong extension version",
+        "issue": 22,
+        "pullRequest": 24
       }
     ]
   },
