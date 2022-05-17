@@ -1,5 +1,16 @@
 [
   {
+    "publishDate": "2022-05-XX",
+    "version": "1.1.1",
+    "changes": [
+      {
+        "type": "docs",
+        "description": "Update README with correct features",
+        "pullRequest": 23
+      }
+    ]
+  },
+  {
     "publishDate": "2022-05-16",
     "version": "1.1.0",
     "changes": [
@@ -50,7 +61,7 @@
           },
           {
             "type": "fix",
-            "description": "Fixed an issue where you could uncheck chacklist items while waiting for approval",
+            "description": "Fixed an issue where you could uncheck checklist items while waiting for approval",
             "pullRequest": 19
           },
           {

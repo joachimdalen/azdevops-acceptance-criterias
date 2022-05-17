@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.1 (2022-05-XX)
+
+### 📝 Documentation (1)
+
+- Update README with correct features
+  - Changed in [PR#23 - Update readme with correct features](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/23)
+
+---
+
 ## 1.1.0 (2022-05-16)
 
 ### 🐛 Fixes (1)
@@ -9,11 +18,18 @@
 
 ## 📦 Module changes
 
+### 📝 Documentation (1)
+
+#### `admin-hub@1.0.1`
+
+- Update documentation url
+  - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+
 ### 🐛 Fixes (2)
 
 #### `criteria-panel@1.1.0`
 
-- Fixed an issue where you could uncheck chacklist items while waiting for approval
+- Fixed an issue where you could uncheck checklist items while waiting for approval
 
   - Fixed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
@@ -44,13 +60,6 @@
 - Added processing comments. See [approvals and rejections](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing#approvals-and-rejections)
   - Suggested in [GH#4 - Approval / Rejection comments](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4)
   - Added in [PR#21 - Add processing comment](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/21)
-
-### 📝 Documentation (1)
-
-#### `admin-hub@1.0.1`
-
-- Update documentation url
-  - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
 ---
 
