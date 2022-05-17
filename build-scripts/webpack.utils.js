@@ -20,7 +20,7 @@ module.exports = {
   },
   getExtensionVersion() {
     return {
-      EXTENSION_VERSION: process.env.TASK_EXTENSION_VERSION || vssConfig.version
+      EXTENSION_VERSION: process.env.COMPILED_TASK_EXTENSION_VERSION || vssConfig.version
     };
   }
 };
