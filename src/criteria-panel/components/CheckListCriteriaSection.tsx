@@ -1,9 +1,7 @@
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { FormItem } from 'azure-devops-ui/FormItem';
 import { MessageBar, MessageBarSeverity } from 'azure-devops-ui/MessageBar';
-import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
@@ -11,6 +9,7 @@ import { move } from '../../common/common';
 import { getCombined, hasError } from '../../common/errorUtils';
 import { ICheckList, ICheckListCriteria } from '../../common/types';
 import { useCriteriaPanelContext } from '../CriteriaPanelContext';
+import CheckListEditRow from './checklist/CheckListEditRow';
 
 interface CheckListCriteriaSectionProps {
   errors: { [key: string]: string[] } | undefined;
@@ -19,8 +18,17 @@ interface CheckListCriteriaSectionProps {
 const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JSX.Element => {
   const { dispatch, state } = useCriteriaPanelContext();
   const [items, setItems] = useState<ICheckListCriteria[]>(state.checklist?.criterias || []);
-  const add = (id: ICheckListCriteria) => {
-    setItems(prev => [...prev, id]);
+  const [focused, setFocused] = useState<string | undefined>(undefined);
+  const add = (id: ICheckListCriteria, index?: number) => {
+    if (index === undefined) setItems(prev => [...prev, id]);
+    else {
+      setItems(prev => {
+        const newArr = [...prev];
+        newArr.splice(index, 0, id);
+        return newArr;
+      });
+    }
+    setFocused(id.id);
   };
 
   const remove = (crit: ICheckListCriteria) => {
@@ -29,8 +37,8 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
     }
   };
 
-  const updateItem = (criteria: ICheckListCriteria, text: string) => {
-    const index = items.findIndex(x => x.id === criteria.id);
+  const updateItem = (id: string, text: string) => {
+    const index = items.findIndex(x => x.id === id);
     if (index === -1) return;
 
     const newItems = [...items];
@@ -80,7 +88,29 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
         </ConditionalChildren>
 
         <ConditionalChildren renderChildren={items.length !== 0}>
-          {items.map((item, index) => {
+          {items.map((item, index) => (
+            <CheckListEditRow
+              key={item.id}
+              focusedItemId={focused}
+              itemIndex={index}
+              errors={errors}
+              isLast={index === items.length - 1}
+              removeItem={() => {
+                remove(item);
+              }}
+              item={item}
+              onChange={(id: string, value: string) => updateItem(id, value)}
+              moveItem={dir => {
+                const nI = [...items];
+                move(nI, index, dir === 'up' ? -1 : 1);
+                setItems(nI);
+              }}
+              addItem={() => {
+                add({ id: uuidV4(), text: '', completed: false }, index + 1);
+              }}
+            />
+          ))}
+          {/* {items.map((item, index) => {
             return (
               <FormItem
                 key={item.id}
@@ -94,6 +124,12 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
                     placeholder={`Some criteria...`}
                     onChange={(_, val) => updateItem(item, val)}
                     value={item.text}
+                    onKeyDown={event => {
+                      console.log(event.key);
+                      if (event.key === 'Enter') {
+                        add({ id: uuidV4(), text: '', completed: false }, index + 1);
+                      }
+                    }}
                   />
                   <Button
                     id={`${item.id}-up`}
@@ -130,7 +166,7 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
                 </div>
               </FormItem>
             );
-          })}
+          })} */}
         </ConditionalChildren>
       </div>
       {items.length >= 3 && addItemToolbar}
