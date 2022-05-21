@@ -1,7 +1,7 @@
 [
   {
     "publishDate": "2022-05-XX",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "changes": [
       {
         "type": "docs",
@@ -18,7 +18,7 @@
     "modules": [
       {
         "name": "criteria-panel",
-        "version": "1.1.1",
+        "version": "1.2.0",
         "changes": [
           {
             "type": "fix",
@@ -36,7 +36,7 @@
       },
       {
         "name": "admin-hub",
-        "version": "X.X.X",
+        "version": "1.1.0",
         "changes": [
           {
             "type": "feature",
@@ -47,7 +47,7 @@
       },
       {
         "name": "work-hub",
-        "version": "X.X.X",
+        "version": "1.1.0",
         "changes": [
           {
             "type": "feature",
