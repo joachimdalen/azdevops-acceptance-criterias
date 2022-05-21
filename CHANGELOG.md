@@ -15,13 +15,24 @@
 
 ## 📦 Module changes
 
-### 🐛 Fixes (1)
+### 🐛 Fixes (3)
 
 #### `criteria-panel@1.2.0`
 
 - Fixed validation messages not showing for checklist items
+
   - Reported in [GH#26 - Checklist is missing validation messages on items](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/26)
   - Fixed in [PR#27 - Fix missing validation for checklist items](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/27)
+
+- Fixed some missing colors when in light mode
+  - Reported in [GH#28 - Fix colors in lightmode](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/28)
+  - Fixed in [PR#31 - Fix some missing colors when using a light mode theme](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/31)
+
+#### `work-hub@1.1.0`
+
+- Fixed some missing colors when in light mode
+  - Reported in [GH#28 - Fix colors in lightmode](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/28)
+  - Fixed in [PR#31 - Fix some missing colors when using a light mode theme](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/31)
 
 ### 🚀 Features (3)
 

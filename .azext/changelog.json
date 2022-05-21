@@ -31,6 +31,12 @@
             "description": "Add key board shortcuts. See the [documentation](https://devops-extensions.dev/docs/extensions/acceptance-criterias/shortcuts) for details.",
             "issue": 25,
             "pullRequest": 29
+          },
+          {
+            "type": "fix",
+            "description": "Fixed some missing colors when in light mode",
+            "issue": 28,
+            "pullRequest": 31
           }
         ]
       },
@@ -53,6 +59,12 @@
             "type": "feature",
             "description": "Add buttons to open documentation",
             "pullRequest": 29
+          },
+          {
+            "type": "fix",
+            "description": "Fixed some missing colors when in light mode",
+            "issue": 28,
+            "pullRequest": 31
           }
         ]
       }
