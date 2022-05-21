@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import CheckListCriteriaSection from '../../../criteria-panel/components/CheckListCriteriaSection';
-import { CriteriaPanelProvider } from '../../../criteria-panel/CriteriaPanelContext';
+import CheckListCriteriaSection from '../../../../criteria-panel/components/checklist/CheckListCriteriaSection';
+import { CriteriaPanelProvider } from '../../../../criteria-panel/CriteriaPanelContext';
 
 describe('CheckListCriteriaSection', () => {
   it('should be empty initially', async () => {
@@ -171,5 +171,127 @@ describe('CheckListCriteriaSection', () => {
 
     expect(inputsNew[0].value).toEqual('This item 2');
     expect(inputsNew[1].value).toEqual('This item');
+  });
+
+  describe('shortcuts', () => {
+    it('should move item up when key combo is pressed', async () => {
+      render(
+        <CriteriaPanelProvider
+          defaultState={{
+            isLoading: false,
+            type: 'checklist',
+            checklist: {
+              criterias: [
+                { completed: false, id: '1234', text: 'This item' },
+                { completed: false, id: '4321', text: 'This item 2' }
+              ]
+            }
+          }}
+        >
+          <CheckListCriteriaSection errors={undefined} />
+        </CriteriaPanelProvider>
+      );
+
+      const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
+
+      expect(inputs[0].value).toEqual('This item');
+      expect(inputs[1].value).toEqual('This item 2');
+
+      const inputOne = screen.getByDisplayValue('This item 2');
+      fireEvent.keyUp(inputOne, { key: 'ArrowUp', ctrlKey: true });
+
+      const inputsNew = screen.getAllByRole<HTMLInputElement>('textbox');
+
+      expect(inputsNew[0].value).toEqual('This item 2');
+      expect(inputsNew[1].value).toEqual('This item');
+    });
+    it('should move item down when key combo is pressed', async () => {
+      render(
+        <CriteriaPanelProvider
+          defaultState={{
+            isLoading: false,
+            type: 'checklist',
+            checklist: {
+              criterias: [
+                { completed: false, id: '1234', text: 'This item' },
+                { completed: false, id: '4321', text: 'This item 2' }
+              ]
+            }
+          }}
+        >
+          <CheckListCriteriaSection errors={undefined} />
+        </CriteriaPanelProvider>
+      );
+
+      const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
+
+      expect(inputs[0].value).toEqual('This item');
+      expect(inputs[1].value).toEqual('This item 2');
+
+      const inputOne = screen.getByDisplayValue('This item');
+      fireEvent.keyUp(inputOne, { key: 'ArrowDown', ctrlKey: true });
+
+      const inputsNew = screen.getAllByRole<HTMLInputElement>('textbox');
+
+      expect(inputsNew[0].value).toEqual('This item 2');
+      expect(inputsNew[1].value).toEqual('This item');
+    });
+    it('should remove item down when key combo is pressed', async () => {
+      render(
+        <CriteriaPanelProvider
+          defaultState={{
+            isLoading: false,
+            type: 'checklist',
+            checklist: {
+              criterias: [
+                { completed: false, id: '1234', text: 'This item' },
+                { completed: false, id: '4321', text: 'This item 2' }
+              ]
+            }
+          }}
+        >
+          <CheckListCriteriaSection errors={undefined} />
+        </CriteriaPanelProvider>
+      );
+
+      const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
+
+      expect(inputs.length).toEqual(2);
+
+      const inputOne = screen.getByDisplayValue('This item 2');
+      fireEvent.keyUp(inputOne, { key: 'Delete', ctrlKey: true });
+
+      const inputsNew = screen.getAllByRole<HTMLInputElement>('textbox');
+      expect(inputsNew.length).toEqual(1);
+    });
+
+    it('should add item down when key combo is pressed', async () => {
+      render(
+        <CriteriaPanelProvider
+          defaultState={{
+            isLoading: false,
+            type: 'checklist',
+            checklist: {
+              criterias: [
+                { completed: false, id: '1234', text: 'This item' },
+                { completed: false, id: '4321', text: 'This item 2' }
+              ]
+            }
+          }}
+        >
+          <CheckListCriteriaSection errors={undefined} />
+        </CriteriaPanelProvider>
+      );
+
+      const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
+
+      expect(inputs.length).toEqual(2);
+
+      const inputOne = screen.getByDisplayValue('This item 2');
+      fireEvent.keyUp(inputOne, { key: 'Enter', ctrlKey: true });
+
+      const inputsNew = screen.getAllByRole<HTMLInputElement>('textbox');
+      expect(inputsNew.length).toEqual(3);
+    });
   });
 });

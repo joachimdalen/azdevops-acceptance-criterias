@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react';
 
-import TextCriteriaSection from '../../../criteria-panel/components/TextCriteriaSection';
-import { CriteriaPanelProvider } from '../../../criteria-panel/CriteriaPanelContext';
+import TextCriteriaSection from '../../../../criteria-panel/components/text/TextCriteriaSection';
+import { CriteriaPanelProvider } from '../../../../criteria-panel/CriteriaPanelContext';
+
+
 
 describe('TextCriteriaSection', () => {
   it('should be empty initially', async () => {

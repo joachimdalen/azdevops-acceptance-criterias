@@ -1,7 +1,7 @@
 [
   {
     "publishDate": "2022-05-XX",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "changes": [
       {
         "type": "docs",
@@ -18,13 +18,41 @@
     "modules": [
       {
         "name": "criteria-panel",
-        "version": "1.1.1",
+        "version": "1.2.0",
         "changes": [
           {
             "type": "fix",
             "description": "Fixed validation messages not showing for checklist items",
             "issue": 26,
             "pullRequest": 27
+          },
+          {
+            "type": "feature",
+            "description": "Add key board shortcuts. See the [documentation](https://devops-extensions.dev/docs/extensions/acceptance-criterias/shortcuts) for details.",
+            "issue": 25,
+            "pullRequest": 29
+          }
+        ]
+      },
+      {
+        "name": "admin-hub",
+        "version": "1.1.0",
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Update documentation urls",
+            "pullRequest": 29
+          }
+        ]
+      },
+      {
+        "name": "work-hub",
+        "version": "1.1.0",
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Add buttons to open documentation",
+            "pullRequest": 29
           }
         ]
       }

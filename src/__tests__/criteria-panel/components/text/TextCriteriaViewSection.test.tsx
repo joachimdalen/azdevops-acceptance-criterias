@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 
-import TextCriteriaViewSection from '../../../../criteria-panel/components/view/TextCriteriaViewSection';
+import TextCriteriaViewSection from '../../../../criteria-panel/components/text/TextCriteriaViewSection';
 
 describe('TextCriteriaViewSection', () => {
   it('should show text', async () => {
