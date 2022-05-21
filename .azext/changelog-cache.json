@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1243868639,
+      "number": 26,
+      "submitter": "joachimdalen",
+      "title": "Checklist is missing validation messages on items",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/26"
+    },
+    {
       "id": 1237547338,
       "number": 22,
       "submitter": "joachimdalen",
@@ -30,6 +37,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 943353748,
+      "number": 27,
+      "submitter": "joachimdalen",
+      "title": "Fix missing validation for checklist items",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/27"
+    },
     {
       "id": 938303744,
       "number": 24,
