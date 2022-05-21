@@ -15,7 +15,7 @@
 
 ## 📦 Module changes
 
-### 🐛 Fixes (4)
+### 🐛 Fixes (6)
 
 #### `criteria-panel@1.2.0`
 
@@ -37,8 +37,18 @@
 #### `work-hub@1.1.0`
 
 - Fixed some missing colors when in light mode
+
   - Reported in [GH#28 - Fix colors in lightmode](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/28)
   - Fixed in [PR#31 - Fix some missing colors when using a light mode theme](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/31)
+
+- Fixed free text search being case sensitive
+
+  - Reported in [GH#33 - Filter should be case-insensitive](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/33)
+  - Fixed in [PR#34 - Fix filter issues](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/34)
+
+- Fixed an issue that could lead to the browser window crashing when working with a large amount of criterias and filters
+  - Reported in [GH#33 - Filter should be case-insensitive](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/33)
+  - Fixed in [PR#34 - Fix filter issues](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/34)
 
 ### 🚀 Features (3)
 

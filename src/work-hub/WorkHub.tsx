@@ -29,7 +29,7 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
 import { ZeroData } from 'azure-devops-ui/ZeroData';
 import cx from 'classnames';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { chunk } from '../common/chunkUtil';
 import { SlimErrorBoundary } from '../common/components/SlimErrorBoundary';
@@ -55,10 +55,8 @@ const WorkHub = (): JSX.Element => {
   const [loadingWis, toggleLoadingWis] = useBooleanToggle();
   const [showFilter, toggleFilter] = useBooleanToggle(true);
   const [didShowPanel, toggleDidShow] = useBooleanToggle(false);
-  //  const { dispatch, state: workHubState } = useWorkHubContext();
   const [showPanel, togglePanel] = useBooleanToggle(false);
   const [showSettingsPanel, toggleSettingsPanel] = useBooleanToggle(false);
-  const ref = useRef(null);
   const [error, setError] = useState<string | undefined>();
   const isActive = !loadingData && !loadingWis && error === undefined;
   const commandBarItems: IHeaderCommandBarItem[] = [
@@ -85,16 +83,6 @@ const WorkHub = (): JSX.Element => {
       },
       onActivate: () => toggleFilter()
     },
-    // {
-    //   id: 'columns',
-    //   iconProps: { iconName: 'TripleColumnEdit' },
-    //   subtle: true,
-    //   disabled: !isActive,
-    //   tooltipProps: {
-    //     text: 'Configure columns'
-    //   },
-    //   onActivate: () => togglePanel()
-    // },
     {
       id: 'settings',
       iconProps: { iconName: 'Settings' },
@@ -337,6 +325,8 @@ const WorkHub = (): JSX.Element => {
     }
   };
 
+  const filterFunc = useCallback(filter => applyFilter(filter), [criterias]);
+
   return (
     <Surface background={SurfaceBackground.neutral}>
       <Page className="flex-grow">
@@ -356,7 +346,7 @@ const WorkHub = (): JSX.Element => {
                     <HubFilterBar
                       criterias={criterias}
                       showFilter={showFilter}
-                      onFilterChanged={filter => applyFilter(filter)}
+                      onFilterChanged={filterFunc}
                     />
                   </SlimErrorBoundary>
                 </ConditionalChildren>
