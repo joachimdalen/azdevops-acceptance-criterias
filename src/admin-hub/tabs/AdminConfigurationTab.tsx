@@ -30,7 +30,7 @@ const SettingRow = ({
   toggle: (key: string, value: boolean) => Promise<void>;
 }) => {
   return (
-    <div className="policy-toggle flex-row padding-vertical-16 padding-horizontal-20">
+    <div className="flex-row padding-vertical-16 padding-horizontal-20">
       <div className="flex-column padding-right-16">
         <Toggle
           onText="On"

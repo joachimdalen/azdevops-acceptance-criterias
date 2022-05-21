@@ -2,7 +2,8 @@ import { Button } from 'azure-devops-ui/Button';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useRef } from 'react';
-import { hasError, getCombined } from '../../../common/errorUtils';
+
+import { getCombined, hasError } from '../../../common/errorUtils';
 import { ICheckListCriteria } from '../../../common/types';
 
 interface CheckListEditRowProps {
@@ -52,12 +53,12 @@ const CheckListEditRow = ({
         <TextField
           containerClassName="flex-grow"
           width={TextFieldWidth.auto}
-          placeholder={`Some criteria...`}
+          placeholder={`Some criteria... (Tip: Press 'Ctrl + Enter' to add a new row)`}
           onChange={(_, val) => onChange(item.id, val)}
           value={item.text}
           onKeyDown={event => {
             console.log(event.key);
-            if (event.key === 'Enter') {
+            if (event.ctrlKey && event.key === 'Enter') {
               addItem();
             }
           }}

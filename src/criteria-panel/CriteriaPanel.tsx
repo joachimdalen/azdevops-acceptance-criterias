@@ -43,7 +43,7 @@ import {
   IAcceptanceCriteria,
   ProcessEvent
 } from '../common/types';
-import CheckListCriteriaSection from './components/CheckListCriteriaSection';
+import CheckListCriteriaSection from './components/checklist/CheckListCriteriaSection';
 import CompletedProcessContainer from './components/CompletedProcessContainer';
 import CompletionContainer from './components/CompletionContainer';
 import HistoryList from './components/HistoryList';

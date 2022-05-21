@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import CheckListCriteriaSection from '../../../criteria-panel/components/CheckListCriteriaSection';
-import { CriteriaPanelProvider } from '../../../criteria-panel/CriteriaPanelContext';
+import CheckListCriteriaSection from '../../../../criteria-panel/components/checklist/CheckListCriteriaSection';
+import { CriteriaPanelProvider } from '../../../../criteria-panel/CriteriaPanelContext';
 
 describe('CheckListCriteriaSection', () => {
   it('should be empty initially', async () => {

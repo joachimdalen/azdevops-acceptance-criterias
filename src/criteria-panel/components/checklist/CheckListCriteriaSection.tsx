@@ -5,11 +5,11 @@ import { MessageBar, MessageBarSeverity } from 'azure-devops-ui/MessageBar';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
-import { move } from '../../common/common';
-import { getCombined, hasError } from '../../common/errorUtils';
-import { ICheckList, ICheckListCriteria } from '../../common/types';
-import { useCriteriaPanelContext } from '../CriteriaPanelContext';
-import CheckListEditRow from './checklist/CheckListEditRow';
+import { move } from '../../../common/common';
+import { getCombined, hasError } from '../../../common/errorUtils';
+import { ICheckList, ICheckListCriteria } from '../../../common/types';
+import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
+import CheckListEditRow from './CheckListEditRow';
 
 interface CheckListCriteriaSectionProps {
   errors: { [key: string]: string[] } | undefined;
@@ -77,10 +77,13 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
           <div className="flex-column flex-center">
             <h3 className="secondary-text">Build your criteria</h3>
             <p className="secondary-text">Add your checklist items</p>
+            <p className="secondary-text">
+              Press <code>Ctrl + Enter</code> to add a new item below when typing
+            </p>
           </div>
         </ConditionalChildren>
         <ConditionalChildren
-          renderChildren={items.length === 0 && hasError(errors, 'checklist.criterias')}
+          renderChildren={hasError(errors, 'checklist.criterias')}
         >
           <MessageBar severity={MessageBarSeverity.Error}>
             {getCombined(errors, 'checklist.criterias', 'Checklist')}
@@ -110,63 +113,6 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
               }}
             />
           ))}
-          {/* {items.map((item, index) => {
-            return (
-              <FormItem
-                key={item.id}
-                error={hasError(errors, 'checklist.scenario')}
-                message={getCombined(errors, 'checklist.scenario', 'Scenario')}
-              >
-                <div className="flex-row flex-center rhythm-horizontal-4">
-                  <TextField
-                    containerClassName="flex-grow"
-                    width={TextFieldWidth.auto}
-                    placeholder={`Some criteria...`}
-                    onChange={(_, val) => updateItem(item, val)}
-                    value={item.text}
-                    onKeyDown={event => {
-                      console.log(event.key);
-                      if (event.key === 'Enter') {
-                        add({ id: uuidV4(), text: '', completed: false }, index + 1);
-                      }
-                    }}
-                  />
-                  <Button
-                    id={`${item.id}-up`}
-                    disabled={index === 0}
-                    iconProps={{ iconName: 'Up' }}
-                    subtle
-                    tooltipProps={{ text: 'Move Up' }}
-                    onClick={() => {
-                      const nI = [...items];
-                      move(nI, index, -1);
-                      setItems(nI);
-                    }}
-                  />
-
-                  <Button
-                    id={`${item.id}-down`}
-                    disabled={index === items.length - 1}
-                    iconProps={{ iconName: 'Down' }}
-                    subtle
-                    tooltipProps={{ text: 'Move Down' }}
-                    onClick={() => {
-                      const nI = [...items];
-                      move(nI, index, 1);
-                      setItems(nI);
-                    }}
-                  />
-                  <Button
-                    id={`${item.id}-remove`}
-                    iconProps={{ iconName: 'Delete' }}
-                    subtle
-                    tooltipProps={{ text: 'Remove' }}
-                    onClick={() => remove(item)}
-                  />
-                </div>
-              </FormItem>
-            );
-          })} */}
         </ConditionalChildren>
       </div>
       {items.length >= 3 && addItemToolbar}
