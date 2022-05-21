@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1243995308,
+      "number": 30,
+      "submitter": "joachimdalen",
+      "title": "Reset all settings does not reset the admin view",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/30"
+    },
+    {
       "id": 1243891035,
       "number": 28,
       "submitter": "joachimdalen",
@@ -51,6 +58,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 943485692,
+      "number": 32,
+      "submitter": "joachimdalen",
+      "title": "Redesign and fixes to Admin Hub",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/32"
+    },
     {
       "id": 943449700,
       "number": 31,

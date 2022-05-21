@@ -1,5 +1,3 @@
-import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
-import { Button } from 'azure-devops-ui/Button';
 import { Card } from 'azure-devops-ui/Card';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Toggle } from 'azure-devops-ui/Toggle';
@@ -10,7 +8,6 @@ import { CriteriaTypes, GlobalSettingsDocument } from '../../common/types';
 import PageWrapper from '../components/PageWrapper';
 
 interface SettingSection {
-  title: string;
   setting: SettingRow;
   toggle: (key: string, value: boolean) => Promise<void>;
 }
@@ -30,7 +27,7 @@ const SettingRow = ({
   toggle: (key: string, value: boolean) => Promise<void>;
 }) => {
   return (
-    <div className="flex-row padding-vertical-16 padding-horizontal-20">
+    <div className="flex-row padding-vertical-16 padding-horizontal-20 separator-line-bottom">
       <div className="flex-column padding-right-16">
         <Toggle
           onText="On"
@@ -126,7 +123,6 @@ const AdminConfigurationTab = (): React.ReactElement => {
   const sections: SettingSection[] = useMemo(() => {
     return [
       {
-        title: 'Allowed criteria types',
         setting: {
           title: 'Limit criteria types',
           description: 'Select what criteria types can be created',
@@ -152,7 +148,6 @@ const AdminConfigurationTab = (): React.ReactElement => {
         toggle: updateCriteria
       },
       {
-        title: 'Required approver',
         setting: {
           title: 'Require approver on all criterias',
           description: 'Ensures all criterias is created with assigned approvers',
@@ -173,27 +168,25 @@ const AdminConfigurationTab = (): React.ReactElement => {
     <PageWrapper>
       <Surface background={SurfaceBackground.neutral}>
         <div className="rhythm-vertical-16 flex-column">
-          <Card titleProps={{ text: 'Reset global settings' }}>
+          <Card
+            titleProps={{ text: 'Settings' }}
+            headerCommandBarItems={[
+              {
+                id: 'reset-configuration',
+                text: 'Reset configuration',
+                isPrimary: true,
+                onActivate: () => {
+                  storageService.resetSettings().then(newSettings => setSettings(newSettings));
+                }
+              }
+            ]}
+          >
             <div className="flex-column flex-grow">
-              <Button
-                text="Reset all settings"
-                danger
-                onClick={() => {
-                  storageService.resetSettings();
-                }}
-              />
+              {sections.map(section => {
+                return <SettingRow settings={section.setting} toggle={section.toggle} />;
+              })}
             </div>
           </Card>
-
-          {sections.map(section => {
-            return (
-              <Card titleProps={{ text: section.title }}>
-                <div className="flex-column flex-grow">
-                  <SettingRow settings={section.setting} toggle={section.toggle} />
-                </div>
-              </Card>
-            );
-          })}
         </div>
       </Surface>
     </PageWrapper>

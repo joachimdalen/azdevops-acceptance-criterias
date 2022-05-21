@@ -15,7 +15,7 @@
 
 ## 📦 Module changes
 
-### 🐛 Fixes (3)
+### 🐛 Fixes (4)
 
 #### `criteria-panel@1.2.0`
 
@@ -27,6 +27,12 @@
 - Fixed some missing colors when in light mode
   - Reported in [GH#28 - Fix colors in lightmode](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/28)
   - Fixed in [PR#31 - Fix some missing colors when using a light mode theme](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/31)
+
+#### `admin-hub@1.1.0`
+
+- Fixed an issue where pressing 'Reset all settings' would not reset the view
+  - Reported in [GH#30 - Reset all settings does not reset the admin view](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/30)
+  - Fixed in [PR#32 - Redesign and fixes to Admin Hub](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/32)
 
 #### `work-hub@1.1.0`
 
@@ -51,6 +57,14 @@
 
 - Add buttons to open documentation
   - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
+
+### 📣 Enhancements (1)
+
+#### `admin-hub@1.1.0`
+
+- Redesigned and cleaned up the configuration view
+  - Suggested in [GH#30 - Reset all settings does not reset the admin view](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/30)
+  - Improved in [PR#32 - Redesign and fixes to Admin Hub](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/32)
 
 ## 🌟 Contributors
 

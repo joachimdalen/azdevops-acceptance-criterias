@@ -48,6 +48,18 @@
             "type": "feature",
             "description": "Update documentation urls",
             "pullRequest": 29
+          },
+          {
+            "type": "fix",
+            "description": "Fixed an issue where pressing 'Reset all settings' would not reset the view",
+            "issue": 30,
+            "pullRequest": 32
+          },
+          {
+            "type": "enhancement",
+            "description": "Redesigned and cleaned up the configuration view",
+            "issue": 30,
+            "pullRequest": 32
           }
         ]
       },
