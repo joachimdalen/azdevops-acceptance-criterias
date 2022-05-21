@@ -3,13 +3,14 @@ import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useRef } from 'react';
 
+import { capitalizeFirstLetter } from '../../../common/common';
 import { getCombined, hasError } from '../../../common/errorUtils';
-import { ICheckListCriteria } from '../../../common/types';
+import { IScenarioCriteria } from '../../../common/types';
 
-interface CheckListEditRowProps {
+interface ScenarioCriteriaEditRowProps {
   itemIndex: number;
   isLast: boolean;
-  item: ICheckListCriteria;
+  item: IScenarioCriteria;
   errors: { [key: string]: string[] } | undefined;
   moveItem: (direction: 'up' | 'down') => void;
   onChange: (id: string, value: string) => void;
@@ -18,7 +19,7 @@ interface CheckListEditRowProps {
   focusedItemId?: string;
 }
 
-const CheckListEditRow = ({
+const ScenarioCriteriaEditRow = ({
   itemIndex,
   item,
   isLast,
@@ -28,7 +29,7 @@ const CheckListEditRow = ({
   addItem,
   removeItem,
   focusedItemId
-}: CheckListEditRowProps): JSX.Element => {
+}: ScenarioCriteriaEditRowProps): JSX.Element => {
   const inputRef = useRef<HTMLTextAreaElement & HTMLInputElement>(null);
 
   useEffect(() => {
@@ -46,14 +47,15 @@ const CheckListEditRow = ({
   return (
     <FormItem
       key={item.id}
-      error={hasError(errors, `checklist.criterias[${itemIndex}].text`)}
-      message={getCombined(errors, `checklist.criterias[${itemIndex}].text`, 'Text')}
+      label={capitalizeFirstLetter(item.type)}
+      error={hasError(errors, `scenario.criterias[${itemIndex}].text`)}
+      message={getCombined(errors, `scenario.criterias[${itemIndex}].text`, 'Text')}
     >
       <div className="flex-row flex-center rhythm-horizontal-4">
         <TextField
           containerClassName="flex-grow"
           width={TextFieldWidth.auto}
-          placeholder={`Some criteria...`}
+          placeholder={`${capitalizeFirstLetter(item.type)}...`}
           onChange={(_, val) => onChange(item.id, val)}
           value={item.text}
           onKeyUp={event => {
@@ -109,4 +111,4 @@ const CheckListEditRow = ({
   );
 };
 
-export default CheckListEditRow;
+export default ScenarioCriteriaEditRow;

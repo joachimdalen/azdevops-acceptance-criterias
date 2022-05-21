@@ -44,16 +44,16 @@ import {
   ProcessEvent
 } from '../common/types';
 import CheckListCriteriaSection from './components/checklist/CheckListCriteriaSection';
+import ChecklistCriteriaViewSection from './components/checklist/ChecklistCriteriaViewSection';
 import CompletedProcessContainer from './components/CompletedProcessContainer';
 import CompletionContainer from './components/CompletionContainer';
 import HistoryList from './components/HistoryList';
 import ProcessingContainer from './components/ProcessingContainer';
 import RejectionProcessContainer from './components/RejectionProcessContainer';
-import ScenarioCriteria from './components/ScenarioCriteriaSection';
-import TextCriteriaSection from './components/TextCriteriaSection';
-import ChecklistCriteriaViewSection from './components/view/ChecklistCriteriaViewSection';
-import ScenarioCriteriaViewSection from './components/view/ScenarioCriteriaViewSection';
-import TextCriteriaViewSection from './components/view/TextCriteriaViewSection';
+import ScenarioCriteria from './components/scenario/ScenarioCriteriaSection';
+import ScenarioCriteriaViewSection from './components/scenario/ScenarioCriteriaViewSection';
+import TextCriteriaSection from './components/text/TextCriteriaSection';
+import TextCriteriaViewSection from './components/text/TextCriteriaViewSection';
 import { useCriteriaPanelContext } from './CriteriaPanelContext';
 import { getSchema } from './CriteriaPanelData';
 

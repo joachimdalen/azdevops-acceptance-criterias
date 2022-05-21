@@ -1,37 +1,44 @@
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { FormItem } from 'azure-devops-ui/FormItem';
 import { Link } from 'azure-devops-ui/Link';
 import { MessageBar, MessageBarSeverity } from 'azure-devops-ui/MessageBar';
-import { useEffect, useState } from 'react';
+import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
+import { useEffect, useRef, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { move } from '../../../common/common';
 import KeyBoardShortcut from '../../../common/components/key-board-shortcut/KeyBoardShortcut';
 import { DOCS_URL_KEYBOARD_SHORTCUTS } from '../../../common/documentationUrls';
 import { getCombined, hasError } from '../../../common/errorUtils';
-import { ICheckList, ICheckListCriteria } from '../../../common/types';
+import { IScenario, IScenarioCriteria } from '../../../common/types';
 import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
-import CheckListEditRow from './CheckListEditRow';
+import ScenarioCriteriaEditRow from './ScenarioCriteriaEditRow';
 
-interface CheckListCriteriaSectionProps {
+interface ScenarioCriteriaSectionProps {
   errors: { [key: string]: string[] } | undefined;
 }
 
-const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JSX.Element => {
+const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.Element => {
   const { dispatch, state } = useCriteriaPanelContext();
-  const [items, setItems] = useState<ICheckListCriteria[]>(state.checklist?.criterias || []);
+  const [scenario, setScenario] = useState<string>(state.scenario?.scenario || '');
+  const [items, setItems] = useState<IScenarioCriteria[]>(state.scenario?.criterias || []);
   const [focused, setFocused] = useState<string | undefined>(undefined);
-  const add = (id: ICheckListCriteria, index?: number) => {
+  const [currentIndex, setCurrentIndex] = useState<number | undefined>(undefined);
+  const inputRef = useRef<Button>(null);
+
+  const add = (id: IScenarioCriteria, index?: number) => {
     if (index === undefined) setItems(prev => [...prev, id]);
     else {
       setItems(prev => {
         const newArr = [...prev];
-        newArr.splice(index, 0, id);
+        newArr.splice(index + 1, 0, id);
         return newArr;
       });
     }
     setFocused(id.id);
+    setCurrentIndex(undefined);
   };
 
   const remove = (criteriaId: string) => {
@@ -53,37 +60,71 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
   };
 
   useEffect(() => {
-    const item: ICheckList = {
+    const item: IScenario = {
+      scenario,
       criterias: items
     };
     dispatch({ type: 'SET_CRITERIA', data: item });
-  }, [items]);
-
-  const addItemToolbar = (
-    <ButtonGroup className="separator-line-top separator-line-bottom justify-center padding-4 dark-background sticky-toolbar">
-      <Button
-        subtle
-        text="Add item"
-        iconProps={{ iconName: 'Add' }}
-        onClick={() => add({ id: uuidV4(), text: '', completed: false })}
-      />
-    </ButtonGroup>
-  );
+  }, [items, scenario]);
 
   return (
     <div className="rhythm-vertical-16 flex-grow margin-top-8">
-      {addItemToolbar}
+      <FormItem
+        label="Scenario"
+        error={hasError(errors, 'scenario.scenario')}
+        message={getCombined(errors, 'scenario.scenario', 'Scenario')}
+      >
+        <TextField
+          width={TextFieldWidth.auto}
+          placeholder="Short description.."
+          multiline
+          resizable
+          rows={4}
+          value={scenario}
+          onChange={(_, val) => {
+            setScenario(val);
+          }}
+        />
+      </FormItem>
+
+      <ButtonGroup className="separator-line-top separator-line-bottom justify-center padding-4 dark-background sticky-toolbar">
+        <Button
+          ref={inputRef}
+          subtle
+          text="Given"
+          iconProps={{ iconName: 'Add' }}
+          onClick={() => add({ id: uuidV4(), type: 'given' }, currentIndex)}
+        />
+        <Button
+          subtle
+          text="When"
+          iconProps={{ iconName: 'Add' }}
+          onClick={() => add({ id: uuidV4(), type: 'when' }, currentIndex)}
+        />
+        <Button
+          subtle
+          text="Then"
+          iconProps={{ iconName: 'Add' }}
+          onClick={() => add({ id: uuidV4(), type: 'then' }, currentIndex)}
+        />
+        <Button
+          subtle
+          text="And"
+          iconProps={{ iconName: 'Add' }}
+          onClick={() => add({ id: uuidV4(), type: 'and' }, currentIndex)}
+        />
+      </ButtonGroup>
       <div className="rhythm-vertical-8 padding-bottom-16">
         <ConditionalChildren
-          renderChildren={items.length === 0 && !hasError(errors, 'checklist.criterias')}
+          renderChildren={items.length === 0 && !hasError(errors, 'scenario.criterias')}
         >
           <div className="flex-column flex-center">
             <h3 className="secondary-text">Build your criteria</h3>
-            <p className="secondary-text">Add your checklist items</p>
             <p className="secondary-text flex-row flex-center">
-              Press <KeyBoardShortcut keys={['Ctrl', 'Enter']} /> to add a new item below when
-              typing
+              Press <KeyBoardShortcut keys={['Ctrl', 'Enter']} /> to move to the toolbar when
+              typing.
             </p>
+            <p className="secondary-text">The new item is added below the focused item</p>
             <p className="secondary-text">
               See the{' '}
               <Link
@@ -97,15 +138,17 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
             </p>
           </div>
         </ConditionalChildren>
-        <ConditionalChildren renderChildren={hasError(errors, 'checklist.criterias')}>
+        <ConditionalChildren
+          renderChildren={items.length === 0 && hasError(errors, 'scenario.criterias')}
+        >
           <MessageBar severity={MessageBarSeverity.Error}>
-            {getCombined(errors, 'checklist.criterias', 'Checklist')}
+            {getCombined(errors, 'scenario.criterias', 'Criterias')}
           </MessageBar>
         </ConditionalChildren>
 
         <ConditionalChildren renderChildren={items.length !== 0}>
           {items.map((item, index) => (
-            <CheckListEditRow
+            <ScenarioCriteriaEditRow
               key={item.id}
               focusedItemId={focused}
               itemIndex={index}
@@ -122,15 +165,16 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
                 setItems(nI);
               }}
               addItem={() => {
-                add({ id: uuidV4(), text: '', completed: false }, index + 1);
+                console.log(index);
+                setCurrentIndex(index);
+                inputRef?.current?.focus();
               }}
             />
           ))}
         </ConditionalChildren>
       </div>
-      {items.length >= 3 && addItemToolbar}
     </div>
   );
 };
 
-export default CheckListCriteriaSection;
+export default ScenarioCriteriaSection;

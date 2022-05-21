@@ -3,9 +3,10 @@ import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
-import { getCombined,hasError } from '../../common/errorUtils';
-import { ITextCriteria } from '../../common/types';
-import { useCriteriaPanelContext } from '../CriteriaPanelContext';
+import { getCombined, hasError } from '../../../common/errorUtils';
+import { ITextCriteria } from '../../../common/types';
+import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
+
 interface TextCriteriaSectionProps {
   errors: { [key: string]: string[] } | undefined;
 }

@@ -7,8 +7,8 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
 import React, { useMemo, useState } from 'react';
 
+import { DOCS_URL_EXTENSION } from '../common/documentationUrls';
 import AdminConfigurationTab from './tabs/AdminConfigurationTab';
-import DocumentTab from './tabs/DocumentTab';
 import OrphanedDocumentsTab from './tabs/orphaned/OrphanedDocumentsTab';
 
 const AdminPage = (): React.ReactElement => {
@@ -21,9 +21,7 @@ const AdminPage = (): React.ReactElement => {
       text: 'Open docs',
       iconProps: { iconName: 'Help' },
       onActivate: () => {
-        devOpsService.openLink(
-          'https://devops-extensions.dev/docs/extensions/acceptance-criterias'
-        );
+        devOpsService.openLink(DOCS_URL_EXTENSION);
       }
     }
   ];

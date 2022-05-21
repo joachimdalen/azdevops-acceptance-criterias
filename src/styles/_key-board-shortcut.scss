@@ -1,0 +1,18 @@
+.key-board-shortcut {
+  line-height: 1.55;
+  font-size: $fontSize;
+  font-weight: $fontWeightSemiBold;
+  background-color: var(--palette-black-alpha-10);
+  color: var(--palette-black-alpha-100);
+  padding: $spacing-4;
+  border-radius: $spacing-4;
+  border-color: var(--palette-black-alpha-10);
+  border-style: solid;
+  border-width: 1px 1px 3px;
+  margin: 0 $spacing-4;
+
+  &-plus {
+    font-size: $fontSizeL;
+    font-weight: $fontWeightSemiBold;
+  }
+}

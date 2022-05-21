@@ -34,6 +34,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { chunk } from '../common/chunkUtil';
 import { SlimErrorBoundary } from '../common/components/SlimErrorBoundary';
 import { getWorkItemIdFromCriteriaId } from '../common/criteriaUtils';
+import { DOCS_URL_EXTENSION, DOCS_URL_KEYBOARD_SHORTCUTS } from '../common/documentationUrls';
 import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
@@ -104,6 +105,26 @@ const WorkHub = (): JSX.Element => {
         text: 'Open settings'
       },
       onActivate: () => toggleSettingsPanel()
+    },
+    {
+      id: 'open-docs',
+      text: 'Open docs',
+      iconProps: { iconName: 'Help' },
+      onActivate: () => {
+        devOpsService.openLink(DOCS_URL_EXTENSION);
+      }
+    },
+    {
+      id: 'keyboard-shortcuts',
+      iconProps: { iconName: 'KeyboardClassic' },
+      text: 'Show keyboard shortcuts',
+      subtle: true,
+      tooltipProps: {
+        text: 'Open keyboard shortcuts documentation'
+      },
+      onActivate: () => {
+        devOpsService.openLink(DOCS_URL_KEYBOARD_SHORTCUTS);
+      }
     }
   ];
 

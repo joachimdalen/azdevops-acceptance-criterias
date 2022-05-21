@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import ScenarioCriteriaSection from '../../../criteria-panel/components/ScenarioCriteriaSection';
-import { CriteriaPanelProvider } from '../../../criteria-panel/CriteriaPanelContext';
+import ScenarioCriteriaSection from '../../../../criteria-panel/components/scenario/ScenarioCriteriaSection';
+import { CriteriaPanelProvider } from '../../../../criteria-panel/CriteriaPanelContext';
 
 describe('ScenarioCriteriaSection', () => {
   it('should be empty initially', async () => {
