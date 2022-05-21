@@ -26,7 +26,7 @@ const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.
   const [items, setItems] = useState<IScenarioCriteria[]>(state.scenario?.criterias || []);
   const [focused, setFocused] = useState<string | undefined>(undefined);
   const [currentIndex, setCurrentIndex] = useState<number | undefined>(undefined);
-  const inputRef = useRef<Button>(null);
+  const buttonRef = useRef<Button>(null);
 
   const add = (id: IScenarioCriteria, index?: number) => {
     if (index === undefined) setItems(prev => [...prev, id]);
@@ -48,7 +48,6 @@ const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.
       if (items.length > 1) {
         const newIndex = index - 1 < 0 ? index + 1 : index - 1;
         setFocused(items[newIndex].id);
-        console.log(newIndex);
       }
     }
   };
@@ -95,7 +94,7 @@ const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.
 
       <ButtonGroup className="separator-line-top separator-line-bottom justify-center padding-4 dark-background sticky-toolbar">
         <Button
-          ref={inputRef}
+          ref={buttonRef}
           subtle
           text="Given"
           iconProps={{ iconName: 'Add' }}
@@ -167,9 +166,8 @@ const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.
                 setItems(nI);
               }}
               addItem={() => {
-                console.log(index);
                 setCurrentIndex(index);
-                inputRef?.current?.focus();
+                buttonRef?.current?.focus();
               }}
             />
           ))}

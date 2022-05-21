@@ -33,13 +33,7 @@ const ScenarioCriteriaEditRow = ({
   const inputRef = useRef<HTMLTextAreaElement & HTMLInputElement>(null);
 
   useEffect(() => {
-    console.log([
-      focusedItemId !== undefined,
-      focusedItemId === item.id,
-      inputRef?.current !== null
-    ]);
     if (focusedItemId !== undefined && focusedItemId === item.id && inputRef?.current !== null) {
-      console.log('focusing ' + item.id);
       inputRef.current.focus();
     }
   }, [focusedItemId]);

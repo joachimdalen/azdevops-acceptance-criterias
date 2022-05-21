@@ -41,7 +41,6 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
       if (items.length > 1) {
         const newIndex = index - 1 < 0 ? index + 1 : index - 1;
         setFocused(items[newIndex].id);
-        console.log(newIndex);
       }
     }
   };
