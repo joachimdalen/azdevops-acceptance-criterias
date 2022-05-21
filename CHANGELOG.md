@@ -23,6 +23,30 @@
   - Reported in [GH#26 - Checklist is missing validation messages on items](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/26)
   - Fixed in [PR#27 - Fix missing validation for checklist items](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/27)
 
+### 🚀 Features (3)
+
+#### `criteria-panel@1.1.1`
+
+- Add key board shortcuts. See the [documentation](https://devops-extensions.dev/docs/extensions/acceptance-criterias/shortcuts) for details.
+  - Suggested in [GH#25 - Add keyboard shortcuts for improved navigation and UX](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/25)
+  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
+
+#### `admin-hub@X.X.X`
+
+- Update documentation urls
+  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
+
+#### `work-hub@X.X.X`
+
+- Add buttons to open documentation
+  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
+
+## 🌟 Contributors
+
+Thank you to the following for contributing to the latest release
+
+- [@xperiandri](https://github.com/xperiandri)
+
 ---
 
 ## 1.1.0 (2022-05-16)

@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1241985140,
+      "number": 25,
+      "submitter": "xperiandri",
+      "title": "Add keyboard shortcuts for improved navigation and UX",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/25"
+    },
+    {
       "id": 1243868639,
       "number": 26,
       "submitter": "joachimdalen",
@@ -37,6 +44,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 943376709,
+      "number": 29,
+      "submitter": "joachimdalen",
+      "title": "Add keyboard shortcuts",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29"
+    },
     {
       "id": 943353748,
       "number": 27,

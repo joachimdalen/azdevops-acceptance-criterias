@@ -25,6 +25,34 @@
             "description": "Fixed validation messages not showing for checklist items",
             "issue": 26,
             "pullRequest": 27
+          },
+          {
+            "type": "feature",
+            "description": "Add key board shortcuts. See the [documentation](https://devops-extensions.dev/docs/extensions/acceptance-criterias/shortcuts) for details.",
+            "issue": 25,
+            "pullRequest": 29
+          }
+        ]
+      },
+      {
+        "name": "admin-hub",
+        "version": "X.X.X",
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Update documentation urls",
+            "pullRequest": 29
+          }
+        ]
+      },
+      {
+        "name": "work-hub",
+        "version": "X.X.X",
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Add buttons to open documentation",
+            "pullRequest": 29
           }
         ]
       }
