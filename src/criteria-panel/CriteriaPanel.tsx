@@ -521,7 +521,7 @@ const CriteriaPanel = (): React.ReactElement => {
                   >
                     <MessageCard
                       className="flex-self-stretch"
-                      severity={MessageCardSeverity.Info}
+                      severity={MessageCardSeverity.Warning}
                       buttonProps={[
                         {
                           text: 'Edit',
