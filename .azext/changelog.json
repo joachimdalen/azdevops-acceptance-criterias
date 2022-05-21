@@ -35,7 +35,8 @@
           {
             "type": "fix",
             "description": "Fixed some missing colors when in light mode",
-            "issue": 28
+            "issue": 28,
+            "pullRequest": 31
           }
         ]
       },
@@ -62,7 +63,8 @@
           {
             "type": "fix",
             "description": "Fixed some missing colors when in light mode",
-            "issue": 28
+            "issue": 28,
+            "pullRequest": 31
           }
         ]
       }

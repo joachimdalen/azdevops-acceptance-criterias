@@ -52,6 +52,13 @@
   ],
   "pullRequests": [
     {
+      "id": 943449700,
+      "number": 31,
+      "submitter": "joachimdalen",
+      "title": "Fix some missing colors when using a light mode theme",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/31"
+    },
+    {
       "id": 943376709,
       "number": 29,
       "submitter": "joachimdalen",
