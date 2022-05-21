@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1243891035,
+      "number": 28,
+      "submitter": "joachimdalen",
+      "title": "Fix colors in lightmode",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/28"
+    },
+    {
       "id": 1241985140,
       "number": 25,
       "submitter": "xperiandri",
