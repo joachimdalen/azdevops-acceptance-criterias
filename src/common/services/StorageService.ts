@@ -30,7 +30,7 @@ export interface IStorageService {
   setCriteriaDetailsDocument(data: CriteriaDetailDocument): Promise<CriteriaDetailDocument>;
   deleteCriteriaDetilsDocument(id: string): Promise<void>;
   deleteHistoryDocument(id: string): Promise<void>;
-  resetSettings(): Promise<void>;
+  resetSettings(): Promise<GlobalSettingsDocument>;
   getHistory(id: string): Promise<HistoryDocument | undefined>;
   setHistory(data: HistoryDocument): Promise<HistoryDocument>;
 }
@@ -42,8 +42,14 @@ class StorageService implements IStorageService {
   private _criteriaDetailsCollection?: string;
   private _criteriaHistoryCollection?: string;
   private _settingsCollection?: string;
-
   private _projectId?: string;
+  private defaultSettingsDocument: GlobalSettingsDocument = {
+    id: 'Global',
+    limitAllowedCriteriaTypes: false,
+    allowedCriteriaTypes: [],
+    requireApprovers: false,
+    __etag: -1
+  };
 
   public constructor() {
     this._devOpsService = new DevOpsService();
@@ -162,13 +168,6 @@ class StorageService implements IStorageService {
   }
 
   public async getSettings(): Promise<GlobalSettingsDocument> {
-    const defaultDocument: GlobalSettingsDocument = {
-      id: 'Global',
-      limitAllowedCriteriaTypes: false,
-      allowedCriteriaTypes: [],
-      requireApprovers: false,
-      __etag: -1
-    };
     try {
       const dataService = await this.getDataService();
 
@@ -177,7 +176,7 @@ class StorageService implements IStorageService {
       }
 
       if (!this._projectId) {
-        return defaultDocument;
+        return this.defaultSettingsDocument;
       }
       const dataManager = await dataService.getExtensionDataManager(
         DevOps.getExtensionContext().id,
@@ -185,7 +184,7 @@ class StorageService implements IStorageService {
       );
 
       const document = await dataManager.getDocument(this._settingsCollection, 'Global', {
-        defaultValue: defaultDocument
+        defaultValue: this.defaultSettingsDocument
       });
 
       return document;
@@ -193,7 +192,7 @@ class StorageService implements IStorageService {
       if (error?.status !== 404) {
         throw new Error(error);
       } else {
-        return defaultDocument;
+        return this.defaultSettingsDocument;
       }
     }
   }
@@ -212,18 +211,8 @@ class StorageService implements IStorageService {
     return dataManager.setDocument(this._settingsCollection, data);
   }
 
-  public async resetSettings(): Promise<void> {
-    const dataService = await this.getDataService();
-
-    if (this._settingsCollection === undefined) {
-      throw new Error('Failed to initialize ');
-    }
-
-    const dataManager = await dataService.getExtensionDataManager(
-      DevOps.getExtensionContext().id,
-      await DevOps.getAccessToken()
-    );
-    return dataManager.deleteDocument(this._settingsCollection, 'Global');
+  public async resetSettings(): Promise<GlobalSettingsDocument> {
+    return this.setSettings(this.defaultSettingsDocument);
   }
 
   // Criteria details
