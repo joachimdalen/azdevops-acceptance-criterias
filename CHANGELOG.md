@@ -21,6 +21,7 @@
 
 - Fixed validation messages not showing for checklist items
   - Reported in [GH#26 - Checklist is missing validation messages on items](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/26)
+  - Fixed in [PR#27 - Fix missing validation for checklist items](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/27)
 
 ---
 

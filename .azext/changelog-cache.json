@@ -38,6 +38,13 @@
   ],
   "pullRequests": [
     {
+      "id": 943353748,
+      "number": 27,
+      "submitter": "joachimdalen",
+      "title": "Fix missing validation for checklist items",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/27"
+    },
+    {
       "id": 938303744,
       "number": 24,
       "submitter": "joachimdalen",

@@ -23,7 +23,8 @@
           {
             "type": "fix",
             "description": "Fixed validation messages not showing for checklist items",
-            "issue": 26
+            "issue": 26,
+            "pullRequest": 27
           }
         ]
       }
