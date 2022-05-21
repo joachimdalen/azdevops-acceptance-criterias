@@ -52,19 +52,15 @@ const HubFilterBar = ({
       });
     }
 
+    f.subscribe(() => {
+      const state = f.getState();
+      setLocalItem(LocalStorageKeys.FilterState, state);
+      onFilterChanged(state);
+    }, FILTER_CHANGE_EVENT);
+
     return f;
-  }, []);
+  }, [onFilterChanged]);
 
-  useEffect(() => {
-    filter.subscribe(() => {
-      setLocalItem(LocalStorageKeys.FilterState, filter.getState());
-      onFilterChanged(filter.getState());
-    }, FILTER_CHANGE_EVENT);
-
-    return filter.unsubscribe(() => {
-      onFilterChanged(filter.getState());
-    }, FILTER_CHANGE_EVENT);
-  }, [filter, onFilterChanged]);
   const approversSelection = useMemo(() => new DropdownMultiSelection(), []);
   const typeSelection = useMemo(() => new DropdownSelection(), []);
   const stateSelection = useMemo(() => new DropdownSelection(), []);
@@ -108,7 +104,7 @@ const HubFilterBar = ({
           id: c,
           text: capitalizeFirstLetter(c),
           render: (ri, ci, tc, ti) => (
-            <SimpleTableCell columnIndex={ci} tableColumn={tc}>
+            <SimpleTableCell key={ti.id} columnIndex={ci} tableColumn={tc}>
               <StatusTag state={c} />
             </SimpleTableCell>
           )
