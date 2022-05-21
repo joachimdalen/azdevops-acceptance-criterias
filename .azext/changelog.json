@@ -77,6 +77,18 @@
             "description": "Fixed some missing colors when in light mode",
             "issue": 28,
             "pullRequest": 31
+          },
+          {
+            "type": "fix",
+            "description": "Fixed free text search being case sensitive",
+            "issue": 33,
+            "pullRequest": 34
+          },
+          {
+            "type": "fix",
+            "description": "Fixed an issue that could lead to the browser window crashing when working with a large amount of criterias and filters",
+            "issue": 33,
+            "pullRequest": 34
           }
         ]
       }

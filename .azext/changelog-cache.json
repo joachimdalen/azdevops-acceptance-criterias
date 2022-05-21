@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1244048801,
+      "number": 33,
+      "submitter": "joachimdalen",
+      "title": "Filter should be case-insensitive",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/33"
+    },
+    {
       "id": 1243995308,
       "number": 30,
       "submitter": "joachimdalen",
@@ -58,6 +65,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 943501754,
+      "number": 34,
+      "submitter": "joachimdalen",
+      "title": "Fix filter issues",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/34"
+    },
     {
       "id": 943485692,
       "number": 32,
