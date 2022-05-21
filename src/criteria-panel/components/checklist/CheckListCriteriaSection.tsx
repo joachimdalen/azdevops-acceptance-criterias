@@ -35,8 +35,14 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
   };
 
   const remove = (criteriaId: string) => {
-    if (items.findIndex(x => x.id === criteriaId) !== -1) {
+    const index = items.findIndex(x => x.id === criteriaId);
+    if (index !== -1) {
       setItems(prev => prev.filter(x => x.id !== criteriaId));
+      if (items.length > 1) {
+        const newIndex = index - 1 < 0 ? index + 1 : index - 1;
+        setFocused(items[newIndex].id);
+        console.log(newIndex);
+      }
     }
   };
 
@@ -86,11 +92,7 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
             </p>
             <p className="secondary-text">
               See the{' '}
-              <Link
-                href={DOCS_URL_KEYBOARD_SHORTCUTS}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
+              <Link href={DOCS_URL_KEYBOARD_SHORTCUTS} rel="noopener noreferrer" target="_blank">
                 documentation
               </Link>{' '}
               for a full list of shortcuts
