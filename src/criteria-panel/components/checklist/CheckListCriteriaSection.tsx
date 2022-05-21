@@ -1,3 +1,4 @@
+import { getCombined, hasError } from '@joachimdalen/azdevops-ext-core/ValidationUtils';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
@@ -9,7 +10,6 @@ import { v4 as uuidV4 } from 'uuid';
 import { move } from '../../../common/common';
 import KeyBoardShortcut from '../../../common/components/key-board-shortcut/KeyBoardShortcut';
 import { DOCS_URL_KEYBOARD_SHORTCUTS } from '../../../common/documentationUrls';
-import { getCombined, hasError } from '../../../common/errorUtils';
 import { ICheckList, ICheckListCriteria } from '../../../common/types';
 import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
 import CheckListEditRow from './CheckListEditRow';

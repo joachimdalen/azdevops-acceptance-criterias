@@ -1,9 +1,9 @@
+import { getCombined, hasError } from '@joachimdalen/azdevops-ext-core/ValidationUtils';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
-import { getCombined, hasError } from '../../../common/errorUtils';
 import { ITextCriteria } from '../../../common/types';
 import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
 

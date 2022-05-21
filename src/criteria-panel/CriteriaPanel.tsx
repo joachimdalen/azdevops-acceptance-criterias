@@ -8,6 +8,10 @@ import { getLoggedInUser, isLoggedInUser } from '@joachimdalen/azdevops-ext-core
 import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
 import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
+import {
+  getCombined,
+  hasError,
+  parseValidationError} from '@joachimdalen/azdevops-ext-core/ValidationUtils';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
@@ -27,7 +31,6 @@ import ApproverDisplay from '../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
 import StatusTag from '../common/components/StatusTag';
 import { isCompleted, isProcessed } from '../common/criteriaUtils';
-import { getCombined, hasError, parseValidationError } from '../common/errorUtils';
 import { LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaHistoryService from '../common/services/CriteriaHistoryService';
 import CriteriaService from '../common/services/CriteriaService';

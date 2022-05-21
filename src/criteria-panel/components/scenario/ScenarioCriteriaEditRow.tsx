@@ -1,10 +1,10 @@
+import { getCombined, hasError } from '@joachimdalen/azdevops-ext-core/ValidationUtils';
 import { Button } from 'azure-devops-ui/Button';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useRef } from 'react';
 
 import { capitalizeFirstLetter } from '../../../common/common';
-import { getCombined, hasError } from '../../../common/errorUtils';
 import { IScenarioCriteria } from '../../../common/types';
 
 interface ScenarioCriteriaEditRowProps {
