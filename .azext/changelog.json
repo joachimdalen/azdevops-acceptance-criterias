@@ -14,6 +14,20 @@
         "issue": 22,
         "pullRequest": 24
       }
+    ],
+    "modules": [
+      {
+        "name": "criteria-panel",
+        "version": "1.1.1",
+        "changes": [
+          {
+            "type": "fix",
+            "description": "Fixed validation messages not showing for checklist items",
+            "issue": 26,
+            "pullRequest": 27
+          }
+        ]
+      }
     ]
   },
   {

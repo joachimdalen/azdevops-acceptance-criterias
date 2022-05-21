@@ -13,6 +13,16 @@
   - Scheduled in [GH#22 - Build sets the wrong extension version in scripts when setting the version manually](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/22)
   - Changed in [PR#24 - Fix pipeline setting wrong extension version when defined manually](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/24)
 
+## 📦 Module changes
+
+### 🐛 Fixes (1)
+
+#### `criteria-panel@1.1.1`
+
+- Fixed validation messages not showing for checklist items
+  - Reported in [GH#26 - Checklist is missing validation messages on items](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/26)
+  - Fixed in [PR#27 - Fix missing validation for checklist items](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/27)
+
 ---
 
 ## 1.1.0 (2022-05-16)
