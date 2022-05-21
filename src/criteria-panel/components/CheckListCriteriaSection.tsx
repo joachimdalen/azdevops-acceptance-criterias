@@ -84,8 +84,8 @@ const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JS
             return (
               <FormItem
                 key={item.id}
-                error={hasError(errors, 'checklist.scenario')}
-                message={getCombined(errors, 'checklist.scenario', 'Scenario')}
+                error={hasError(errors, `checklist.criterias[${index}].text`)}
+                message={getCombined(errors, `checklist.criterias[${index}].text`, 'Text')}
               >
                 <div className="flex-row flex-center rhythm-horizontal-4">
                   <TextField
