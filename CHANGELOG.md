@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.0 (2022-05-XX)
+## 1.2.0 (2022-05-22)
 
 ### 📝 Documentation (1)
 
@@ -100,17 +100,6 @@ Thank you to the following for contributing to the latest release
 - Update documentation url
   - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
-### 🐛 Fixes (2)
-
-#### `criteria-panel@1.1.0`
-
-- Fixed an issue where you could uncheck checklist items while waiting for approval
-
-  - Fixed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
-
-- Fixed an issue where the checklist would be out of sync when performing multiple processing actions without closing the panel
-  - Fixed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
-
 ### 🛠️ Maintenance (2)
 
 #### `work-hub@1.0.3`
@@ -122,6 +111,17 @@ Thank you to the following for contributing to the latest release
 
 - Remove unused code
   - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+
+### 🐛 Fixes (2)
+
+#### `criteria-panel@1.1.0`
+
+- Fixed an issue where you could uncheck checklist items while waiting for approval
+
+  - Fixed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+
+- Fixed an issue where the checklist would be out of sync when performing multiple processing actions without closing the panel
+  - Fixed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
 ### 🚀 Features (2)
 
