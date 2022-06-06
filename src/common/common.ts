@@ -5,7 +5,7 @@ import { IButtonProps } from 'azure-devops-ui/Button';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { IMessageBarProps } from 'azure-devops-ui/MessageBar';
 
-import { CriteriaDetailDocument, IAcceptanceCriteria } from './types';
+import { CriteriaDetailDocument, CriteriaTemplateDocument, IAcceptanceCriteria } from './types';
 
 export enum PanelIds {
   CriteriaPanel = 'criteria-panel',
@@ -23,6 +23,10 @@ export interface CriteriaModalResult {
     criteria: IAcceptanceCriteria;
     details?: CriteriaDetailDocument;
   };
+}
+export interface CriteriaTemplateModalResult {
+  result: 'CANCEL' | 'SAVE';
+  data?: CriteriaTemplateDocument;
 }
 
 export const capitalizeFirstLetter = (text: string): string => {

@@ -6,7 +6,7 @@ import PageWrapper from '../../components/PageWrapper';
 import OrphanedCriteriaDetailsTab from './tabs/OrphanedCriteriaDetailsTab';
 import OrphanedCriteriasTab from './tabs/OrphanedCriteriasTab';
 
-const OrphanedDocumentsTab = (): React.ReactElement => {
+const OrphanedDocumentsSection = (): React.ReactElement => {
   const [selectedTab, setSelectedTab] = useState<string>('criterias');
 
   return (
@@ -33,4 +33,4 @@ const OrphanedDocumentsTab = (): React.ReactElement => {
   );
 };
 
-export default OrphanedDocumentsTab;
+export default OrphanedDocumentsSection;

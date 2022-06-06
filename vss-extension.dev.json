@@ -107,29 +107,6 @@
       ]
     },
     {
-      "id": "admin-hub",
-      "type": "ms.vss-web.hub",
-      "description": "Configuration hub for Acceptance Criterias",
-      "targets": ["ms.vss-web.project-admin-hub-group"],
-      "properties": {
-        "name": "Acceptance Criterias (DEV)",
-        "order": 1,
-        "uri": "admin-hub.html",
-        "icon": {
-          "light": "dist/assets/hub-icon-dark.png",
-          "dark": "dist/assets/hub-icon-light.png"
-        }
-      },
-      "constraints": [
-        {
-          "name": "Feature",
-          "properties": {
-            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
-          }
-        }
-      ]
-    },
-    {
       "id": "criterias-control-page",
       "type": "ms.vss-work-web.work-item-form-page",
       "targets": ["ms.vss-work-web.work-item-form"],
@@ -253,7 +230,8 @@
         "ms.vss-admin-web.project-admin-hub-component-icons-collapsible"
       ],
       "properties": {
-        "name": "Acceptance Criterias (DEV)"
+        "name": "Acceptance Criterias (DEV)",
+        "order": 70
       },
       "constraints": [
         {

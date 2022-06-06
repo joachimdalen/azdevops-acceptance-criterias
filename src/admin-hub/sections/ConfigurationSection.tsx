@@ -1,24 +1,31 @@
+import { LoadingSection } from '@joachimdalen/azdevops-ext-core/LoadingSection';
+import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { Card } from 'azure-devops-ui/Card';
+import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
-import { Toggle } from 'azure-devops-ui/Toggle';
 import { useEffect, useMemo, useState } from 'react';
+
 import SettingRow from '../../common/components/setting-section/SettingRow';
 import { SettingSection } from '../../common/components/setting-section/types';
-
 import { StorageService } from '../../common/services/StorageService';
 import { CriteriaTypes, GlobalSettingsDocument } from '../../common/types';
 import PageWrapper from '../components/PageWrapper';
 
-
-
-const AdminConfigurationTab = (): React.ReactElement => {
+const ConfigurationSection = (): React.ReactElement => {
   const storageService = useMemo(() => new StorageService(), []);
+  const [loading, toggleLoading] = useBooleanToggle(true);
   const [settings, setSettings] = useState<GlobalSettingsDocument>();
 
   useEffect(() => {
     async function init() {
-      const loadedSetting = await storageService.getSettings();
-      setSettings(loadedSetting);
+      try {
+        const loadedSetting = await storageService.getSettings();
+        setSettings(loadedSetting);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        toggleLoading();
+      }
     }
 
     init();
@@ -102,30 +109,33 @@ const AdminConfigurationTab = (): React.ReactElement => {
   return (
     <PageWrapper>
       <Surface background={SurfaceBackground.neutral}>
-        <div className="rhythm-vertical-16 flex-column">
-          <Card
-            titleProps={{ text: 'Settings' }}
-            headerCommandBarItems={[
-              {
-                id: 'reset-configuration',
-                text: 'Reset configuration',
-                isPrimary: true,
-                onActivate: () => {
-                  storageService.resetSettings().then(newSettings => setSettings(newSettings));
+        <LoadingSection isLoading={loading} text="Loading configuration..." />
+        <ConditionalChildren renderChildren={!loading}>
+          <div className="rhythm-vertical-16 flex-column">
+            <Card
+              titleProps={{ text: 'Settings' }}
+              headerCommandBarItems={[
+                {
+                  id: 'reset-configuration',
+                  text: 'Reset configuration',
+                  isPrimary: true,
+                  onActivate: () => {
+                    storageService.resetSettings().then(newSettings => setSettings(newSettings));
+                  }
                 }
-              }
-            ]}
-          >
-            <div className="flex-column flex-grow">
-              {sections.map(section => {
-                return <SettingRow settings={section.setting} toggle={section.toggle} />;
-              })}
-            </div>
-          </Card>
-        </div>
+              ]}
+            >
+              <div className="flex-column flex-grow">
+                {sections.map(section => {
+                  return <SettingRow settings={section.setting} toggle={section.toggle} />;
+                })}
+              </div>
+            </Card>
+          </div>
+        </ConditionalChildren>
       </Surface>
     </PageWrapper>
   );
 };
 
-export default AdminConfigurationTab;
+export default ConfigurationSection;

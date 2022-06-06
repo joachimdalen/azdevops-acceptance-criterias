@@ -1,22 +1,18 @@
 import { CommandBar } from '@fluentui/react';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
-import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
-import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { Panel } from 'azure-devops-ui/Panel';
 import { ColumnMore, ISimpleTableCell, renderSimpleCell, Table } from 'azure-devops-ui/Table';
-import { Tab, Tabs, TabSize } from 'azure-devops-ui/Tabs';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
-import { useMemo, useState } from 'react';
-import { PanelIds } from '../../../common/common';
+import { useMemo } from 'react';
 
+import { CriteriaTemplateModalResult, PanelIds } from '../../../common/common';
 import CriteriaTypeDisplay from '../../../common/components/CriteriaTypeDisplay';
-import CriteriaService from '../../../common/services/CriteriaService';
-import { CriteriaTemplate, CriteriaTypes } from '../../../common/types';
-import TemplatePanel from '../../../criteria-template-panel/TemplatePanel';
+import CriteriaTemplateService from '../../../common/services/CriteriaTemplateService';
+import { CriteriaTemplateDocument, CriteriaTypes } from '../../../common/types';
 
 interface CriteriaTemplateTypesProps {
   type: CriteriaTypes;
-  templates: CriteriaTemplate[];
+  templates: CriteriaTemplateDocument[];
+  onAdd: (doc: CriteriaTemplateDocument) => Promise<void>;
 }
 
 interface CriteriaTemplateRow extends ISimpleTableCell {
@@ -25,7 +21,11 @@ interface CriteriaTemplateRow extends ISimpleTableCell {
   description: string;
 }
 
-const CriteriaTemplateTypes = ({ type, templates }: CriteriaTemplateTypesProps): JSX.Element => {
+const CriteriaTemplateTypes = ({
+  type,
+  templates,
+  onAdd
+}: CriteriaTemplateTypesProps): JSX.Element => {
   const devOpsService = useMemo(() => new DevOpsService(), []);
   const itemProvider = useMemo(
     () =>
@@ -55,6 +55,17 @@ const CriteriaTemplateTypes = ({ type, templates }: CriteriaTemplateTypesProps):
               devOpsService.showPanel<any | undefined, PanelIds>(PanelIds.CriteriaTemplatePanel, {
                 title: `New ${type} template`,
                 size: 2,
+                onClose: async (result: CriteriaTemplateModalResult | undefined) => {
+                  console.log(result);
+                  try {
+                    if (result?.result === 'SAVE' && result.data) {
+                      onAdd(result.data);
+                    }
+                  } catch (error: any) {
+                    devOpsService.showToast(error.message);
+                  }
+                },
+
                 configuration: {
                   type
                 }

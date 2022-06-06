@@ -5,11 +5,14 @@ import { showRootComponent } from '@joachimdalen/azdevops-ext-core/showRootCompo
 
 import TemplatePanel from './TemplatePanel';
 import { CriteriaBuilderProvider } from '../common/criterias/CriteriaBuilderContext';
+import { CriteriaTemplateProvider } from './CriteriaTemplateProvider';
 
 showRootComponent(
   <ErrorBoundary>
     <CriteriaBuilderProvider>
-      <TemplatePanel />
+      <CriteriaTemplateProvider>
+        <TemplatePanel />
+      </CriteriaTemplateProvider>
     </CriteriaBuilderProvider>
   </ErrorBoundary>,
   'criteria-template-panel-container'

@@ -123,6 +123,8 @@ const OrphanedCriteriaDetailsTab = (): React.ReactElement => {
             onActivate: () => {
               service.deleteCriteriaDocument(item.id);
               service.deleteCriteriaDetilsDocument(item.id);
+              service.deleteHistoryDocument(item.id);
+              setDocuments(prev => prev.filter(x => x.id !== item.id));
             }
           }
         ]

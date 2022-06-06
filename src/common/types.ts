@@ -21,15 +21,15 @@ export interface IAcceptanceCriteria {
   title: string;
 }
 
-export interface CriteriaTemplate {
+export interface CriteriaTemplateDocument {
   id: string;
   type: CriteriaTypes;
   name: string;
+  title: string;
   description?: string;
   scenario?: IScenario;
   text?: ITextCriteria;
   checklist?: ICheckList;
-
   createdBy: IInternalIdentity;
   updatedBy?: IInternalIdentity;
   createdAt: Date;
