@@ -12,7 +12,7 @@ import {
   HistoryEvent
 } from '../../common/types';
 import CriteriaPanel from '../../criteria-panel/CriteriaPanel';
-import { CriteriaPanelProvider } from '../../criteria-panel/CriteriaPanelContext';
+import { CriteriaBuilderProvider } from '../../common/criterias/CriteriaBuilderContext';
 import { getApprover, getTextCriteria } from '../../testdata';
 
 type CpCon = (CriteriaPanelConfig & { panel: any }) | undefined;
@@ -73,9 +73,9 @@ describe('CriteriaPanel', () => {
     });
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Title/));
@@ -110,9 +110,9 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/This is the content/));
@@ -147,9 +147,9 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Complete criteria\?/));
@@ -182,9 +182,9 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/This criteria was completed/));
@@ -218,9 +218,9 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Ready for approval/));
@@ -255,9 +255,9 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/This criteria needs your attention/));
@@ -292,9 +292,9 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(historyWithContent);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/History/));

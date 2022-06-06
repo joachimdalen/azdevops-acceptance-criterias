@@ -11,7 +11,8 @@ import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdow
 import {
   getCombined,
   hasError,
-  parseValidationError} from '@joachimdalen/azdevops-ext-core/ValidationUtils';
+  parseValidationError
+} from '@joachimdalen/azdevops-ext-core/ValidationUtils';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
@@ -30,6 +31,10 @@ import { CriteriaModalResult } from '../common/common';
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
 import StatusTag from '../common/components/StatusTag';
+import CheckListCriteriaSection from '../common/criterias/checklist/CheckListCriteriaSection';
+import { useCriteriaBuilderContext } from '../common/criterias/CriteriaBuilderContext';
+import ScenarioCriteria from '../common/criterias/scenario/ScenarioCriteriaSection';
+import TextCriteriaSection from '../common/criterias/text/TextCriteriaSection';
 import { isCompleted, isProcessed } from '../common/criteriaUtils';
 import { LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaHistoryService from '../common/services/CriteriaHistoryService';
@@ -46,22 +51,18 @@ import {
   IAcceptanceCriteria,
   ProcessEvent
 } from '../common/types';
-import CheckListCriteriaSection from './components/checklist/CheckListCriteriaSection';
 import ChecklistCriteriaViewSection from './components/checklist/ChecklistCriteriaViewSection';
 import CompletedProcessContainer from './components/CompletedProcessContainer';
 import CompletionContainer from './components/CompletionContainer';
 import HistoryList from './components/HistoryList';
 import ProcessingContainer from './components/ProcessingContainer';
 import RejectionProcessContainer from './components/RejectionProcessContainer';
-import ScenarioCriteria from './components/scenario/ScenarioCriteriaSection';
 import ScenarioCriteriaViewSection from './components/scenario/ScenarioCriteriaViewSection';
-import TextCriteriaSection from './components/text/TextCriteriaSection';
 import TextCriteriaViewSection from './components/text/TextCriteriaViewSection';
-import { useCriteriaPanelContext } from './CriteriaPanelContext';
 import { getSchema } from './CriteriaPanelData';
 
 const CriteriaPanel = (): React.ReactElement => {
-  const { state: panelState, dispatch } = useCriteriaPanelContext();
+  const { state: panelState, dispatch } = useCriteriaBuilderContext();
   const [tabId, setTabId] = useState('details');
   const [eTag, setEtag] = useState<number | undefined>();
   const [isError, setIsError] = useBooleanToggle();

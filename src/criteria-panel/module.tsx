@@ -2,13 +2,13 @@ import { ErrorBoundary } from '@joachimdalen/azdevops-ext-core/ErrorBoundary';
 import { showRootComponent } from '@joachimdalen/azdevops-ext-core/showRootComponent';
 
 import CriteriaPanel from './CriteriaPanel';
-import { CriteriaPanelProvider } from './CriteriaPanelContext';
+import { CriteriaBuilderProvider } from '../common/criterias/CriteriaBuilderContext';
 
 showRootComponent(
   <ErrorBoundary>
-    <CriteriaPanelProvider>
+    <CriteriaBuilderProvider>
       <CriteriaPanel />
-    </CriteriaPanelProvider>
+    </CriteriaBuilderProvider>
   </ErrorBoundary>,
   'criteria-panel-container'
 );

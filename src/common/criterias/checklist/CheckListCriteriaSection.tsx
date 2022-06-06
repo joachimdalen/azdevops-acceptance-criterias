@@ -9,9 +9,9 @@ import { v4 as uuidV4 } from 'uuid';
 
 import { move } from '../../../common/common';
 import KeyBoardShortcut from '../../../common/components/key-board-shortcut/KeyBoardShortcut';
+import { useCriteriaBuilderContext } from '../../../common/criterias/CriteriaBuilderContext';
 import { DOCS_URL_KEYBOARD_SHORTCUTS } from '../../../common/documentationUrls';
 import { ICheckList, ICheckListCriteria } from '../../../common/types';
-import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
 import CheckListEditRow from './CheckListEditRow';
 
 interface CheckListCriteriaSectionProps {
@@ -19,7 +19,7 @@ interface CheckListCriteriaSectionProps {
 }
 
 const CheckListCriteriaSection = ({ errors }: CheckListCriteriaSectionProps): JSX.Element => {
-  const { dispatch, state } = useCriteriaPanelContext();
+  const { dispatch, state } = useCriteriaBuilderContext();
   const [items, setItems] = useState<ICheckListCriteria[]>(state.checklist?.criterias || []);
   const [focused, setFocused] = useState<string | undefined>(undefined);
   const add = (id: ICheckListCriteria, index?: number) => {

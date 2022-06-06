@@ -1,23 +1,23 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import CheckListCriteriaSection from '../../../../criteria-panel/components/checklist/CheckListCriteriaSection';
-import { CriteriaPanelProvider } from '../../../../criteria-panel/CriteriaPanelContext';
+import CheckListCriteriaSection from '../../../../common/criterias/checklist/CheckListCriteriaSection';
+import { CriteriaBuilderProvider } from '../../../../common/criterias/CriteriaBuilderContext';
 
 describe('CheckListCriteriaSection', () => {
   it('should be empty initially', async () => {
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CheckListCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Add your checklist items/));
   });
   it('should add row when button is pressed', async () => {
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CheckListCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Add your checklist items/));
@@ -29,9 +29,9 @@ describe('CheckListCriteriaSection', () => {
   });
   it('should show second toolbar with 3 items', async () => {
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CheckListCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Add your checklist items/));
@@ -45,9 +45,8 @@ describe('CheckListCriteriaSection', () => {
   });
   it('should render items when passed', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'checklist',
           checklist: {
             criterias: [{ completed: false, id: '1234', text: 'This item' }]
@@ -55,7 +54,7 @@ describe('CheckListCriteriaSection', () => {
         }}
       >
         <CheckListCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const boxes = screen.getAllByRole<HTMLInputElement>('textbox', { name: 'Some criteria...' });
@@ -64,9 +63,8 @@ describe('CheckListCriteriaSection', () => {
   });
   it('should remove item when clicked', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'checklist',
           checklist: {
             criterias: [
@@ -77,7 +75,7 @@ describe('CheckListCriteriaSection', () => {
         }}
       >
         <CheckListCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const removeBtn = screen.getByTestId('__bolt-1234-remove');
@@ -88,9 +86,8 @@ describe('CheckListCriteriaSection', () => {
   });
   it('should update item', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'checklist',
           checklist: {
             criterias: [{ completed: false, id: '1234', text: 'This item' }]
@@ -98,7 +95,7 @@ describe('CheckListCriteriaSection', () => {
         }}
       >
         <CheckListCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const text = screen.getByRole<HTMLInputElement>('textbox', { name: 'Some criteria...' });
@@ -111,9 +108,8 @@ describe('CheckListCriteriaSection', () => {
 
   it('should move item up when clicked', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'checklist',
           checklist: {
             criterias: [
@@ -124,7 +120,7 @@ describe('CheckListCriteriaSection', () => {
         }}
       >
         <CheckListCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
@@ -143,9 +139,8 @@ describe('CheckListCriteriaSection', () => {
 
   it('should move item down when clicked', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'checklist',
           checklist: {
             criterias: [
@@ -156,7 +151,7 @@ describe('CheckListCriteriaSection', () => {
         }}
       >
         <CheckListCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
@@ -176,9 +171,8 @@ describe('CheckListCriteriaSection', () => {
   describe('shortcuts', () => {
     it('should move item up when key combo is pressed', async () => {
       render(
-        <CriteriaPanelProvider
+        <CriteriaBuilderProvider
           defaultState={{
-            isLoading: false,
             type: 'checklist',
             checklist: {
               criterias: [
@@ -189,7 +183,7 @@ describe('CheckListCriteriaSection', () => {
           }}
         >
           <CheckListCriteriaSection errors={undefined} />
-        </CriteriaPanelProvider>
+        </CriteriaBuilderProvider>
       );
 
       const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
@@ -207,9 +201,8 @@ describe('CheckListCriteriaSection', () => {
     });
     it('should move item down when key combo is pressed', async () => {
       render(
-        <CriteriaPanelProvider
+        <CriteriaBuilderProvider
           defaultState={{
-            isLoading: false,
             type: 'checklist',
             checklist: {
               criterias: [
@@ -220,7 +213,7 @@ describe('CheckListCriteriaSection', () => {
           }}
         >
           <CheckListCriteriaSection errors={undefined} />
-        </CriteriaPanelProvider>
+        </CriteriaBuilderProvider>
       );
 
       const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
@@ -238,9 +231,8 @@ describe('CheckListCriteriaSection', () => {
     });
     it('should remove item down when key combo is pressed', async () => {
       render(
-        <CriteriaPanelProvider
+        <CriteriaBuilderProvider
           defaultState={{
-            isLoading: false,
             type: 'checklist',
             checklist: {
               criterias: [
@@ -251,7 +243,7 @@ describe('CheckListCriteriaSection', () => {
           }}
         >
           <CheckListCriteriaSection errors={undefined} />
-        </CriteriaPanelProvider>
+        </CriteriaBuilderProvider>
       );
 
       const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
@@ -267,9 +259,8 @@ describe('CheckListCriteriaSection', () => {
 
     it('should add item down when key combo is pressed', async () => {
       render(
-        <CriteriaPanelProvider
+        <CriteriaBuilderProvider
           defaultState={{
-            isLoading: false,
             type: 'checklist',
             checklist: {
               criterias: [
@@ -280,7 +271,7 @@ describe('CheckListCriteriaSection', () => {
           }}
         >
           <CheckListCriteriaSection errors={undefined} />
-        </CriteriaPanelProvider>
+        </CriteriaBuilderProvider>
       );
 
       const inputs = screen.getAllByRole<HTMLInputElement>('textbox');

@@ -1,16 +1,14 @@
 import { render, screen } from '@testing-library/react';
 
-import TextCriteriaSection from '../../../../criteria-panel/components/text/TextCriteriaSection';
-import { CriteriaPanelProvider } from '../../../../criteria-panel/CriteriaPanelContext';
-
-
+import { CriteriaBuilderProvider } from '../../../../common/criterias/CriteriaBuilderContext';
+import TextCriteriaSection from '../../../../common/criterias/text/TextCriteriaSection';
 
 describe('TextCriteriaSection', () => {
   it('should be empty initially', async () => {
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <TextCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const input = screen.getByRole('textbox');
@@ -19,9 +17,8 @@ describe('TextCriteriaSection', () => {
 
   it('should render items when passed', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'text',
           text: {
             id: 'hello',
@@ -30,7 +27,7 @@ describe('TextCriteriaSection', () => {
         }}
       >
         <TextCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const input = screen.getByRole('textbox');

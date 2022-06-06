@@ -1,24 +1,23 @@
-import { fireEvent, prettyDOM, render, screen, waitFor } from '@testing-library/react';
-import CheckListCriteriaSection from '../../../../criteria-panel/components/checklist/CheckListCriteriaSection';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import ScenarioCriteriaSection from '../../../../criteria-panel/components/scenario/ScenarioCriteriaSection';
-import { CriteriaPanelProvider } from '../../../../criteria-panel/CriteriaPanelContext';
+import { CriteriaBuilderProvider } from '../../../../common/criterias/CriteriaBuilderContext';
+import ScenarioCriteriaSection from '../../../../common/criterias/scenario/ScenarioCriteriaSection';
 
 describe('ScenarioCriteriaSection', () => {
   it('should be empty initially', async () => {
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <ScenarioCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/The new item is added below the focused item/));
   });
   it('should add row when button is pressed', async () => {
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <ScenarioCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/The new item is added below the focused item/));
@@ -31,9 +30,8 @@ describe('ScenarioCriteriaSection', () => {
 
   it('should render items when passed', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'scenario',
           scenario: {
             scenario: 'This is the scenario',
@@ -42,7 +40,7 @@ describe('ScenarioCriteriaSection', () => {
         }}
       >
         <ScenarioCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const boxes = screen.getAllByRole<HTMLInputElement>('textbox', { name: 'Given' });
@@ -51,9 +49,8 @@ describe('ScenarioCriteriaSection', () => {
   });
   it('should remove item when clicked', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'scenario',
           scenario: {
             scenario: 'This is the scenario',
@@ -66,7 +63,7 @@ describe('ScenarioCriteriaSection', () => {
         }}
       >
         <ScenarioCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const removeBtn = screen.getByTestId('__bolt-2-remove');
@@ -77,9 +74,8 @@ describe('ScenarioCriteriaSection', () => {
   });
   it('should update item', async () => {
     render(
-      <CriteriaPanelProvider
+      <CriteriaBuilderProvider
         defaultState={{
-          isLoading: false,
           type: 'scenario',
           scenario: {
             scenario: 'This is the scenario',
@@ -92,7 +88,7 @@ describe('ScenarioCriteriaSection', () => {
         }}
       >
         <ScenarioCriteriaSection errors={undefined} />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     const text = screen.getByRole<HTMLInputElement>('textbox', { name: 'Given' });
@@ -106,9 +102,8 @@ describe('ScenarioCriteriaSection', () => {
   describe('shortcuts', () => {
     it('should move item up when key combo is pressed', async () => {
       render(
-        <CriteriaPanelProvider
+        <CriteriaBuilderProvider
           defaultState={{
-            isLoading: false,
             type: 'scenario',
             scenario: {
               scenario: 'Some scenario',
@@ -120,7 +115,7 @@ describe('ScenarioCriteriaSection', () => {
           }}
         >
           <ScenarioCriteriaSection errors={undefined} />
-        </CriteriaPanelProvider>
+        </CriteriaBuilderProvider>
       );
 
       const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
@@ -138,9 +133,8 @@ describe('ScenarioCriteriaSection', () => {
     });
     it('should move item down when key combo is pressed', async () => {
       render(
-        <CriteriaPanelProvider
+        <CriteriaBuilderProvider
           defaultState={{
-            isLoading: false,
             type: 'scenario',
             scenario: {
               scenario: 'Some scenario',
@@ -152,7 +146,7 @@ describe('ScenarioCriteriaSection', () => {
           }}
         >
           <ScenarioCriteriaSection errors={undefined} />
-        </CriteriaPanelProvider>
+        </CriteriaBuilderProvider>
       );
 
       const inputs = screen.getAllByRole<HTMLInputElement>('textbox');
@@ -170,9 +164,8 @@ describe('ScenarioCriteriaSection', () => {
     });
     it('should remove item down when key combo is pressed', async () => {
       render(
-        <CriteriaPanelProvider
+        <CriteriaBuilderProvider
           defaultState={{
-            isLoading: false,
             type: 'scenario',
             scenario: {
               scenario: 'Some scenario',
@@ -184,7 +177,7 @@ describe('ScenarioCriteriaSection', () => {
           }}
         >
           <ScenarioCriteriaSection errors={undefined} />
-        </CriteriaPanelProvider>
+        </CriteriaBuilderProvider>
       );
 
       const inputs = screen.getAllByRole<HTMLInputElement>('textbox');

@@ -9,11 +9,11 @@ import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useRef, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
-import { move } from '../../../common/common';
-import KeyBoardShortcut from '../../../common/components/key-board-shortcut/KeyBoardShortcut';
-import { DOCS_URL_KEYBOARD_SHORTCUTS } from '../../../common/documentationUrls';
-import { IScenario, IScenarioCriteria } from '../../../common/types';
-import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
+import { move } from '../../common';
+import KeyBoardShortcut from '../../components/key-board-shortcut/KeyBoardShortcut';
+import { DOCS_URL_KEYBOARD_SHORTCUTS } from '../../documentationUrls';
+import { IScenario, IScenarioCriteria } from '../../types';
+import { useCriteriaBuilderContext } from '../CriteriaBuilderContext';
 import ScenarioCriteriaEditRow from './ScenarioCriteriaEditRow';
 
 interface ScenarioCriteriaSectionProps {
@@ -21,7 +21,7 @@ interface ScenarioCriteriaSectionProps {
 }
 
 const ScenarioCriteriaSection = ({ errors }: ScenarioCriteriaSectionProps): JSX.Element => {
-  const { dispatch, state } = useCriteriaPanelContext();
+  const { dispatch, state } = useCriteriaBuilderContext();
   const [scenario, setScenario] = useState<string>(state.scenario?.scenario || '');
   const [items, setItems] = useState<IScenarioCriteria[]>(state.scenario?.criterias || []);
   const [focused, setFocused] = useState<string | undefined>(undefined);

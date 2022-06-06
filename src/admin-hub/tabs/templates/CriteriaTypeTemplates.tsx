@@ -1,4 +1,5 @@
 import { CommandBar } from '@fluentui/react';
+import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { Panel } from 'azure-devops-ui/Panel';
@@ -6,11 +7,12 @@ import { ColumnMore, ISimpleTableCell, renderSimpleCell, Table } from 'azure-dev
 import { Tab, Tabs, TabSize } from 'azure-devops-ui/Tabs';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { useMemo, useState } from 'react';
+import { PanelIds } from '../../../common/common';
 
 import CriteriaTypeDisplay from '../../../common/components/CriteriaTypeDisplay';
 import CriteriaService from '../../../common/services/CriteriaService';
 import { CriteriaTemplate, CriteriaTypes } from '../../../common/types';
-import TemplatePanel from './TemplatePanel';
+import TemplatePanel from '../../../criteria-template-panel/TemplatePanel';
 
 interface CriteriaTemplateTypesProps {
   type: CriteriaTypes;
@@ -24,7 +26,7 @@ interface CriteriaTemplateRow extends ISimpleTableCell {
 }
 
 const CriteriaTemplateTypes = ({ type, templates }: CriteriaTemplateTypesProps): JSX.Element => {
-  const [addNew, setAddNew] = useState(false);
+  const devOpsService = useMemo(() => new DevOpsService(), []);
   const itemProvider = useMemo(
     () =>
       new ArrayItemProvider<CriteriaTemplateRow>(
@@ -38,7 +40,6 @@ const CriteriaTemplateTypes = ({ type, templates }: CriteriaTemplateTypesProps):
   console.log(templates);
   console.log(itemProvider);
 
-  const criteriaService = useMemo(() => new CriteriaService(), []);
   return (
     <div>
       <CommandBar
@@ -51,12 +52,13 @@ const CriteriaTemplateTypes = ({ type, templates }: CriteriaTemplateTypesProps):
               return <CriteriaTypeDisplay iconOnly type={type} />;
             },
             onClick: () => {
-              // criteriaService.showPanel({
-              //   onClose: async res => {
-              //     console.log(res);
-              //   }
-              // });
-              setAddNew(true);
+              devOpsService.showPanel<any | undefined, PanelIds>(PanelIds.CriteriaTemplatePanel, {
+                title: `New ${type} template`,
+                size: 2,
+                configuration: {
+                  type
+                }
+              });
             }
           }
         ]}
@@ -83,9 +85,6 @@ const CriteriaTemplateTypes = ({ type, templates }: CriteriaTemplateTypesProps):
         ]}
         itemProvider={itemProvider}
       />
-      <ConditionalChildren renderChildren={addNew}>
-        <TemplatePanel onDismiss={() => setAddNew(false)} />
-      </ConditionalChildren>
     </div>
   );
 };

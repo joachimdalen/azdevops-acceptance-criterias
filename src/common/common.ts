@@ -8,7 +8,8 @@ import { IMessageBarProps } from 'azure-devops-ui/MessageBar';
 import { CriteriaDetailDocument, IAcceptanceCriteria } from './types';
 
 export enum PanelIds {
-  CriteriaPanel = 'criteria-panel'
+  CriteriaPanel = 'criteria-panel',
+  CriteriaTemplatePanel = 'criteria-template-panel'
 }
 
 export enum DialogIds {

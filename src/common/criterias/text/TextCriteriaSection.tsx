@@ -4,14 +4,14 @@ import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
+import { useCriteriaBuilderContext } from '../../../common/criterias/CriteriaBuilderContext';
 import { ITextCriteria } from '../../../common/types';
-import { useCriteriaPanelContext } from '../../CriteriaPanelContext';
 
 interface TextCriteriaSectionProps {
   errors: { [key: string]: string[] } | undefined;
 }
 const TextCriteriaSection = ({ errors }: TextCriteriaSectionProps): JSX.Element => {
-  const { state: panelState, dispatch } = useCriteriaPanelContext();
+  const { state: panelState, dispatch } = useCriteriaBuilderContext();
   const [description, setDescription] = useState<string | undefined>(panelState.text?.description);
 
   useEffect(() => {

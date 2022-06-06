@@ -1,9 +1,8 @@
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
-import { CriteriaTypes, ICheckList, IScenario, ITextCriteria } from '../common/types';
+import { CriteriaTypes, ICheckList, IScenario, ITextCriteria } from '../types';
 
-export interface ICriteriaPanelContextState {
-  isLoading: boolean;
+export interface ICriteriaBuilderContextState {
   type: CriteriaTypes;
   scenario?: IScenario;
   text?: ITextCriteria;
@@ -15,27 +14,26 @@ export interface ReducerAction {
   data?: any;
 }
 
-const intDefaultState: ICriteriaPanelContextState = {
-  isLoading: true,
+const intDefaultState: ICriteriaBuilderContextState = {
   type: 'scenario'
 };
 
-export interface ICriteriaPanelContext {
-  state: ICriteriaPanelContextState;
+export interface ICriteriaBuilderContext {
+  state: ICriteriaBuilderContextState;
   dispatch: Dispatch<ReducerAction>;
 }
 
-const CriteriaPanelContext = createContext<ICriteriaPanelContext>({} as any);
+const CriteriaBuilderContext = createContext<ICriteriaBuilderContext>({} as any);
 
 export type ContextAction = 'INIT' | 'SET_CRITERIA' | 'SET_TYPE';
-type CriteriaPanelProviderProps = {
+type CriteriaBuilderProviderProps = {
   children: React.ReactNode;
-  defaultState?: ICriteriaPanelContextState;
+  defaultState?: ICriteriaBuilderContextState;
 };
 function panelReducer(
-  state: ICriteriaPanelContextState,
+  state: ICriteriaBuilderContextState,
   action: ReducerAction
-): ICriteriaPanelContextState {
+): ICriteriaBuilderContextState {
   switch (action.type) {
     case 'INIT': {
       return { ...state };
@@ -63,21 +61,23 @@ function panelReducer(
     }
   }
 }
-function CriteriaPanelProvider({
+function CriteriaBuilderProvider({
   children,
   defaultState
-}: CriteriaPanelProviderProps): JSX.Element {
+}: CriteriaBuilderProviderProps): JSX.Element {
   const [state, dispatch] = useReducer(panelReducer, defaultState || intDefaultState);
 
-  const value: ICriteriaPanelContext = { state, dispatch };
-  return <CriteriaPanelContext.Provider value={value}>{children}</CriteriaPanelContext.Provider>;
+  const value: ICriteriaBuilderContext = { state, dispatch };
+  return (
+    <CriteriaBuilderContext.Provider value={value}>{children}</CriteriaBuilderContext.Provider>
+  );
 }
 
-function useCriteriaPanelContext(): ICriteriaPanelContext {
-  const context = useContext(CriteriaPanelContext);
+function useCriteriaBuilderContext(): ICriteriaBuilderContext {
+  const context = useContext(CriteriaBuilderContext);
   if (context === undefined) {
-    throw new Error('useCriteriaPanelContext must be used within a CriteriaPanelProvider');
+    throw new Error('useCriteriaBuilderContext must be used within a CriteriaBuilderProvider');
   }
   return context;
 }
-export { CriteriaPanelProvider, useCriteriaPanelContext };
+export { CriteriaBuilderProvider, useCriteriaBuilderContext };
