@@ -242,6 +242,93 @@
           }
         }
       ]
+    },
+    {
+      "id": "acceptance-project-settings-tab-group",
+      "type": "ms.vss-web.tab-group",
+      "targets": [
+        "ms.vss-admin-web.project-admin-hub-component",
+        "ms.vss-admin-web.project-admin-hub-component-icons",
+        "ms.vss-admin-web.project-admin-hub-component-collapsible",
+        "ms.vss-admin-web.project-admin-hub-component-icons-collapsible"
+      ],
+      "properties": {
+        "name": "Acceptance Criterias (DEV)"
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin-configuration",
+      "type": "ms.vss-web.tab",
+      "targets": [".acceptance-project-settings-tab-group"],
+      "properties": {
+        "name": "Configuration",
+        "uri": "admin-hub.html",
+        "iconProps": {
+          "iconName": "Configuration",
+          "className": "admin-tab-icon",
+          "order": 1
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin-templates",
+      "type": "ms.vss-web.tab",
+      "targets": [".acceptance-project-settings-tab-group"],
+      "properties": {
+        "name": "Templates",
+        "uri": "admin-hub.html",
+        "iconProps": {
+          "iconName": "FileTemplate",
+          "className": "admin-tab-icon",
+          "order": 2
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin-document-mgmt",
+      "type": "ms.vss-web.tab",
+      "targets": [".acceptance-project-settings-tab-group"],
+      "properties": {
+        "name": "Orphaned Criterias",
+        "uri": "admin-hub.html",
+        "iconProps": {
+          "iconName": "ExploreData",
+          "className": "admin-tab-icon",
+          "order": 3
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
     }
   ]
 }
