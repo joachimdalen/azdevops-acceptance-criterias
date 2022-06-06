@@ -7,10 +7,12 @@ import { criteriaIcons, CriteriaTypes } from '../types';
 
 const CriteriaTypeDisplay = ({
   type,
-  title
+  title,
+  iconOnly = false
 }: {
   type: CriteriaTypes;
   title?: string;
+  iconOnly?: boolean;
 }): JSX.Element => {
   const iconUrl = useMemo(() => {
     const mapping = criteriaIcons.get(type);
@@ -30,11 +32,13 @@ const CriteriaTypeDisplay = ({
           <img src={iconUrl} height={16} />
         </Tooltip>
       )}
-      <span className="margin-horizontal-8 flex-grow body-m">
-        <Tooltip text={title || typeText}>
-          <span>{title || typeText}</span>
-        </Tooltip>
-      </span>
+      {iconOnly === false && (
+        <span className="margin-horizontal-8 flex-grow body-m">
+          <Tooltip text={title || typeText}>
+            <span>{title || typeText}</span>
+          </Tooltip>
+        </span>
+      )}
     </div>
   );
 };

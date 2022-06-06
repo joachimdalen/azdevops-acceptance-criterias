@@ -21,6 +21,26 @@ export interface IAcceptanceCriteria {
   title: string;
 }
 
+export interface CriteriaTemplate {
+  id: string;
+  type: CriteriaTypes;
+  name: string;
+  description?: string;
+  scenario?: IScenario;
+  text?: ITextCriteria;
+  checklist?: ICheckList;
+
+  createdBy: IInternalIdentity;
+  updatedBy?: IInternalIdentity;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface CriteriaTemplateSettings {
+  requireApprover: boolean;
+  allowChanges: boolean;
+}
+
 export type CriteriaTypes = 'scenario' | 'text' | 'checklist';
 
 export interface CriteriaIconMapping {
