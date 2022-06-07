@@ -8,11 +8,13 @@ import { criteriaIcons, CriteriaTypes } from '../types';
 const CriteriaTypeDisplay = ({
   type,
   title,
-  iconOnly = false
+  iconOnly = false,
+  size = 16
 }: {
   type: CriteriaTypes;
   title?: string;
   iconOnly?: boolean;
+  size?: number;
 }): JSX.Element => {
   const iconUrl = useMemo(() => {
     const mapping = criteriaIcons.get(type);
@@ -29,7 +31,7 @@ const CriteriaTypeDisplay = ({
     <div className="flex-row flex-grow flex-center">
       {iconUrl && (
         <Tooltip text={typeText}>
-          <img src={iconUrl} height={16} />
+          <img src={iconUrl} height={size} />
         </Tooltip>
       )}
       {iconOnly === false && (

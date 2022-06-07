@@ -97,6 +97,15 @@ const TemplatesSection = (): React.ReactElement => {
                             const added = await templateService.createOrUpdate(doc);
                             setTemplates(prev => [...prev, added]);
                           }}
+                          onDelete={async id => {
+                            await templateService.delete(id, () => {
+                              setTemplates(prev => prev.filter(x => x.id !== id));
+                            });
+                          }}
+                          onDuplicate={async id => {
+                            const added = await templateService.duplicate(id);
+                            setTemplates(prev => [...prev, added]);
+                          }}
                         />
                       </span>
                     </Tooltip>

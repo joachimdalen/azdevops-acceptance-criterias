@@ -37,6 +37,8 @@ export interface IStorageService {
   setHistory(data: HistoryDocument): Promise<HistoryDocument>;
   getTemplates(): Promise<CriteriaTemplateDocument[]>;
   setTemplate(data: CriteriaTemplateDocument): Promise<CriteriaTemplateDocument>;
+  deleteTemplate(id: string): Promise<void>;
+  getTemplate(id: string): Promise<CriteriaTemplateDocument | undefined>;
 }
 class StorageService implements IStorageService {
   private readonly _devOpsService: IDevOpsService;
@@ -370,6 +372,47 @@ class StorageService implements IStorageService {
     return dataManager.setDocument(this._criteriaTemplateCollection, data, {
       scopeType: ScopeType.Default
     });
+  }
+  public async deleteTemplate(id: string): Promise<void> {
+    try {
+      const dataService = await this.getDataService();
+      if (this._criteriaTemplateCollection === undefined) {
+        throw new Error('Failed to initialize ');
+      }
+      const dataManager = await dataService.getExtensionDataManager(
+        DevOps.getExtensionContext().id,
+        await DevOps.getAccessToken()
+      );
+      await dataManager.deleteDocument(this._criteriaTemplateCollection, id, {
+        scopeType: this.scopeType
+      });
+    } catch (error: any) {
+      if (error?.status !== 404) {
+        throw new Error(error);
+      }
+    }
+  }
+  public async getTemplate(id: string): Promise<CriteriaTemplateDocument | undefined> {
+    const dataService = await this.getDataService();
+
+    if (this._criteriaTemplateCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    const document: CriteriaTemplateDocument | undefined = await dataManager.getDocument(
+      this._criteriaTemplateCollection,
+      id,
+      {
+        scopeType: this.scopeType,
+        defaultValue: undefined
+      }
+    );
+
+    return document;
   }
 }
 

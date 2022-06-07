@@ -178,6 +178,17 @@ const TemplatePanel = (): React.ReactElement => {
             />
           </FormItem>
         </div>
+
+        <div className="rhythm-vertical-16 flex-grow">
+          <h3>Options</h3>
+          <div className="margin-top-16 flex-column flex-grow">
+            {sections.map(section => {
+              return <SettingRow settings={section.setting} toggle={section.toggle} />;
+            })}
+          </div>
+        </div>
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={selectedTabId === 'criteria'}>
         <div className="rhythm-vertical-16 flex-grow">
           <h3>Criteria Details</h3>
           <FormItem label="Title">
@@ -197,26 +208,16 @@ const TemplatePanel = (): React.ReactElement => {
               onClear={() => setApprover(undefined)}
             />
           </FormItem>
+          <ConditionalChildren renderChildren={config?.type === 'scenario'}>
+            <ScenarioCriteriaSection errors={undefined} />
+          </ConditionalChildren>
+          <ConditionalChildren renderChildren={config?.type === 'checklist'}>
+            <CheckListCriteriaSection errors={undefined} />
+          </ConditionalChildren>
+          <ConditionalChildren renderChildren={config?.type === 'text'}>
+            <TextCriteriaSection errors={undefined} />
+          </ConditionalChildren>
         </div>
-        <div className="rhythm-vertical-16 flex-grow">
-          <h3>Options</h3>
-          <div className="margin-top-16 flex-column flex-grow">
-            {sections.map(section => {
-              return <SettingRow settings={section.setting} toggle={section.toggle} />;
-            })}
-          </div>
-        </div>
-      </ConditionalChildren>
-      <ConditionalChildren renderChildren={selectedTabId === 'criteria'}>
-        <ConditionalChildren renderChildren={config?.type === 'scenario'}>
-          <ScenarioCriteriaSection errors={undefined} />
-        </ConditionalChildren>
-        <ConditionalChildren renderChildren={config?.type === 'checklist'}>
-          <CheckListCriteriaSection errors={undefined} />
-        </ConditionalChildren>
-        <ConditionalChildren renderChildren={config?.type === 'text'}>
-          <TextCriteriaSection errors={undefined} />
-        </ConditionalChildren>
       </ConditionalChildren>
     </PanelWrapper>
   );
