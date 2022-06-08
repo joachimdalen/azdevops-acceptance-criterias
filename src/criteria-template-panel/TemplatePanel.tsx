@@ -18,16 +18,26 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar } from 'azure-devops-ui/Tabs';
 import { TabSize } from 'azure-devops-ui/Tabs.Types';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import * as React from 'react';
 import * as yup from 'yup';
-import { parseValidationError } from '@joachimdalen/azdevops-ext-core/ValidationUtils';
+import {
+  getCombined,
+  getValidationCount,
+  getValidationCountByPattern,
+  hasError,
+  parseValidationError
+} from '@joachimdalen/azdevops-ext-core/ValidationUtils';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 
 import { v4 as uuidV4 } from 'uuid';
+import { getSchema } from '../common/validationSchemas';
+import { Pill, PillSize } from 'azure-devops-ui/Pill';
+import CriteriaTemplateService from '../common/services/CriteriaTemplateService';
 interface TemplatePanelConfig {
   type: CriteriaTypes;
   panel: any;
+  templateId?: string;
 }
 
 const TemplatePanel = (): React.ReactElement => {
@@ -37,8 +47,19 @@ const TemplatePanel = (): React.ReactElement => {
   const [templateDescription, setTemplateDescription] = useState('');
   const [title, setTitle] = useState('');
   const [approver, setApprover] = useState<IInternalIdentity | undefined>();
-
+  const [errors, setErrors] = useState<{ [key: string]: string[] } | undefined>();
   const { state, dispatch } = useCriteriaBuilderContext();
+  const templateService = useMemo(() => new CriteriaTemplateService(), []);
+  const getData = (itemTemplate: CriteriaTemplateDocument) => {
+    switch (itemTemplate.type) {
+      case 'text':
+        return itemTemplate?.text;
+      case 'scenario':
+        return itemTemplate?.scenario;
+      case 'checklist':
+        return itemTemplate?.checklist;
+    }
+  };
   useEffect(() => {
     async function initModule() {
       try {
@@ -52,7 +73,22 @@ const TemplatePanel = (): React.ReactElement => {
         const conf: TemplatePanelConfig = DevOps.getConfiguration() as TemplatePanelConfig;
         setConfig(conf);
 
-        dispatch({ type: 'SET_TYPE', data: conf.type });
+        if (conf.templateId !== undefined) {
+          const template = await templateService.getTemplate(conf.templateId);
+          if (template) {
+            console.log(template.type);
+            dispatch({ type: 'SET_TYPE', data: template.type });
+            setTemplateDescription(template.description || '');
+            setTemplateName(template.name || '');
+            setTitle(template.title);
+            dispatch({
+              type: 'SET_CRITERIA',
+              data: getData(template)
+            });
+          }
+        } else {
+          dispatch({ type: 'SET_TYPE', data: conf.type });
+        }
 
         await DevOps.notifyLoadSucceeded();
         DevOps.resize();
@@ -99,9 +135,12 @@ const TemplatePanel = (): React.ReactElement => {
   };
   const save = async () => {
     if (config !== undefined && config.panel) {
-      const schema = yup.object().shape({
-        title: yup.string().min(4).max(300)
-      });
+      const schema = getSchema(state.type).concat(
+        yup.object().shape({
+          name: yup.string().required().min(5).max(100),
+          description: yup.string().min(5).max(200)
+        })
+      );
       const user = await getLoggedInUser();
       const doc: CriteriaTemplateDocument = {
         id: uuidV4(),
@@ -110,10 +149,10 @@ const TemplatePanel = (): React.ReactElement => {
         name: templateName,
         description: templateDescription,
         title: title,
-        type: config.type,
-        text: config.type === 'text' ? state.text : undefined,
-        checklist: config.type === 'checklist' ? state.checklist : undefined,
-        scenario: config.type === 'scenario' ? state.scenario : undefined
+        type: state.type,
+        text: state.type === 'text' ? state.text : undefined,
+        checklist: state.type === 'checklist' ? state.checklist : undefined,
+        scenario: state.type === 'scenario' ? state.scenario : undefined
       };
       try {
         await schema.validate(doc, { abortEarly: false });
@@ -125,6 +164,8 @@ const TemplatePanel = (): React.ReactElement => {
       } catch (error) {
         if (error instanceof yup.ValidationError) {
           const data = parseValidationError(error);
+          setErrors(data);
+          console.log(data);
         } else {
           console.error(error);
         }
@@ -153,8 +194,45 @@ const TemplatePanel = (): React.ReactElement => {
             tabSize={TabSize.Compact}
             className="margin-bottom-16"
           >
-            <Tab id="details" name="Details" />
-            <Tab id="criteria" name="Criteria" />
+            <Tab
+              id="details"
+              name="Details"
+              renderBadge={() => {
+                const count = getValidationCount(errors, ['name', 'description']);
+                if (count === undefined) return undefined;
+                return (
+                  <Pill
+                    className="bolt-tab-badge"
+                    size={PillSize.compact}
+                    color={{ red: 184, green: 35, blue: 57 }}
+                  >
+                    {count}
+                  </Pill>
+                );
+              }}
+            />
+            <Tab
+              id="criteria"
+              name="Criteria"
+              renderBadge={() => {
+                const count = getValidationCount(errors, ['title', 'requiredApprover']);
+                const countTwo = getValidationCountByPattern(
+                  errors,
+                  /^(scenario|text|checklist|]).+$/
+                );
+                if (count === undefined && countTwo == undefined) return undefined;
+                const fullCount = (count || 0) + (countTwo || 0);
+                return (
+                  <Pill
+                    className="bolt-tab-badge"
+                    size={PillSize.compact}
+                    color={{ red: 184, green: 35, blue: 57 }}
+                  >
+                    {fullCount}
+                  </Pill>
+                );
+              }}
+            />
           </TabBar>
         </Surface>
       </div>
@@ -162,14 +240,23 @@ const TemplatePanel = (): React.ReactElement => {
       <ConditionalChildren renderChildren={selectedTabId === 'details'}>
         <div className="rhythm-vertical-16 flex-grow">
           <h3>Template Details</h3>
-          <FormItem label="Template name">
+
+          <FormItem
+            label="Template name"
+            error={hasError(errors, 'name')}
+            message={getCombined(errors, 'name')}
+          >
             <TextField
               value={templateName}
               onChange={(e, v) => setTemplateName(v)}
               placeholder="Give the template a short name..."
             />
           </FormItem>
-          <FormItem label="Template description">
+          <FormItem
+            label="Template description"
+            error={hasError(errors, 'description')}
+            message={getCombined(errors, 'description')}
+          >
             <TextField
               multiline
               value={templateDescription}
@@ -191,31 +278,44 @@ const TemplatePanel = (): React.ReactElement => {
       <ConditionalChildren renderChildren={selectedTabId === 'criteria'}>
         <div className="rhythm-vertical-16 flex-grow">
           <h3>Criteria Details</h3>
-          <FormItem label="Title">
+          <FormItem
+            label="Title"
+            error={hasError(errors, 'title')}
+            message={getCombined(errors, 'title')}
+          >
             <TextField
               width={TextFieldWidth.auto}
               placeholder="Short title.."
-              maxLength={100}
               value={title}
-              onChange={(e, v) => setTitle(v)}
+              maxLength={100}
+              onChange={e => {
+                setTitle(e.target.value);
+              }}
             />
           </FormItem>
-          <FormItem label="Required Approver">
+          <FormItem
+            label="Required Approver"
+            error={hasError(errors, 'requiredApprover')}
+            message={getCombined(errors, 'requiredApprover')}
+          >
             <IdentityPicker
               localStorageKey={LocalStorageRawKeys.HostUrl}
-              onChange={i => setApprover(i)}
               identity={approver}
+              onChange={i => {
+                setApprover(i);
+              }}
               onClear={() => setApprover(undefined)}
             />
           </FormItem>
-          <ConditionalChildren renderChildren={config?.type === 'scenario'}>
-            <ScenarioCriteriaSection errors={undefined} />
+
+          <ConditionalChildren renderChildren={state?.type === 'scenario'}>
+            <ScenarioCriteriaSection errors={errors} />
           </ConditionalChildren>
-          <ConditionalChildren renderChildren={config?.type === 'checklist'}>
-            <CheckListCriteriaSection errors={undefined} />
+          <ConditionalChildren renderChildren={state?.type === 'checklist'}>
+            <CheckListCriteriaSection errors={errors} />
           </ConditionalChildren>
-          <ConditionalChildren renderChildren={config?.type === 'text'}>
-            <TextCriteriaSection errors={undefined} />
+          <ConditionalChildren renderChildren={state?.type === 'text'}>
+            <TextCriteriaSection errors={errors} />
           </ConditionalChildren>
         </div>
       </ConditionalChildren>

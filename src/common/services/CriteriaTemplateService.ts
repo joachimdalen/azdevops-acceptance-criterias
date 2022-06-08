@@ -3,7 +3,7 @@ import { IStorageService, StorageService } from './StorageService';
 import { v4 as uuidV4 } from 'uuid';
 import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { DevOpsService, IDevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
-import { DialogIds, IConfirmationConfig } from '../common';
+import { CriteriaTemplateModalResult, DialogIds, IConfirmationConfig, PanelIds } from '../common';
 import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 class CriteriaTemplateService {
   private readonly _dataStore: IStorageService;
@@ -23,6 +23,16 @@ class CriteriaTemplateService {
         throw new Error(error);
       }
       return [];
+    }
+  }
+  public async getTemplate(id: string): Promise<CriteriaTemplateDocument | undefined> {
+    try {
+      const template = await this._dataStore.getTemplate(id);
+      return template;
+    } catch (error: any) {
+      if (error?.status !== 404) {
+        throw new Error(error);
+      }
     }
   }
 
@@ -58,6 +68,31 @@ class CriteriaTemplateService {
       }
     );
   }
+
+  public async edit(
+    id: string | undefined,
+    onUpdate: (item: CriteriaTemplateDocument) => Promise<void>
+  ): Promise<void> {
+    await this._devOpsService.showPanel<any | undefined, PanelIds>(PanelIds.CriteriaTemplatePanel, {
+      title: `Edit template`,
+      size: 2,
+      onClose: async (result: CriteriaTemplateModalResult | undefined) => {
+        console.log(result);
+        try {
+          if (result?.result === 'SAVE' && result.data) {
+            onUpdate(result.data);
+          }
+        } catch (error: any) {
+          this._devOpsService.showToast(error.message);
+        }
+      },
+
+      configuration: {
+        templateId: id
+      }
+    });
+  }
+
   public async duplicate(id: string): Promise<CriteriaTemplateDocument> {
     const template = await this._dataStore.getTemplate(id);
     if (template === undefined) {

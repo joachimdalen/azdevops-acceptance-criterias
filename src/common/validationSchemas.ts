@@ -2,7 +2,7 @@ import * as yup from 'yup';
 
 import { CriteriaTypes } from '../common/types';
 
-export const getSchema = (type: CriteriaTypes, approverRequired = false): any => {
+export const getSchema = (type: CriteriaTypes, approverRequired = false): yup.ObjectSchema<any> => {
   const baseSchema = yup.object().shape({
     title: yup.string().required().min(4).max(300),
     requiredApprover: approverRequired

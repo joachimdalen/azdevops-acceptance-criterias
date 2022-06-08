@@ -30,6 +30,7 @@ interface CriteriaTemplateTypesProps {
   onAdd: (doc: CriteriaTemplateDocument) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onDuplicate: (id: string) => Promise<void>;
+  onOpen: (id: string) => Promise<void>;
 }
 
 const CriteriaTemplateTypes = ({
@@ -37,7 +38,8 @@ const CriteriaTemplateTypes = ({
   templates,
   onAdd,
   onDelete,
-  onDuplicate
+  onDuplicate,
+  onOpen
 }: CriteriaTemplateTypesProps): JSX.Element => {
   const devOpsService = useMemo(() => new DevOpsService(), []);
   const itemProvider = useMemo(
@@ -111,8 +113,8 @@ const CriteriaTemplateTypes = ({
                   tableItem,
                   {
                     title: tableItem.name,
-                    onClick: (item: CriteriaTemplateDocument) => {
-                      console.log(item);
+                    onClick: async (item: CriteriaTemplateDocument) => {
+                      await onOpen(item.id);
                     }
                   },
                   ariaRowIndex
@@ -125,7 +127,10 @@ const CriteriaTemplateTypes = ({
                   {
                     id: 'edit',
                     text: 'Edit template',
-                    iconProps: { iconName: 'Edit' }
+                    iconProps: { iconName: 'Edit' },
+                    onActivate: async () => {
+                      await onOpen(item.id);
+                    }
                   },
                   {
                     id: 'duplicate',

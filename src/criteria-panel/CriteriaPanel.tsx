@@ -51,6 +51,7 @@ import {
   IAcceptanceCriteria,
   ProcessEvent
 } from '../common/types';
+import { getSchema } from '../common/validationSchemas';
 import ChecklistCriteriaViewSection from './components/checklist/ChecklistCriteriaViewSection';
 import CompletedProcessContainer from './components/CompletedProcessContainer';
 import CompletionContainer from './components/CompletionContainer';
@@ -59,7 +60,6 @@ import ProcessingContainer from './components/ProcessingContainer';
 import RejectionProcessContainer from './components/RejectionProcessContainer';
 import ScenarioCriteriaViewSection from './components/scenario/ScenarioCriteriaViewSection';
 import TextCriteriaViewSection from './components/text/TextCriteriaViewSection';
-import { getSchema } from './CriteriaPanelData';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaBuilderContext();
