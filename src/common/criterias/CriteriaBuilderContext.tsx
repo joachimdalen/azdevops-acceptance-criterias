@@ -1,8 +1,11 @@
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
 import { CriteriaTypes, ICheckList, IScenario, ITextCriteria } from '../types';
 
 export interface ICriteriaBuilderContextState {
+  title: string;
+  approver?: IInternalIdentity;
   type: CriteriaTypes;
   scenario?: IScenario;
   text?: ITextCriteria;
@@ -15,7 +18,8 @@ export interface ReducerAction {
 }
 
 const intDefaultState: ICriteriaBuilderContextState = {
-  type: 'scenario'
+  type: 'scenario',
+  title: ''
 };
 
 export interface ICriteriaBuilderContext {
@@ -25,7 +29,7 @@ export interface ICriteriaBuilderContext {
 
 const CriteriaBuilderContext = createContext<ICriteriaBuilderContext>({} as any);
 
-export type ContextAction = 'INIT' | 'SET_CRITERIA' | 'SET_TYPE';
+export type ContextAction = 'INIT' | 'SET_CRITERIA' | 'SET_TYPE' | 'SET_TITLE' | 'SET_APPROVER';
 type CriteriaBuilderProviderProps = {
   children: React.ReactNode;
   defaultState?: ICriteriaBuilderContextState;
@@ -40,6 +44,12 @@ function panelReducer(
     }
     case 'SET_TYPE': {
       return { ...state, type: action.data };
+    }
+    case 'SET_TITLE': {
+      return { ...state, title: action.data };
+    }
+    case 'SET_APPROVER': {
+      return { ...state, approver: action.data };
     }
 
     case 'SET_CRITERIA': {

@@ -27,6 +27,7 @@ export interface CriteriaTemplateDocument {
   name: string;
   title: string;
   description?: string;
+  approver?: IInternalIdentity;
   scenario?: IScenario;
   text?: ITextCriteria;
   checklist?: ICheckList;

@@ -80,7 +80,8 @@ class CriteriaTemplateService {
         console.log(result);
         try {
           if (result?.result === 'SAVE' && result.data) {
-            onUpdate(result.data);
+            const updated = await this.createOrUpdate(result.data);
+            onUpdate(updated);
           }
         } catch (error: any) {
           this._devOpsService.showToast(error.message);

@@ -4,7 +4,6 @@ import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { IdentityPicker } from '@joachimdalen/azdevops-ext-core/IdentityPicker';
-import { getLoggedInUser, isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
 import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
 import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
@@ -28,14 +27,11 @@ import { useEffect, useMemo, useState } from 'react';
 import * as yup from 'yup';
 
 import { CriteriaModalResult } from '../common/common';
-import ApproverDisplay from '../common/components/ApproverDisplay';
 import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
-import StatusTag from '../common/components/StatusTag';
 import CheckListCriteriaSection from '../common/criterias/checklist/CheckListCriteriaSection';
 import { useCriteriaBuilderContext } from '../common/criterias/CriteriaBuilderContext';
 import ScenarioCriteria from '../common/criterias/scenario/ScenarioCriteriaSection';
 import TextCriteriaSection from '../common/criterias/text/TextCriteriaSection';
-import { isCompleted, isProcessed } from '../common/criteriaUtils';
 import { LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaHistoryService from '../common/services/CriteriaHistoryService';
 import CriteriaService from '../common/services/CriteriaService';
@@ -48,18 +44,11 @@ import {
   CriteriaTypes,
   GlobalSettingsDocument,
   HistoryDocument,
-  IAcceptanceCriteria,
-  ProcessEvent
+  IAcceptanceCriteria
 } from '../common/types';
 import { getSchema } from '../common/validationSchemas';
-import ChecklistCriteriaViewSection from './components/checklist/ChecklistCriteriaViewSection';
-import CompletedProcessContainer from './components/CompletedProcessContainer';
-import CompletionContainer from './components/CompletionContainer';
 import HistoryList from './components/HistoryList';
-import ProcessingContainer from './components/ProcessingContainer';
-import RejectionProcessContainer from './components/RejectionProcessContainer';
-import ScenarioCriteriaViewSection from './components/scenario/ScenarioCriteriaViewSection';
-import TextCriteriaViewSection from './components/text/TextCriteriaViewSection';
+import ReadOnlyView from './ReadOnlyView';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaBuilderContext();
@@ -92,29 +81,7 @@ const CriteriaPanel = (): React.ReactElement => {
   const [detailsError, setDetailsError] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string[] } | undefined>();
 
-  const criteriaTypeItemsFiltered = useMemo(() => {
-    if (settings?.limitAllowedCriteriaTypes) {
-      return [
-        {
-          id: 'checklist',
-          text: 'Checklist',
-          disabled: !settings.allowedCriteriaTypes.includes('checklist')
-        },
-        {
-          id: 'scenario',
-          text: 'Scenario',
-          disabled: !settings.allowedCriteriaTypes.includes('scenario')
-        },
-        { id: 'text', text: 'Text', disabled: !settings.allowedCriteriaTypes.includes('text') }
-      ];
-    }
 
-    return [
-      { id: 'checklist', text: 'Checklist' },
-      { id: 'scenario', text: 'Scenario' },
-      { id: 'text', text: 'Text' }
-    ];
-  }, [settings]);
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, passedDetails?: CriteriaDetailDocument) {
     const getData = () => {
@@ -200,7 +167,8 @@ const CriteriaPanel = (): React.ReactElement => {
                 if (crit) {
                   if (dataChange) {
                     setCriteriaInfo(crit, isLoad ? loadedDetails : undefined);
-                    await checkApproval(crit);
+                    const canApprove = await criteriaService.checkApproval(crit);
+                    toggleCanApprove(canApprove);
                   }
 
                   if (
@@ -233,38 +201,6 @@ const CriteriaPanel = (): React.ReactElement => {
 
     initModule();
   }, []);
-
-  const checkApproval = async (criteria: IAcceptanceCriteria) => {
-    if (
-      criteria.state === AcceptanceCriteriaState.AwaitingApproval &&
-      criteria.requiredApprover !== undefined
-    ) {
-      if (criteria.requiredApprover.entityType === 'User') {
-        if (isLoggedInUser(criteria.requiredApprover)) {
-          toggleCanApprove(true);
-        }
-      } else {
-        const teams = await criteriaService.getUserTeams();
-
-        if (teams.some(y => y.id === criteria.requiredApprover?.id)) {
-          toggleCanApprove(true);
-        } else {
-          const user = await getLoggedInUser();
-          if (user?.descriptor !== undefined) {
-            const groups = await criteriaService.getUserGroups(user.descriptor);
-            const group = groups.find(
-              x => x.containerDescriptor === criteria.requiredApprover?.descriptor
-            );
-            if (group !== undefined) {
-              toggleCanApprove(true);
-            }
-          }
-        }
-      }
-    }
-  };
-
-  const typeSelection = useDropdownSelection(criteriaTypeItemsFiltered, panelState.type);
 
   const dismiss = () => {
     const config = DevOps.getConfiguration();
@@ -332,38 +268,6 @@ const CriteriaPanel = (): React.ReactElement => {
       details: acd
     };
   };
-
-  async function processCriteria(id: string, approve: ProcessEvent, comment?: string) {
-    if (workItemId && parseInt(workItemId) > 0) {
-      const result = await criteriaService.processCriteria(workItemId, id, approve, comment);
-      if (result !== undefined) {
-        toggleWasChanged(true);
-        setCriteriaInfo(result.criteria, result.details);
-      }
-    } else {
-      WebLogger.error('Precondition failed');
-    }
-  }
-
-  async function processCheckListCriteria(id: string, complete: boolean) {
-    if (workItemId && parseInt(workItemId) > 0 && criteria?.id) {
-      const result = await criteriaService.processCheckListCriteria(
-        workItemId,
-        criteria?.id,
-        id,
-        complete
-      );
-      if (result !== undefined) {
-        setDetails(result.details);
-        if (result.criteria) {
-          setCriteria(result.criteria);
-          await checkApproval(result.criteria);
-        }
-      }
-    } else {
-      WebLogger.error('Precondition failed ' + workItemId, criteria?.id);
-    }
-  }
 
   const editContent = (
     <>
@@ -510,134 +414,22 @@ const CriteriaPanel = (): React.ReactElement => {
           </ConditionalChildren>
           <ConditionalChildren renderChildren={isReadOnly}>
             {criteria && (
-              <>
-                <div className="rhythm-vertical-16 flex-grow border-bottom-light padding-bottom-16">
-                  <ConditionalChildren
-                    renderChildren={
-                      isCompleted(criteria) &&
-                      editAfterComplete === false &&
-                      canEdit &&
-                      criteria.state !== AcceptanceCriteriaState.Rejected
-                    }
-                  >
-                    <MessageCard
-                      className="flex-self-stretch"
-                      severity={MessageCardSeverity.Warning}
-                      buttonProps={[
-                        {
-                          text: 'Edit',
-                          onClick: () => {
-                            toggleEditAfterComplete();
-                            setIsReadOnly(false);
-                          }
-                        }
-                      ]}
-                    >
-                      {`This criteria has already been ${criteria.state}. You can still edit it, but it may reset history and progress.`}
-                    </MessageCard>
-                  </ConditionalChildren>
-                  <div className="flex-row rhythm-horizontal-8">
-                    <FormItem label="Required Approver" className="flex-grow">
-                      <ApproverDisplay approver={criteria?.requiredApprover} large />
-                    </FormItem>
-                    <ConditionalChildren renderChildren={isProcessed(criteria, details)}>
-                      <FormItem
-                        label={
-                          criteria.state === AcceptanceCriteriaState.Approved
-                            ? 'Approved by'
-                            : 'Rejected by'
-                        }
-                        className="flex-grow"
-                      >
-                        <ApproverDisplay approver={details?.processed?.processedBy} large />
-                      </FormItem>
-                    </ConditionalChildren>
-                    <FormItem label="State" className="flex-grow">
-                      <StatusTag state={criteria.state} />
-                    </FormItem>
-                  </div>
-                  <ConditionalChildren
-                    renderChildren={details?.latestComment !== undefined && isCompleted(criteria)}
-                  >
-                    <FormItem label="Latest Comment" className="flex-grow">
-                      {details?.latestComment}
-                    </FormItem>
-                  </ConditionalChildren>
-                </div>
-                <ConditionalChildren
-                  renderChildren={
-                    canApprove &&
-                    workItemId !== undefined &&
-                    criteria.state === AcceptanceCriteriaState.AwaitingApproval
-                  }
-                >
-                  <ProcessingContainer processCriteria={processCriteria} criteriaId={criteria.id} />
-                </ConditionalChildren>
-                <ConditionalChildren
-                  renderChildren={criteria.state === AcceptanceCriteriaState.Rejected}
-                >
-                  <RejectionProcessContainer
-                    criteriaId={criteria.id}
-                    onProcess={async (criteriaId: string, action: ProcessEvent) => {
-                      await criteriaService.toggleCompletion(criteriaId, action);
-                    }}
-                  />
-                </ConditionalChildren>
-                <ConditionalChildren
-                  renderChildren={
-                    criteria.state === AcceptanceCriteriaState.Completed ||
-                    criteria.state === AcceptanceCriteriaState.Approved
-                  }
-                >
-                  <CompletedProcessContainer
-                    criteriaId={criteria.id}
-                    onProcess={async (criteriaId: string, action: ProcessEvent) => {
-                      await criteriaService.toggleCompletion(criteriaId, action);
-                    }}
-                  />
-                </ConditionalChildren>
-                <ConditionalChildren
-                  renderChildren={
-                    criteria.state === AcceptanceCriteriaState.New &&
-                    (criteria.type !== 'checklist' ||
-                      (criteria.type === 'checklist' &&
-                        details?.checklist?.criterias?.every(x => x.completed)))
-                  }
-                >
-                  <CompletionContainer
-                    criteria={criteria}
-                    onComplete={async (criteriaId: string) => {
-                      await criteriaService.toggleCompletion(criteriaId, ProcessEvent.Complete);
-                    }}
-                  />
-                </ConditionalChildren>
-                <ConditionalChildren
-                  renderChildren={criteria.type === 'scenario' && details !== undefined}
-                >
-                  {details?.scenario && <ScenarioCriteriaViewSection details={details} />}
-                </ConditionalChildren>
-                <ConditionalChildren
-                  renderChildren={criteria.type === 'text' && details !== undefined}
-                >
-                  {details?.text && <TextCriteriaViewSection details={details} />}
-                </ConditionalChildren>
-                <ConditionalChildren
-                  renderChildren={criteria.type === 'checklist' && details !== undefined}
-                >
-                  {details?.checklist && (
-                    <ChecklistCriteriaViewSection
-                      isCompleted={
-                        isCompleted(criteria) ||
-                        criteria.state === AcceptanceCriteriaState.AwaitingApproval
-                      }
-                      details={details}
-                      processItem={processCheckListCriteria}
-                    />
-                  )}
-                </ConditionalChildren>
-              </>
+              <ReadOnlyView
+                criteria={criteria}
+                details={details}
+                canApproveCriteria={canApprove}
+                criteriaService={criteriaService}
+                onDataChange={(
+                  crit: IAcceptanceCriteria,
+                  passedDetails?: CriteriaDetailDocument
+                ) => {
+                  setCriteriaInfo(crit, passedDetails);
+                }}
+                workItemId={workItemId}
+              />
             )}
           </ConditionalChildren>
+
           <ConditionalChildren renderChildren={!isReadOnly}>{editContent}</ConditionalChildren>
         </ConditionalChildren>
       </ConditionalChildren>

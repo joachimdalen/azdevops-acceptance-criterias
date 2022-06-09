@@ -195,6 +195,15 @@ const AcceptanceControl = (): React.ReactElement => {
         }
       },
       {
+        key: 'newItemFromTemplate',
+        text: 'New from template',
+        cacheKey: 'myCacheKey',
+        iconProps: { iconName: 'FileTemplate' },
+        onClick: () => {
+          showPanel(undefined, undefined, undefined, true);
+        }
+      },
+      {
         key: 'refresh',
         text: 'Refresh',
         cacheKey: 'myCacheKey',
@@ -213,17 +222,17 @@ const AcceptanceControl = (): React.ReactElement => {
     );
   }
 
-  if (isNew) {
-    return (
-      <div className="acceptance-control-container">
-        <ZeroData
-          imageAltText={''}
-          iconProps={{ iconName: 'Save' }}
-          secondaryText="Save the work item to start adding acceptance criterias"
-        />
-      </div>
-    );
-  }
+  // if (isNew) {
+  //   return (
+  //     <div className="acceptance-control-container">
+  //       <ZeroData
+  //         imageAltText={''}
+  //         iconProps={{ iconName: 'Save' }}
+  //         secondaryText="Save the work item to start adding acceptance criterias"
+  //       />
+  //     </div>
+  //   );
+  // }
 
   async function onDelete(id: string) {
     const config: IConfirmationConfig = {

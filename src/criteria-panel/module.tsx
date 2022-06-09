@@ -3,11 +3,12 @@ import { showRootComponent } from '@joachimdalen/azdevops-ext-core/showRootCompo
 
 import CriteriaPanel from './CriteriaPanel';
 import { CriteriaBuilderProvider } from '../common/criterias/CriteriaBuilderContext';
+import NewTemplatePanelContent from './NewTemplatePanelContent';
 
 showRootComponent(
   <ErrorBoundary>
     <CriteriaBuilderProvider>
-      <CriteriaPanel />
+      <NewTemplatePanelContent />
     </CriteriaBuilderProvider>
   </ErrorBoundary>,
   'criteria-panel-container'

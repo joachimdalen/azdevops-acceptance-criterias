@@ -81,6 +81,7 @@ const TemplatePanel = (): React.ReactElement => {
             setTemplateDescription(template.description || '');
             setTemplateName(template.name || '');
             setTitle(template.title);
+            setApprover(template.approver);
             dispatch({
               type: 'SET_CRITERIA',
               data: getData(template)
@@ -143,11 +144,12 @@ const TemplatePanel = (): React.ReactElement => {
       );
       const user = await getLoggedInUser();
       const doc: CriteriaTemplateDocument = {
-        id: uuidV4(),
+        id: config.templateId || uuidV4(),
         createdAt: new Date(),
         createdBy: user as any,
         name: templateName,
         description: templateDescription,
+        approver: approver,
         title: title,
         type: state.type,
         text: state.type === 'text' ? state.text : undefined,

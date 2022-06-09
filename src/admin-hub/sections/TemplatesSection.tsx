@@ -103,8 +103,14 @@ const TemplatesSection = (): React.ReactElement => {
                             });
                           }}
                           onOpen={async (id: string | undefined) => {
-                            await templateService.edit(id, async () => {
-                              setTemplates(prev => prev.filter(x => x.id !== id));
+                            await templateService.edit(id, async updated => {
+                              setTemplates(prev => {
+                                const newItems = [...prev];
+                                const index = prev.findIndex(x => x.id === id);
+                                if (index < 1) return prev;
+                                newItems[index] = updated;
+                                return newItems;
+                              });
                             });
                           }}
                           onDuplicate={async id => {

@@ -1,5 +1,5 @@
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
-import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
+import { getLoggedInUser, isLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
 import { getClient } from 'azure-devops-extension-api';
 import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
 import { GraphMembership, GraphRestClient } from 'azure-devops-extension-api/Graph';
@@ -478,6 +478,37 @@ class CriteriaService {
     const types = await client.queryByWiql({ query: query }, project?.name);
 
     return types;
+  }
+
+  public async checkApproval(criteria: IAcceptanceCriteria): Promise<boolean> {
+    if (
+      criteria.state === AcceptanceCriteriaState.AwaitingApproval &&
+      criteria.requiredApprover !== undefined
+    ) {
+      if (criteria.requiredApprover.entityType === 'User') {
+        if (isLoggedInUser(criteria.requiredApprover)) {
+          return true;
+        }
+      } else {
+        const teams = await this.getUserTeams();
+
+        if (teams.some(y => y.id === criteria.requiredApprover?.id)) {
+          return true;
+        } else {
+          const user = await getLoggedInUser();
+          if (user?.descriptor !== undefined) {
+            const groups = await this.getUserGroups(user.descriptor);
+            const group = groups.find(
+              x => x.containerDescriptor === criteria.requiredApprover?.descriptor
+            );
+            if (group !== undefined) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
   }
 }
 
