@@ -41,14 +41,18 @@ import {
   CriteriaDetailDocument,
   CriteriaDocument,
   CriteriaPanelConfig,
+  CriteriaPanelMode,
   CriteriaTypes,
   GlobalSettingsDocument,
   HistoryDocument,
-  IAcceptanceCriteria
+  IAcceptanceCriteria,
+  isViewMode,
+  LoadedCriteriaPanelConfig
 } from '../common/types';
 import { getSchema } from '../common/validationSchemas';
 import HistoryList from './components/HistoryList';
 import ReadOnlyView from './ReadOnlyView';
+import EditView from './EditView';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaBuilderContext();
@@ -65,10 +69,7 @@ const CriteriaPanel = (): React.ReactElement => {
     ],
     []
   );
-  const [isReadOnly, setIsReadOnly] = useState(false);
-  const [canEdit, setCanEdit] = useState(true);
-  const [identity, setIdentity] = useState<IInternalIdentity | undefined>(undefined);
-  const [title, setTitle] = useState<string>('');
+  const [mode, setMode] = useState<CriteriaPanelMode>(CriteriaPanelMode.New);
   const [criteria, setCriteria] = useState<IAcceptanceCriteria | undefined>();
   const [details, setDetails] = useState<CriteriaDetailDocument>();
   const [canApprove, toggleCanApprove] = useBooleanToggle();
@@ -80,8 +81,6 @@ const CriteriaPanel = (): React.ReactElement => {
   const [editAfterComplete, toggleEditAfterComplete] = useBooleanToggle();
   const [detailsError, setDetailsError] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string[] } | undefined>();
-
-
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, passedDetails?: CriteriaDetailDocument) {
     const getData = () => {
@@ -95,8 +94,9 @@ const CriteriaPanel = (): React.ReactElement => {
       }
     };
     dispatch({ type: 'SET_TYPE', data: crit.type });
-    setIdentity(crit.requiredApprover);
-    setTitle(crit.title);
+    dispatch({ type: 'SET_APPROVER', data: crit.requiredApprover });
+    dispatch({ type: 'SET_TITLE', data: crit.title });
+
     setCriteria(crit);
     if (passedDetails !== undefined) {
       dispatch({
@@ -107,12 +107,12 @@ const CriteriaPanel = (): React.ReactElement => {
       setDetailsError(passedDetails === undefined && details === undefined);
     }
 
-    if (
-      crit.state === AcceptanceCriteriaState.Approved ||
-      crit.state === AcceptanceCriteriaState.Completed
-    ) {
-      setIsReadOnly(true);
-    }
+    // if (
+    //   crit.state === AcceptanceCriteriaState.Approved ||
+    //   crit.state === AcceptanceCriteriaState.Completed
+    // ) {
+    //   setIsReadOnly(true);
+    // }
   }
 
   useEffect(() => {
@@ -126,16 +126,9 @@ const CriteriaPanel = (): React.ReactElement => {
         await DevOps.ready();
 
         loadTheme(createTheme(appTheme));
-        const config = DevOps.getConfiguration() as
-          | (CriteriaPanelConfig & { panel: any })
-          | undefined;
+        const config = DevOps.getConfiguration() as LoadedCriteriaPanelConfig;
         if (config && config.panel) {
-          if (config.isReadOnly) {
-            setIsReadOnly(true);
-          }
-          if (config.canEdit !== undefined) {
-            setCanEdit(config.canEdit);
-          }
+          setMode(config.mode);
 
           const fetchedSettings = await storageService.getSettings();
 
@@ -174,7 +167,7 @@ const CriteriaPanel = (): React.ReactElement => {
                   if (
                     (historyEvents === undefined || doc?.__etag !== eTag) &&
                     doc?.__etag !== 1 &&
-                    config.isReadOnly &&
+                    isViewMode(mode) &&
                     historyChange
                   ) {
                     setEtag(doc?.__etag);
@@ -203,7 +196,7 @@ const CriteriaPanel = (): React.ReactElement => {
   }, []);
 
   const dismiss = () => {
-    const config = DevOps.getConfiguration();
+    const config = DevOps.getConfiguration() as LoadedCriteriaPanelConfig;
     if (config.panel) {
       const res: CriteriaModalResult = {
         result: 'CANCEL',
@@ -213,7 +206,7 @@ const CriteriaPanel = (): React.ReactElement => {
     }
   };
   const save = async () => {
-    const config = DevOps.getConfiguration();
+    const config = DevOps.getConfiguration() as LoadedCriteriaPanelConfig;
     if (config.panel) {
       const schema = getSchema(panelState.type, settings?.requireApprovers || false);
       const ac = getCriteriaPayload();
@@ -249,10 +242,10 @@ const CriteriaPanel = (): React.ReactElement => {
     const id = criteria?.id || 'unset';
     const ac: IAcceptanceCriteria = {
       id: id,
-      requiredApprover: identity,
+      requiredApprover: panelState.approver,
       state: criteria?.state || AcceptanceCriteriaState.New,
       type: panelState.type,
-      title: title
+      title: panelState.title
     };
 
     const acd: CriteriaDetailDocument = {
@@ -269,86 +262,86 @@ const CriteriaPanel = (): React.ReactElement => {
     };
   };
 
-  const editContent = (
-    <>
-      <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
-        <FormItem
-          label="Title"
-          error={hasError(errors, 'title')}
-          message={getCombined(errors, 'title')}
-        >
-          <TextField
-            width={TextFieldWidth.auto}
-            placeholder="Short title.."
-            value={title}
-            maxLength={100}
-            onChange={e => {
-              setTitle(e.target.value);
-            }}
-          />
-        </FormItem>
-        <FormItem
-          label="Required Approver"
-          error={hasError(errors, 'requiredApprover')}
-          message={getCombined(errors, 'requiredApprover')}
-        >
-          <IdentityPicker
-            localStorageKey={LocalStorageRawKeys.HostUrl}
-            identity={identity}
-            onChange={i => {
-              setIdentity(i);
-            }}
-            onClear={() => setIdentity(undefined)}
-          />
-        </FormItem>
-        <FormItem label="Criteria Type" className="flex-grow">
-          <Dropdown
-            disabled={isReadOnly}
-            placeholder="Select an Option"
-            items={criteriaTypeItemsFiltered}
-            selection={typeSelection}
-            onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
-            renderItem={(
-              rowIndex: number,
-              columnIndex: number,
-              tableColumn: ITableColumn<IListBoxItem>,
-              tableItem: IListBoxItem
-            ) => {
-              const date: any = tableItem.data;
-              return (
-                <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
-                  <div className="flex-column justify-center">
-                    <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
-                    {tableItem.disabled && (
-                      <span className="font-size-xs error-text margin-top-4">
-                        This criteria type is disallowed by setting set by a project admin
-                      </span>
-                    )}
-                  </div>
-                </SimpleTableCell>
-              );
-            }}
-          />
-        </FormItem>
-        {/* <FormItem label="Tags" className="flex-grow">
-          <InternalTagPicker />
-        </FormItem> */}
-      </div>
+  // const editContent = (
+  //   <>
+  //     <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
+  //       <FormItem
+  //         label="Title"
+  //         error={hasError(errors, 'title')}
+  //         message={getCombined(errors, 'title')}
+  //       >
+  //         <TextField
+  //           width={TextFieldWidth.auto}
+  //           placeholder="Short title.."
+  //           value={title}
+  //           maxLength={100}
+  //           onChange={e => {
+  //             setTitle(e.target.value);
+  //           }}
+  //         />
+  //       </FormItem>
+  //       <FormItem
+  //         label="Required Approver"
+  //         error={hasError(errors, 'requiredApprover')}
+  //         message={getCombined(errors, 'requiredApprover')}
+  //       >
+  //         <IdentityPicker
+  //           localStorageKey={LocalStorageRawKeys.HostUrl}
+  //           identity={identity}
+  //           onChange={i => {
+  //             setIdentity(i);
+  //           }}
+  //           onClear={() => setIdentity(undefined)}
+  //         />
+  //       </FormItem>
+  //       <FormItem label="Criteria Type" className="flex-grow">
+  //         <Dropdown
+  //           disabled={isReadOnly}
+  //           placeholder="Select an Option"
+  //           items={criteriaTypeItemsFiltered}
+  //           selection={typeSelection}
+  //           onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
+  //           renderItem={(
+  //             rowIndex: number,
+  //             columnIndex: number,
+  //             tableColumn: ITableColumn<IListBoxItem>,
+  //             tableItem: IListBoxItem
+  //           ) => {
+  //             const date: any = tableItem.data;
+  //             return (
+  //               <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
+  //                 <div className="flex-column justify-center">
+  //                   <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
+  //                   {tableItem.disabled && (
+  //                     <span className="font-size-xs error-text margin-top-4">
+  //                       This criteria type is disallowed by setting set by a project admin
+  //                     </span>
+  //                   )}
+  //                 </div>
+  //               </SimpleTableCell>
+  //             );
+  //           }}
+  //         />
+  //       </FormItem>
+  //       {/* <FormItem label="Tags" className="flex-grow">
+  //         <InternalTagPicker />
+  //       </FormItem> */}
+  //     </div>
 
-      <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
-        <ScenarioCriteria errors={errors} />
-      </ConditionalChildren>
-      <ConditionalChildren renderChildren={panelState.type === 'text'}>
-        <TextCriteriaSection errors={errors} />
-      </ConditionalChildren>
-      <ConditionalChildren renderChildren={panelState.type === 'checklist'}>
-        <CheckListCriteriaSection errors={errors} />
-      </ConditionalChildren>
-    </>
-  );
+  //     <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
+  //       <ScenarioCriteria errors={errors} />
+  //     </ConditionalChildren>
+  //     <ConditionalChildren renderChildren={panelState.type === 'text'}>
+  //       <TextCriteriaSection errors={errors} />
+  //     </ConditionalChildren>
+  //     <ConditionalChildren renderChildren={panelState.type === 'checklist'}>
+  //       <CheckListCriteriaSection errors={errors} />
+  //     </ConditionalChildren>
+  //   </>
+  // );
 
   const showEditButton =
-    canEdit &&
+    mode === CriteriaPanelMode.ViewWithEdit &&
     criteria?.state !== AcceptanceCriteriaState.Completed &&
     criteria?.state !== AcceptanceCriteriaState.Approved;
 
@@ -358,12 +351,12 @@ const CriteriaPanel = (): React.ReactElement => {
       contentClassName="full-height h-scroll-hidden"
       cancelButton={{ text: 'Close', onClick: () => dismiss() }}
       okButton={
-        isReadOnly
+        isViewMode(mode)
           ? showEditButton
             ? {
                 text: 'Edit',
                 primary: true,
-                onClick: () => setIsReadOnly(false),
+                onClick: () => setMode(CriteriaPanelMode.Edit),
                 iconProps: { iconName: 'Edit' }
               }
             : undefined
@@ -374,11 +367,13 @@ const CriteriaPanel = (): React.ReactElement => {
               iconProps: { iconName: 'Save' }
             }
       }
-      showVersion={!isReadOnly}
+      showVersion={mode === CriteriaPanelMode.Edit}
       moduleVersion={process.env.CRITERIA_PANEL_VERSION}
     >
       <ConditionalChildren
-        renderChildren={historyEvents !== undefined && historyEvents.items.length > 0 && isReadOnly}
+        renderChildren={
+          historyEvents !== undefined && historyEvents.items.length > 0 && isViewMode(mode)
+        }
       >
         <Surface background={SurfaceBackground.callout}>
           <TabBar
@@ -412,7 +407,7 @@ const CriteriaPanel = (): React.ReactElement => {
               An error occurred. Please refresh and try again
             </MessageCard>
           </ConditionalChildren>
-          <ConditionalChildren renderChildren={isReadOnly}>
+          <ConditionalChildren renderChildren={isViewMode(mode)}>
             {criteria && (
               <ReadOnlyView
                 criteria={criteria}
@@ -430,7 +425,9 @@ const CriteriaPanel = (): React.ReactElement => {
             )}
           </ConditionalChildren>
 
-          <ConditionalChildren renderChildren={!isReadOnly}>{editContent}</ConditionalChildren>
+          <ConditionalChildren renderChildren={mode === CriteriaPanelMode.Edit}>
+            {settings && <EditView errors={errors} settings={settings} />}
+          </ConditionalChildren>
         </ConditionalChildren>
       </ConditionalChildren>
       <ConditionalChildren renderChildren={tabId === 'history' && historyEvents !== undefined}>

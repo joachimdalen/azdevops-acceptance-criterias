@@ -8,7 +8,7 @@ import NewTemplatePanelContent from './NewTemplatePanelContent';
 showRootComponent(
   <ErrorBoundary>
     <CriteriaBuilderProvider>
-      <NewTemplatePanelContent />
+      <CriteriaPanel />
     </CriteriaBuilderProvider>
   </ErrorBoundary>,
   'criteria-panel-container'

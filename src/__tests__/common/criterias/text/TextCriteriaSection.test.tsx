@@ -20,6 +20,7 @@ describe('TextCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'text',
+          title: '',
           text: {
             id: 'hello',
             description: 'Hello there'

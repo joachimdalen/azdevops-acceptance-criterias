@@ -451,10 +451,8 @@ class CriteriaService {
   ): Promise<void> {
     const intConfig: Omit<CriteriaPanelConfig, 'onClose'> = {
       criteriaId: options.criteriaId,
-      canEdit: options.canEdit === undefined ? false : options.canEdit,
-      isReadOnly: options.isReadOnly === undefined ? false : options.isReadOnly,
-      isNew: options.isNew === undefined ? false : options.isNew,
-      workItemId: options.workItemId
+      workItemId: options.workItemId,
+      mode: options.mode
     };
     await this._devOpsService.showPanel<CriteriaModalResult | undefined, PanelIds>(
       PanelIds.CriteriaPanel,

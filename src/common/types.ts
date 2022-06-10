@@ -129,14 +129,20 @@ export interface IProgressStatus {
   type: ProgressBarLabelType;
 }
 
+export interface ContribPanel<T> {
+  panel: {
+    close: (data: T) => Promise<void>;
+  };
+}
 export interface CriteriaPanelConfig {
   workItemId?: string;
   criteriaId?: string;
-  isReadOnly?: boolean;
-  isNew?: boolean;
-  canEdit?: boolean;
+  mode: CriteriaPanelMode;
   onClose?: (result: CriteriaModalResult | undefined) => Promise<void>;
 }
+export interface LoadedCriteriaPanelConfig
+  extends CriteriaPanelConfig,
+    ContribPanel<CriteriaModalResult | undefined> {}
 
 export interface GlobalSettingsDocument {
   readonly id: string;
@@ -204,3 +210,13 @@ export const historyEventProperties: Map<HistoryEvent, EventProperties> = new Ma
     { icon: 'StatusErrorFull', iconColor: 'text-red', title: 'Rejected criteria' }
   ]
 ]);
+export enum CriteriaPanelMode {
+  New = 'new',
+  NewFromTemplate = 'new-from-template',
+  Edit = 'edit',
+  View = 'view',
+  ViewWithEdit = 'view-with-edit'
+}
+
+export const isViewMode = (mode: CriteriaPanelMode): boolean =>
+  mode === CriteriaPanelMode.View || mode === CriteriaPanelMode.ViewWithEdit;

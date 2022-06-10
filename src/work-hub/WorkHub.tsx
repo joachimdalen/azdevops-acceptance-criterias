@@ -38,7 +38,12 @@ import { DOCS_URL_EXTENSION, DOCS_URL_KEYBOARD_SHORTCUTS } from '../common/docum
 import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
-import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../common/types';
+import {
+  CriteriaDocument,
+  CriteriaPanelMode,
+  IAcceptanceCriteria,
+  WorkItemTypeTagProps
+} from '../common/types';
 import ColumnsPanel from './ColumnsPanel';
 import CriteriaTree from './components/CriteriaTree';
 import HubFilterBar from './components/HubFilterBar';
@@ -317,8 +322,7 @@ const WorkHub = (): JSX.Element => {
         {
           criteriaId: criteria.id,
           workItemId: getWorkItemIdFromCriteriaId(criteria.id),
-          canEdit: false,
-          isReadOnly: true
+          mode: CriteriaPanelMode.View
         },
         criteria
       );
@@ -387,8 +391,7 @@ const WorkHub = (): JSX.Element => {
                           {
                             criteriaId: criteria.id,
                             workItemId,
-                            isReadOnly: true,
-                            canEdit: false
+                            mode: CriteriaPanelMode.View
                           },
                           criteria
                         );

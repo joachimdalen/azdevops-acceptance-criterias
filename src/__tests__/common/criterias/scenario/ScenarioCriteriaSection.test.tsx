@@ -33,6 +33,7 @@ describe('ScenarioCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'scenario',
+          title: '',
           scenario: {
             scenario: 'This is the scenario',
             criterias: [{ id: '1', type: 'given', text: 'Given this is true' }]
@@ -52,6 +53,7 @@ describe('ScenarioCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'scenario',
+          title: '',
           scenario: {
             scenario: 'This is the scenario',
             criterias: [
@@ -77,6 +79,7 @@ describe('ScenarioCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'scenario',
+          title: '',
           scenario: {
             scenario: 'This is the scenario',
             criterias: [
@@ -105,6 +108,7 @@ describe('ScenarioCriteriaSection', () => {
         <CriteriaBuilderProvider
           defaultState={{
             type: 'scenario',
+            title: '',
             scenario: {
               scenario: 'Some scenario',
               criterias: [
@@ -136,6 +140,7 @@ describe('ScenarioCriteriaSection', () => {
         <CriteriaBuilderProvider
           defaultState={{
             type: 'scenario',
+            title: '',
             scenario: {
               scenario: 'Some scenario',
               criterias: [
@@ -167,6 +172,7 @@ describe('ScenarioCriteriaSection', () => {
         <CriteriaBuilderProvider
           defaultState={{
             type: 'scenario',
+            title: '',
             scenario: {
               scenario: 'Some scenario',
               criterias: [

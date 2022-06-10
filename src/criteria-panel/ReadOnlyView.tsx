@@ -72,7 +72,7 @@ const ReadOnlyView = ({
   return (
     <>
       <div className="rhythm-vertical-16 flex-grow border-bottom-light padding-bottom-16">
-        <ConditionalChildren
+        {/* <ConditionalChildren
           renderChildren={
             isCompleted(criteria) &&
             editAfterComplete === false &&
@@ -95,7 +95,7 @@ const ReadOnlyView = ({
           >
             {`This criteria has already been ${criteria.state}. You can still edit it, but it may reset history and progress.`}
           </MessageCard>
-        </ConditionalChildren>
+        </ConditionalChildren> */}
         <div className="flex-row rhythm-horizontal-8">
           <FormItem label="Required Approver" className="flex-grow">
             <ApproverDisplay approver={criteria?.requiredApprover} large />

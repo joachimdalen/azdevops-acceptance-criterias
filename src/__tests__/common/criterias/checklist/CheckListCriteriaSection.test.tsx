@@ -48,6 +48,7 @@ describe('CheckListCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'checklist',
+          title: '',
           checklist: {
             criterias: [{ completed: false, id: '1234', text: 'This item' }]
           }
@@ -66,6 +67,7 @@ describe('CheckListCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'checklist',
+          title: '',
           checklist: {
             criterias: [
               { completed: false, id: '1234', text: 'This item' },
@@ -89,6 +91,7 @@ describe('CheckListCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'checklist',
+          title: '',
           checklist: {
             criterias: [{ completed: false, id: '1234', text: 'This item' }]
           }
@@ -111,6 +114,7 @@ describe('CheckListCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'checklist',
+          title: '',
           checklist: {
             criterias: [
               { completed: false, id: '1234', text: 'This item' },
@@ -142,6 +146,7 @@ describe('CheckListCriteriaSection', () => {
       <CriteriaBuilderProvider
         defaultState={{
           type: 'checklist',
+          title: '',
           checklist: {
             criterias: [
               { completed: false, id: '1234', text: 'This item' },
@@ -174,6 +179,7 @@ describe('CheckListCriteriaSection', () => {
         <CriteriaBuilderProvider
           defaultState={{
             type: 'checklist',
+            title: '',
             checklist: {
               criterias: [
                 { completed: false, id: '1234', text: 'This item' },
@@ -204,6 +210,7 @@ describe('CheckListCriteriaSection', () => {
         <CriteriaBuilderProvider
           defaultState={{
             type: 'checklist',
+            title: '',
             checklist: {
               criterias: [
                 { completed: false, id: '1234', text: 'This item' },
@@ -234,6 +241,7 @@ describe('CheckListCriteriaSection', () => {
         <CriteriaBuilderProvider
           defaultState={{
             type: 'checklist',
+            title: '',
             checklist: {
               criterias: [
                 { completed: false, id: '1234', text: 'This item' },
@@ -262,6 +270,7 @@ describe('CheckListCriteriaSection', () => {
         <CriteriaBuilderProvider
           defaultState={{
             type: 'checklist',
+            title: '',
             checklist: {
               criterias: [
                 { completed: false, id: '1234', text: 'This item' },

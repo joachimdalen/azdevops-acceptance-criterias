@@ -30,7 +30,12 @@ import {
   setLocalItem
 } from '../common/localStorage';
 import CriteriaService from '../common/services/CriteriaService';
-import { CriteriaDocument, CriteriaPanelConfig, IAcceptanceCriteria } from '../common/types';
+import {
+  CriteriaDocument,
+  CriteriaPanelConfig,
+  CriteriaPanelMode,
+  IAcceptanceCriteria
+} from '../common/types';
 import CriteriaView from './components/CriteriaView';
 
 const AcceptanceControl = (): React.ReactElement => {
@@ -109,12 +114,7 @@ const AcceptanceControl = (): React.ReactElement => {
     initModule();
   }, []);
 
-  const showPanel = async (
-    criteria?: IAcceptanceCriteria,
-    readOnly?: boolean,
-    canEdit?: boolean,
-    isCreate?: boolean
-  ) => {
+  const showPanel = async (mode: CriteriaPanelMode, criteria?: IAcceptanceCriteria) => {
     const workItemId = await devOpsService.getCurrentWorkItemId();
 
     if (workItemId === undefined) {
@@ -122,12 +122,10 @@ const AcceptanceControl = (): React.ReactElement => {
       return;
     }
 
-    const isRead = isReadOnly || readOnly;
     const config: CriteriaPanelConfig = {
       workItemId: workItemId.toString(),
       criteriaId: criteria?.id,
-      isReadOnly: isRead,
-      canEdit: canEdit,
+      mode: mode,
       onClose: async (result: CriteriaModalResult | undefined) => {
         try {
           if (result?.result === 'SAVE' && result.data) {
@@ -151,7 +149,11 @@ const AcceptanceControl = (): React.ReactElement => {
       }
     };
 
-    if (isCreate !== true || getLocalItem<boolean>(LocalStorageKeys.NewStateFlow)) {
+    if (
+      mode === CriteriaPanelMode.View ||
+      mode === CriteriaPanelMode.ViewWithEdit ||
+      getLocalItem<boolean>(LocalStorageKeys.NewStateFlow)
+    ) {
       await criteriaService.showPanel(config, criteria);
     } else {
       const confirmConfig: IConfirmationConfig = {
@@ -191,7 +193,7 @@ const AcceptanceControl = (): React.ReactElement => {
         cacheKey: 'myCacheKey',
         iconProps: { iconName: 'Add' },
         onClick: () => {
-          showPanel(undefined, undefined, undefined, true);
+          showPanel(CriteriaPanelMode.New);
         }
       },
       {
@@ -200,7 +202,7 @@ const AcceptanceControl = (): React.ReactElement => {
         cacheKey: 'myCacheKey',
         iconProps: { iconName: 'FileTemplate' },
         onClick: () => {
-          showPanel(undefined, undefined, undefined, true);
+          showPanel(CriteriaPanelMode.NewFromTemplate);
         }
       },
       {
@@ -259,8 +261,8 @@ const AcceptanceControl = (): React.ReactElement => {
     });
   }
 
-  async function onEdit(criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) {
-    await showPanel(criteria, readOnly, canEdit);
+  async function onEdit(criteria: IAcceptanceCriteria, mode: CriteriaPanelMode) {
+    await showPanel(mode, criteria);
   }
 
   if (error !== undefined) {
@@ -290,7 +292,7 @@ const AcceptanceControl = (): React.ReactElement => {
           actionType={ZeroDataActionType.ctaButton}
           actionText="New Acceptance Criteria"
           onActionClick={() => {
-            showPanel(undefined, undefined, undefined, true);
+            showPanel(CriteriaPanelMode.New);
           }}
         />
       </ConditionalChildren>

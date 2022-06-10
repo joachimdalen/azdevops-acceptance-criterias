@@ -20,6 +20,7 @@ import StatusTag from '../../common/components/StatusTag';
 import {
   AcceptanceCriteriaState,
   CriteriaDocument,
+  CriteriaPanelMode,
   CriteriaTypes,
   IAcceptanceCriteria,
   IExtendedTableCell,
@@ -29,7 +30,7 @@ import {
 interface CriteriaViewProps {
   criteria?: CriteriaDocument;
   onDelete: (id: string) => Promise<void>;
-  onEdit: (criteria: IAcceptanceCriteria, readOnly?: boolean, canEdit?: boolean) => Promise<void>;
+  onEdit: (criteria: IAcceptanceCriteria, mode: CriteriaPanelMode) => Promise<void>;
 }
 
 interface IProgressStatus {
@@ -82,7 +83,7 @@ const CriteriaView = ({ criteria, onDelete, onEdit }: CriteriaViewProps): JSX.El
           iconProps: { iconName: 'Edit' },
           onActivate: () => {
             if (listItem?.underlyingItem?.data?.rawCriteria) {
-              onEdit(listItem?.underlyingItem?.data?.rawCriteria, false, true);
+              onEdit(listItem?.underlyingItem?.data?.rawCriteria, CriteriaPanelMode.Edit);
             }
           }
         },
@@ -172,7 +173,7 @@ const CriteriaView = ({ criteria, onDelete, onEdit }: CriteriaViewProps): JSX.El
         <InternalLink
           onClick={async () => {
             if (data.rawCriteria) {
-              onEdit(data.rawCriteria, true, true);
+              onEdit(data.rawCriteria, CriteriaPanelMode.ViewWithEdit);
             }
           }}
         >
