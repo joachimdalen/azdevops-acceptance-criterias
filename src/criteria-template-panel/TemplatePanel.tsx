@@ -143,6 +143,7 @@ const TemplatePanel = (): React.ReactElement => {
         })
       );
       const user = await getLoggedInUser();
+      // TODO: Fix date resetting on update
       const doc: CriteriaTemplateDocument = {
         id: config.templateId || uuidV4(),
         createdAt: new Date(),

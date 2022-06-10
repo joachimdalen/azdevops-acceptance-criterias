@@ -118,10 +118,10 @@ const CriteriaPanel = (): React.ReactElement => {
   useEffect(() => {
     async function initModule() {
       try {
-        await DevOps.init({
-          loaded: false,
-          applyTheme: true
-        });
+        // await DevOps.init({
+        //   loaded: false,
+        //   applyTheme: true
+        // });
         WebLogger.information('Loaded criteria panel...');
         await DevOps.ready();
 
@@ -425,7 +425,9 @@ const CriteriaPanel = (): React.ReactElement => {
             )}
           </ConditionalChildren>
 
-          <ConditionalChildren renderChildren={mode === CriteriaPanelMode.Edit}>
+          <ConditionalChildren
+            renderChildren={mode === CriteriaPanelMode.Edit || mode === CriteriaPanelMode.New}
+          >
             {settings && <EditView errors={errors} settings={settings} />}
           </ConditionalChildren>
         </ConditionalChildren>
