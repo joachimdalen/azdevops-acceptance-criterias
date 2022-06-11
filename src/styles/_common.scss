@@ -88,3 +88,6 @@
 .dark-background {
   background-color: var(--palette-black-alpha-4, rgba(0, 0, 0, 0.04));
 }
+.text-red {
+  color: $status-error-foreground;
+}

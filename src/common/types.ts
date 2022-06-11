@@ -22,6 +22,7 @@ export interface IAcceptanceCriteria {
 }
 
 export interface CriteriaTemplateDocument {
+  readonly __etag?: number;
   id: string;
   type: CriteriaTypes;
   name: string;

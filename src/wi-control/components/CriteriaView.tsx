@@ -91,7 +91,7 @@ const CriteriaView = ({ criteria, onDelete, onEdit }: CriteriaViewProps): JSX.El
         {
           id: 'delete',
           text: 'Delete',
-          iconProps: { iconName: 'Delete' },
+          iconProps: { iconName: 'Delete', className: 'text-red' },
           onActivate: () => {
             if (listItem?.underlyingItem?.data?.id) {
               onDelete(listItem.underlyingItem.data.id);

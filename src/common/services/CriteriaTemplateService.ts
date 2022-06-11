@@ -26,14 +26,8 @@ class CriteriaTemplateService {
     }
   }
   public async getTemplate(id: string): Promise<CriteriaTemplateDocument | undefined> {
-    try {
-      const template = await this._dataStore.getTemplate(id);
-      return template;
-    } catch (error: any) {
-      if (error?.status !== 404) {
-        throw new Error(error);
-      }
-    }
+    const template = await this._dataStore.getTemplate(id);
+    return template;
   }
 
   public async createOrUpdate(doc: CriteriaTemplateDocument): Promise<CriteriaTemplateDocument> {
@@ -60,7 +54,7 @@ class CriteriaTemplateService {
         title: 'Delete template?',
         onClose: async result => {
           if (result?.success) {
-            //  await this._dataStore.deleteTemplate(id);
+            await this._dataStore.deleteTemplate(id);
             onDelete();
           }
         },
@@ -80,8 +74,7 @@ class CriteriaTemplateService {
         console.log(result);
         try {
           if (result?.result === 'SAVE' && result.data) {
-            const updated = await this.createOrUpdate(result.data);
-            onUpdate(updated);
+            onUpdate(result.data);
           }
         } catch (error: any) {
           this._devOpsService.showToast(error.message);

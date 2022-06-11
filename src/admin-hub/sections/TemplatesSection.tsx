@@ -29,7 +29,7 @@ const TemplatesSection = (): React.ReactElement => {
   const [itemProvider] = useState(
     new ArrayItemProvider<CriteriaTypes>(['scenario', 'checklist', 'text'])
   );
-  const [selectedItemObservable] = useState(new ObservableValue<CriteriaTypes>('scenario'));
+  const [selectedItemObservable] = useState(new ObservableValue<CriteriaTypes>('text'));
   const [loading, toggleLoading] = useBooleanToggle(true);
 
   useEffect(() => {
@@ -94,11 +94,10 @@ const TemplatesSection = (): React.ReactElement => {
                           templates={templates}
                           type={observerProps.selectedItem}
                           onAdd={async doc => {
-                            const added = await templateService.createOrUpdate(doc);
-                            setTemplates(prev => [...prev, added]);
+                            setTemplates(prev => [...prev, doc]);
                           }}
-                          onDelete={async id => {
-                            await templateService.delete(id, () => {
+                          onDelete={async (id: string) => {
+                            await templateService.delete(id, async () => {
                               setTemplates(prev => prev.filter(x => x.id !== id));
                             });
                           }}

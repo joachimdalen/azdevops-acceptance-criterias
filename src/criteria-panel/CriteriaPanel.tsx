@@ -2,37 +2,19 @@ import './index.scss';
 
 import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
-import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
-import { IdentityPicker } from '@joachimdalen/azdevops-ext-core/IdentityPicker';
 import { PanelWrapper } from '@joachimdalen/azdevops-ext-core/PanelWrapper';
 import { useBooleanToggle } from '@joachimdalen/azdevops-ext-core/useBooleanToggle';
-import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
-import {
-  getCombined,
-  hasError,
-  parseValidationError
-} from '@joachimdalen/azdevops-ext-core/ValidationUtils';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import * as DevOps from 'azure-devops-extension-sdk';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { Dropdown } from 'azure-devops-ui/Dropdown';
-import { FormItem } from 'azure-devops-ui/FormItem';
-import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
 import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
-import { ITableColumn, SimpleTableCell } from 'azure-devops-ui/Table';
 import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
-import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
 import { useEffect, useMemo, useState } from 'react';
-import * as yup from 'yup';
 
 import { CriteriaModalResult } from '../common/common';
-import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
-import CheckListCriteriaSection from '../common/criterias/checklist/CheckListCriteriaSection';
 import { useCriteriaBuilderContext } from '../common/criterias/CriteriaBuilderContext';
-import ScenarioCriteria from '../common/criterias/scenario/ScenarioCriteriaSection';
-import TextCriteriaSection from '../common/criterias/text/TextCriteriaSection';
-import { LocalStorageRawKeys } from '../common/localStorage';
+import useValidation from '../common/hooks/useValidation';
 import CriteriaHistoryService from '../common/services/CriteriaHistoryService';
 import CriteriaService from '../common/services/CriteriaService';
 import { StorageService } from '../common/services/StorageService';
@@ -40,9 +22,7 @@ import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
   CriteriaDocument,
-  CriteriaPanelConfig,
   CriteriaPanelMode,
-  CriteriaTypes,
   GlobalSettingsDocument,
   HistoryDocument,
   IAcceptanceCriteria,
@@ -51,21 +31,23 @@ import {
 } from '../common/types';
 import { getSchema } from '../common/validationSchemas';
 import HistoryList from './components/HistoryList';
-import ReadOnlyView from './ReadOnlyView';
 import EditView from './EditView';
+import ReadOnlyView from './ReadOnlyView';
+import CriteriaPanelService from './CriteriaPanelService';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaBuilderContext();
   const [tabId, setTabId] = useState('details');
   const [eTag, setEtag] = useState<number | undefined>();
   const [isError, setIsError] = useBooleanToggle();
-  const [criteriaService, storageService, historyService] = useMemo(
+  const [criteriaService, storageService, historyService, panelService] = useMemo(
     () => [
       new CriteriaService(error => {
         setIsError(true);
       }),
       new StorageService(),
-      new CriteriaHistoryService()
+      new CriteriaHistoryService(),
+      new CriteriaPanelService()
     ],
     []
   );
@@ -78,9 +60,8 @@ const CriteriaPanel = (): React.ReactElement => {
   const [settings, setSettings] = useState<GlobalSettingsDocument>();
   const [historyEvents, setHistoryEvents] = useState<HistoryDocument>();
   const [wasChanged, toggleWasChanged] = useBooleanToggle();
-  const [editAfterComplete, toggleEditAfterComplete] = useBooleanToggle();
   const [detailsError, setDetailsError] = useState<boolean>(false);
-  const [errors, setErrors] = useState<{ [key: string]: string[] } | undefined>();
+  const { errors, validate } = useValidation();
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, passedDetails?: CriteriaDetailDocument) {
     const getData = () => {
@@ -118,10 +99,6 @@ const CriteriaPanel = (): React.ReactElement => {
   useEffect(() => {
     async function initModule() {
       try {
-        // await DevOps.init({
-        //   loaded: false,
-        //   applyTheme: true
-        // });
         WebLogger.information('Loaded criteria panel...');
         await DevOps.ready();
 
@@ -167,7 +144,7 @@ const CriteriaPanel = (): React.ReactElement => {
                   if (
                     (historyEvents === undefined || doc?.__etag !== eTag) &&
                     doc?.__etag !== 1 &&
-                    isViewMode(mode) &&
+                    isViewMode(config.mode) &&
                     historyChange
                   ) {
                     setEtag(doc?.__etag);
@@ -195,151 +172,6 @@ const CriteriaPanel = (): React.ReactElement => {
     initModule();
   }, []);
 
-  const dismiss = () => {
-    const config = DevOps.getConfiguration() as LoadedCriteriaPanelConfig;
-    if (config.panel) {
-      const res: CriteriaModalResult = {
-        result: 'CANCEL',
-        wasChanged
-      };
-      config.panel.close(res);
-    }
-  };
-  const save = async () => {
-    const config = DevOps.getConfiguration() as LoadedCriteriaPanelConfig;
-    if (config.panel) {
-      const schema = getSchema(panelState.type, settings?.requireApprovers || false);
-      const ac = getCriteriaPayload();
-      try {
-        await schema.validate(
-          {
-            ...ac.criteria,
-            ...ac.details
-          },
-          { abortEarly: false }
-        );
-        setErrors(undefined);
-        const res: CriteriaModalResult = {
-          result: 'SAVE',
-          data: ac
-        };
-        config.panel.close(res);
-      } catch (error) {
-        if (error instanceof yup.ValidationError) {
-          const data = parseValidationError(error);
-          setErrors(data);
-        } else {
-          console.error(error);
-        }
-      }
-    }
-  };
-
-  const getCriteriaPayload = (): {
-    criteria: IAcceptanceCriteria;
-    details: CriteriaDetailDocument;
-  } => {
-    const id = criteria?.id || 'unset';
-    const ac: IAcceptanceCriteria = {
-      id: id,
-      requiredApprover: panelState.approver,
-      state: criteria?.state || AcceptanceCriteriaState.New,
-      type: panelState.type,
-      title: panelState.title
-    };
-
-    const acd: CriteriaDetailDocument = {
-      __etag: details?.__etag,
-      id: id,
-      text: panelState.type === 'text' ? panelState.text : undefined,
-      checklist: panelState.type === 'checklist' ? panelState.checklist : undefined,
-      scenario: panelState.type === 'scenario' ? panelState.scenario : undefined
-    };
-
-    return {
-      criteria: ac,
-      details: acd
-    };
-  };
-
-  // const editContent = (
-  //   <>
-  //     <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
-  //       <FormItem
-  //         label="Title"
-  //         error={hasError(errors, 'title')}
-  //         message={getCombined(errors, 'title')}
-  //       >
-  //         <TextField
-  //           width={TextFieldWidth.auto}
-  //           placeholder="Short title.."
-  //           value={title}
-  //           maxLength={100}
-  //           onChange={e => {
-  //             setTitle(e.target.value);
-  //           }}
-  //         />
-  //       </FormItem>
-  //       <FormItem
-  //         label="Required Approver"
-  //         error={hasError(errors, 'requiredApprover')}
-  //         message={getCombined(errors, 'requiredApprover')}
-  //       >
-  //         <IdentityPicker
-  //           localStorageKey={LocalStorageRawKeys.HostUrl}
-  //           identity={identity}
-  //           onChange={i => {
-  //             setIdentity(i);
-  //           }}
-  //           onClear={() => setIdentity(undefined)}
-  //         />
-  //       </FormItem>
-  //       <FormItem label="Criteria Type" className="flex-grow">
-  //         <Dropdown
-  //           disabled={isReadOnly}
-  //           placeholder="Select an Option"
-  //           items={criteriaTypeItemsFiltered}
-  //           selection={typeSelection}
-  //           onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
-  //           renderItem={(
-  //             rowIndex: number,
-  //             columnIndex: number,
-  //             tableColumn: ITableColumn<IListBoxItem>,
-  //             tableItem: IListBoxItem
-  //           ) => {
-  //             const date: any = tableItem.data;
-  //             return (
-  //               <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
-  //                 <div className="flex-column justify-center">
-  //                   <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
-  //                   {tableItem.disabled && (
-  //                     <span className="font-size-xs error-text margin-top-4">
-  //                       This criteria type is disallowed by setting set by a project admin
-  //                     </span>
-  //                   )}
-  //                 </div>
-  //               </SimpleTableCell>
-  //             );
-  //           }}
-  //         />
-  //       </FormItem>
-  //       {/* <FormItem label="Tags" className="flex-grow">
-  //         <InternalTagPicker />
-  //       </FormItem> */}
-  //     </div>
-
-  //     <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
-  //       <ScenarioCriteria errors={errors} />
-  //     </ConditionalChildren>
-  //     <ConditionalChildren renderChildren={panelState.type === 'text'}>
-  //       <TextCriteriaSection errors={errors} />
-  //     </ConditionalChildren>
-  //     <ConditionalChildren renderChildren={panelState.type === 'checklist'}>
-  //       <CheckListCriteriaSection errors={errors} />
-  //     </ConditionalChildren>
-  //   </>
-  // );
-
   const showEditButton =
     mode === CriteriaPanelMode.ViewWithEdit &&
     criteria?.state !== AcceptanceCriteriaState.Completed &&
@@ -349,7 +181,7 @@ const CriteriaPanel = (): React.ReactElement => {
     <PanelWrapper
       rootClassName="custom-scrollbar scroll-hidden"
       contentClassName="full-height h-scroll-hidden"
-      cancelButton={{ text: 'Close', onClick: () => dismiss() }}
+      cancelButton={{ text: 'Close', onClick: () => panelService.dismissPanel() }}
       okButton={
         isViewMode(mode)
           ? showEditButton
@@ -363,7 +195,13 @@ const CriteriaPanel = (): React.ReactElement => {
           : {
               text: 'Save',
               primary: true,
-              onClick: () => save(),
+              onClick: () =>
+                panelService.save(
+                  panelService.getCriteriaPayload(panelState, criteria, details),
+                  panelState,
+                  validate,
+                  settings
+                ),
               iconProps: { iconName: 'Save' }
             }
       }
