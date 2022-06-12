@@ -1,4 +1,5 @@
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { ErrorBoundary } from '@joachimdalen/azdevops-ext-core/ErrorBoundary';
 import { Header } from 'azure-devops-ui/Header';
 import { IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar';
 import { Page } from 'azure-devops-ui/Page';
@@ -33,7 +34,9 @@ const AdminConfigurationPage = (): React.ReactElement => {
         />
 
         <Surface background={SurfaceBackground.normal}>
-          <ConfigurationSection />
+          <ErrorBoundary title="Failed to load configuration">
+            <ConfigurationSection />
+          </ErrorBoundary>
         </Surface>
       </Page>
     </Surface>

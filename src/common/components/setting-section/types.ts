@@ -1,4 +1,5 @@
 export interface SettingSection {
+  key: string;
   setting: SettingRow;
   toggle: (key: string, value: boolean) => Promise<void>;
 }

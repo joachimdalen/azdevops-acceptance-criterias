@@ -61,7 +61,7 @@ describe('CriteriaPanel', () => {
         close: jest.fn()
       },
       workItemId: '1',
-      mode: CriteriaPanelMode.ViewWithEdit
+      mode: CriteriaPanelMode.Edit
     };
 
     mockGetConfiguration.mockReturnValue(config);

@@ -1,6 +1,7 @@
 import { DevOpsService, IDevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { IExtensionDataService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { DevOpsError, DevOpsErrorCodes } from '../DevOpsError';
 
 import {
   CriteriaDetailDocument,
@@ -198,10 +199,10 @@ class StorageService implements IStorageService {
 
       return document;
     } catch (error: any) {
-      if (error?.status !== 404) {
-        throw new Error(error);
-      } else {
+      if (error?.status === 404) {
         return this.defaultSettingsDocument;
+      } else {
+        throw new Error(error);
       }
     }
   }

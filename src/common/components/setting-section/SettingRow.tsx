@@ -4,8 +4,12 @@ import { SettingRow } from './types';
 
 const SettingRow = ({
   settings,
-  toggle
+  toggle,
+  disabled,
+  id
 }: {
+  id: string;
+  disabled?: boolean;
   settings: SettingRow;
   toggle: (key: string, value: boolean) => Promise<void>;
 }): JSX.Element => {
@@ -15,7 +19,9 @@ const SettingRow = ({
         <Toggle
           onText="On"
           offText="Off"
-          text="Hello"
+          text={settings.title}
+          disabled={disabled}
+          id={id}
           onChange={(e, c) => {
             toggle('root', c);
           }}
@@ -43,10 +49,14 @@ const SettingRow = ({
                 <div className="flex-column rhythm-vertical-16">
                   {settings.options.map(s => {
                     return (
-                      <div className="body-m flex-center flex-row" key={s.id}>
-                        <Toggle checked={s.checked} onChange={(e, c) => toggle(s.id, c)} />
-                        <div className="secondary-text">{s.title}</div>
-                      </div>
+                      <Toggle
+                        key={s.id}
+                        text={s.title}
+                        disabled={disabled}
+                        checked={s.checked}
+                        onChange={(e, c) => toggle(s.id, c)}
+                        className="secondary-text"
+                      />
                     );
                   })}
                 </div>

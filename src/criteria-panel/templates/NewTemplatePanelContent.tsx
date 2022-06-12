@@ -18,6 +18,7 @@ import TemplateFilterBar from './TemplateFilterBar';
 import { IFilterState } from 'azure-devops-ui/Utilities/Filter';
 import { ZeroData } from 'azure-devops-ui/ZeroData';
 import useValidation from '../../common/hooks/useValidation';
+import { getCriteriaDetails } from '../../common/criteriaUtils';
 
 const NewTemplatePanelContent = (): JSX.Element => {
   const [templates, setTemplates] = useState<CriteriaTemplateDocument[]>([]);
@@ -29,16 +30,7 @@ const NewTemplatePanelContent = (): JSX.Element => {
   const [step, setStep] = useState<'pick-template' | 'create'>('pick-template');
   const { state: panelState, dispatch } = useCriteriaBuilderContext();
   const { errors, validate } = useValidation();
-  const getData = (template: CriteriaTemplateDocument) => {
-    switch (template.type) {
-      case 'text':
-        return template?.text;
-      case 'scenario':
-        return template?.scenario;
-      case 'checklist':
-        return template?.checklist;
-    }
-  };
+
   useEffect(() => {
     async function init() {
       WebLogger.information('Loaded criteria panel...');
@@ -139,7 +131,8 @@ const NewTemplatePanelContent = (): JSX.Element => {
             onSelect={(e, row) => {
               dispatch({ type: 'SET_TYPE', data: row.data.type });
               dispatch({ type: 'SET_TITLE', data: row.data.title });
-              dispatch({ type: 'SET_CRITERIA', data: getData(row.data) });
+              dispatch({ type: 'SET_APPROVER', data: row.data.approver });
+              dispatch({ type: 'SET_CRITERIA', data: getCriteriaDetails(row.data.type, row.data) });
 
               setStep('create');
             }}
@@ -155,15 +148,7 @@ const NewTemplatePanelContent = (): JSX.Element => {
       </ConditionalChildren>
 
       <ConditionalChildren renderChildren={step === 'create'}>
-        <EditView
-          errors={undefined}
-          settings={{
-            id: '1',
-            allowedCriteriaTypes: [],
-            limitAllowedCriteriaTypes: false,
-            requireApprovers: false
-          }}
-        />
+        <EditView errors={undefined} showTypePicker={false} />
       </ConditionalChildren>
     </PanelWrapper>
   );

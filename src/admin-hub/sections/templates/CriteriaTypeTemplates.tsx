@@ -1,24 +1,12 @@
-import { CommandBar, getDateRangeArray, ICommandBarItemProps } from '@fluentui/react';
+import { CommandBar } from '@fluentui/react';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
-import { ObservableArray, ObservableValue } from 'azure-devops-ui/Core/Observable';
-import { FilterBar } from 'azure-devops-ui/FilterBar';
-import { ListSelection } from 'azure-devops-ui/List';
+import { ObservableValue } from 'azure-devops-ui/Core/Observable';
 import { MenuItemType } from 'azure-devops-ui/Menu';
-import {
-  ColumnMore,
-  ColumnSelect,
-  ColumnSorting,
-  ITableColumn,
-  sortItems,
-  SortOrder,
-  Table
-} from 'azure-devops-ui/Table';
-import { KeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem';
-import { Filter, IFilterState } from 'azure-devops-ui/Utilities/Filter';
+import { ColumnMore, ITableColumn, Table } from 'azure-devops-ui/Table';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { ZeroData, ZeroDataActionType } from 'azure-devops-ui/ZeroData';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   renderActionCell,
@@ -29,7 +17,6 @@ import {
 import { CriteriaTemplateModalResult, PanelIds } from '../../../common/common';
 import CriteriaTypeDisplay from '../../../common/components/CriteriaTypeDisplay';
 import { CriteriaTemplateDocument, CriteriaTypes } from '../../../common/types';
-import TemplatesFilterBar from './TemplatesFilterBar';
 
 interface CriteriaTemplateTypesProps {
   type: CriteriaTypes;
@@ -48,18 +35,11 @@ const CriteriaTemplateTypes = ({
   onDuplicate,
   onOpen
 }: CriteriaTemplateTypesProps): JSX.Element => {
-  const [internalTemplates, setInternalTemplates] = useState<CriteriaTemplateDocument[]>([]);
-  const [visibleTemplates, setVisibleTemplates] = useState<CriteriaTemplateDocument[]>([]);
   const devOpsService = useMemo(() => new DevOpsService(), []);
 
-  useEffect(() => {
-    setInternalTemplates(templates.filter(x => x.type === type));
-    setVisibleTemplates(templates.filter(x => x.type === type));
-  }, [templates, type]);
-
   const itemProvider = useMemo(
-    () => new ArrayItemProvider(visibleTemplates),
-    [type, visibleTemplates]
+    () => new ArrayItemProvider(templates.filter(x => x.type === type)),
+    [type, templates]
   );
 
   const addCriteria = useCallback(() => {
@@ -216,29 +196,6 @@ const CriteriaTemplateTypes = ({
   ) {
     (tableColumns[columnIndex].width as ObservableValue<number>).value = width;
   }
-  const applyFilter = (filter: IFilterState) => {
-    let items = [...internalTemplates];
-    if (Object.keys(filter).length === 0) {
-      setVisibleTemplates(items);
-      return;
-    }
-
-    const title = filter['title'];
-    if (title) {
-      items = items.filter(
-        v => v.title.toLocaleLowerCase().indexOf(title.value?.toLocaleLowerCase()) > -1
-      );
-    }
-
-    const creators = filter['creators'];
-
-    if (creators && creators.value.length > 0) {
-      items = items.filter(v => creators.value.includes(v.createdBy.entityId));
-    }
-    setVisibleTemplates(items);
-  };
-
-  const filterFunc = useCallback(filter => applyFilter(filter), [internalTemplates]);
 
   return (
     <div>
@@ -252,19 +209,10 @@ const CriteriaTemplateTypes = ({
               return <CriteriaTypeDisplay iconOnly type={type} />;
             },
             onClick: addCriteria
-          },
-          {
-            key: 'import-from-work-item',
-            text: 'Import from work item',
-            iconProps: { iconName: 'WorkItem' }
           }
         ]}
       />
-      <TemplatesFilterBar
-        className="margin-horizontal-8"
-        templates={templates}
-        onFilterChanged={filterFunc}
-      />
+
       <ConditionalChildren renderChildren={itemProvider.length === 0}>
         <ZeroData
           imageAltText={''}

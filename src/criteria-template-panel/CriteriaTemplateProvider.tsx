@@ -2,10 +2,8 @@ import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
 export interface ICriteriaTemplateContextState {
-  title?: string;
-  name?: string;
+  name: string;
   description?: string;
-  approver?: IInternalIdentity;
 }
 
 export interface ReducerAction {
@@ -13,7 +11,9 @@ export interface ReducerAction {
   data?: any;
 }
 
-const intDefaultState: ICriteriaTemplateContextState = {};
+const intDefaultState: ICriteriaTemplateContextState = {
+  name: ''
+};
 
 export interface ICriteriaTemplateContext {
   state: ICriteriaTemplateContextState;
@@ -22,7 +22,7 @@ export interface ICriteriaTemplateContext {
 
 const CriteriaTemplateContext = createContext<ICriteriaTemplateContext>({} as any);
 
-export type ContextAction = 'INIT' | 'SET_TITLE' | 'SET_NAME' | 'SET_DESCRIPTION' | 'SET_APPROVER';
+export type ContextAction = 'INIT' | 'SET_NAME' | 'SET_DESCRIPTION';
 type CriteriaTemplateProviderProps = {
   children: React.ReactNode;
   defaultState?: ICriteriaTemplateContextState;
@@ -35,17 +35,12 @@ function panelReducer(
     case 'INIT': {
       return { ...state };
     }
-    case 'SET_TITLE': {
-      return { ...state, title: action.data };
-    }
+
     case 'SET_NAME': {
       return { ...state, name: action.data };
     }
     case 'SET_DESCRIPTION': {
       return { ...state, description: action.data };
-    }
-    case 'SET_APPROVER': {
-      return { ...state, approver: action.data };
     }
 
     default: {

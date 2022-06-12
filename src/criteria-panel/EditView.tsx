@@ -20,10 +20,11 @@ import { useMemo } from 'react';
 
 interface EditViewProps {
   errors: any;
-  settings: GlobalSettingsDocument;
+  settings?: GlobalSettingsDocument;
+  showTypePicker?: boolean;
 }
 
-const EditView = ({ errors, settings }: EditViewProps): JSX.Element => {
+const EditView = ({ errors, settings, showTypePicker = true }: EditViewProps): JSX.Element => {
   const { state: panelState, dispatch } = useCriteriaBuilderContext();
   const criteriaTypeItemsFiltered = useMemo(() => {
     if (settings?.limitAllowedCriteriaTypes) {
@@ -83,38 +84,37 @@ const EditView = ({ errors, settings }: EditViewProps): JSX.Element => {
             onClear={() => dispatch({ type: 'SET_APPROVER' })}
           />
         </FormItem>
-        <FormItem label="Criteria Type" className="flex-grow">
-          <Dropdown
-            // disabled={isReadOnly}
-            placeholder="Select an Option"
-            items={criteriaTypeItemsFiltered}
-            selection={typeSelection}
-            onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
-            renderItem={(
-              rowIndex: number,
-              columnIndex: number,
-              tableColumn: ITableColumn<IListBoxItem>,
-              tableItem: IListBoxItem
-            ) => {
-              const date: any = tableItem.data;
-              return (
-                <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
-                  <div className="flex-column justify-center">
-                    <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
-                    {tableItem.disabled && (
-                      <span className="font-size-xs error-text margin-top-4">
-                        This criteria type is disallowed by setting set by a project admin
-                      </span>
-                    )}
-                  </div>
-                </SimpleTableCell>
-              );
-            }}
-          />
-        </FormItem>
-        {/* <FormItem label="Tags" className="flex-grow">
-      <InternalTagPicker />
-    </FormItem> */}
+        {showTypePicker && (
+          <FormItem label="Criteria Type" className="flex-grow">
+            <Dropdown
+              // disabled={isReadOnly}
+              placeholder="Select an Option"
+              items={criteriaTypeItemsFiltered}
+              selection={typeSelection}
+              onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
+              renderItem={(
+                rowIndex: number,
+                columnIndex: number,
+                tableColumn: ITableColumn<IListBoxItem>,
+                tableItem: IListBoxItem
+              ) => {
+                const date: any = tableItem.data;
+                return (
+                  <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
+                    <div className="flex-column justify-center">
+                      <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
+                      {tableItem.disabled && (
+                        <span className="font-size-xs error-text margin-top-4">
+                          This criteria type is disallowed by setting set by a project admin
+                        </span>
+                      )}
+                    </div>
+                  </SimpleTableCell>
+                );
+              }}
+            />
+          </FormItem>
+        )}
       </div>
 
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>

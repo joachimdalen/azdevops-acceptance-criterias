@@ -34,6 +34,7 @@ import HistoryList from './components/HistoryList';
 import EditView from './EditView';
 import ReadOnlyView from './ReadOnlyView';
 import CriteriaPanelService from './CriteriaPanelService';
+import { getCriteriaDetails } from '../common/criteriaUtils';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaBuilderContext();
@@ -64,16 +65,6 @@ const CriteriaPanel = (): React.ReactElement => {
   const { errors, validate } = useValidation();
 
   function setCriteriaInfo(crit: IAcceptanceCriteria, passedDetails?: CriteriaDetailDocument) {
-    const getData = () => {
-      switch (crit.type) {
-        case 'text':
-          return passedDetails?.text;
-        case 'scenario':
-          return passedDetails?.scenario;
-        case 'checklist':
-          return passedDetails?.checklist;
-      }
-    };
     dispatch({ type: 'SET_TYPE', data: crit.type });
     dispatch({ type: 'SET_APPROVER', data: crit.requiredApprover });
     dispatch({ type: 'SET_TITLE', data: crit.title });
@@ -82,18 +73,11 @@ const CriteriaPanel = (): React.ReactElement => {
     if (passedDetails !== undefined) {
       dispatch({
         type: 'SET_CRITERIA',
-        data: getData()
+        data: getCriteriaDetails(crit.type, passedDetails)
       });
       setDetails(passedDetails);
       setDetailsError(passedDetails === undefined && details === undefined);
     }
-
-    // if (
-    //   crit.state === AcceptanceCriteriaState.Approved ||
-    //   crit.state === AcceptanceCriteriaState.Completed
-    // ) {
-    //   setIsReadOnly(true);
-    // }
   }
 
   useEffect(() => {
