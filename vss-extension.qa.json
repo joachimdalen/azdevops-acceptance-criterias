@@ -264,7 +264,7 @@
       "targets": [".acceptance-project-settings-tab-group"],
       "properties": {
         "name": "Templates",
-        "uri": "admin-hub.html",
+        "uri": "dist/admin-hub.html",
         "iconProps": {
           "iconName": "FileTemplate",
           "className": "dist/admin-tab-icon",
