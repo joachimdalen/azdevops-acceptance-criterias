@@ -11,15 +11,15 @@ describe('AdminConfigurationPage', () => {
   const getSettingsSpy = jest.spyOn(StorageService.prototype, 'getSettings');
   beforeEach(() => {
     jest.clearAllMocks();
-    const context = {
-      id: 'joachimdalen.acceptance-criterias-dev',
-      publisherId: 'joachimdalen',
-      extensionId: 'acceptance-criterias-dev'
-    };
-    mockGetContributionId.mockReturnValue(
-      'joachimdalen.acceptance-criterias-dev.admin-configuration'
-    );
-    mockGetExtensionContext.mockReturnValue(context);
+    // const context = {
+    //   id: 'joachimdalen.acceptance-criterias-dev',
+    //   publisherId: 'joachimdalen',
+    //   extensionId: 'acceptance-criterias-dev'
+    // };
+    // mockGetContributionId.mockReturnValue(
+    //   'joachimdalen.acceptance-criterias-dev.admin-configuration'
+    // );
+    // mockGetExtensionContext.mockReturnValue(context);
   });
 
   it('should load default', async () => {

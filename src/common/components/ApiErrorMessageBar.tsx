@@ -11,7 +11,7 @@ const ApiErrorMessageBar = ({ apiError, section }: ApiErrorMessageBarProps): JSX
   return (
     <ConditionalChildren renderChildren={apiError !== undefined}>
       <MessageBar severity={MessageBarSeverity.Error} className="margin-bottom-4">
-        {(apiError?.serverError &&
+        {(apiError?.serverError !== undefined &&
           knownDevOpsErros[apiError.serverError.typeKey].replace('{section}', section)) ||
           'Unknown error occurred'}
       </MessageBar>

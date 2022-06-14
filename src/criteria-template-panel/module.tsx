@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import './index.scss';
 
 import { ErrorBoundary } from '@joachimdalen/azdevops-ext-core/ErrorBoundary';

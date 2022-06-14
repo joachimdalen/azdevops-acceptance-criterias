@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import './index.scss';
 
 import { showRootComponent } from '@joachimdalen/azdevops-ext-core/showRootComponent';

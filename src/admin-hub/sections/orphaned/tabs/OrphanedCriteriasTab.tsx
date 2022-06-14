@@ -53,14 +53,16 @@ const OrphanedCriteriasTab = (): React.ReactElement => {
       toggleLoading(true);
       const criterias = await service.getAllCriterias();
 
-      const ids = criterias.map(x => parseInt(x.id));
-
-      const workItmes = await getBatched(ids);
-      const notFound = ids.filter(x => !workItmes.some(y => x === y.id));
-      if (notFound?.length !== 0) {
-        const updated = await workItemService.getDeletedWorkItems(notFound);
-        setDocuments(criterias.filter(x => updated.some(y => x.id === y.id.toString())));
+      if (criterias.length > 0) {
+        const ids = criterias.map(x => parseInt(x.id));
+        const workItmes = await getBatched(ids);
+        const notFound = ids.filter(x => !workItmes.some(y => x === y.id));
+        if (notFound?.length !== 0) {
+          const updated = await workItemService.getDeletedWorkItems(notFound);
+          setDocuments(criterias.filter(x => updated.some(y => x.id === y.id.toString())));
+        }
       }
+
       toggleLoading(false);
     }
 

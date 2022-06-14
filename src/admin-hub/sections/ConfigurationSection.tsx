@@ -132,7 +132,7 @@ const ConfigurationSection = (): React.ReactElement => {
                   text: 'Reset configuration',
                   renderButton: props => (
                     <LoadingButton
-                      loadingText="Resetting configuration..."
+                      loadingText="Resetting"
                       key={props.id}
                       {...props}
                       danger
