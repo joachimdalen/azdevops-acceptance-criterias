@@ -9,11 +9,14 @@ import { useEffect, useState } from 'react';
 import AdminConfigurationPage from './pages/AdminConfigurationPage';
 import AdminDocumentManagementPage from './pages/AdminDocumentManagementPage';
 import AdminTemplatesPage from './pages/AdminTemplatesPage';
+import { getHostUrl } from '@joachimdalen/azdevops-ext-core/HostUtils';
+import { LocalStorageRawKeys } from '../common/localStorage';
 
 const AdminHub = (): JSX.Element => {
   const [adminSection, setAdminSection] = useState('');
   useEffect(() => {
     loadTheme(createTheme(appTheme));
+    getHostUrl(LocalStorageRawKeys.HostUrlWithOrg, true);
     DevOps.init().then(async () => {
       WebLogger.information('Loaded admin hub...');
 

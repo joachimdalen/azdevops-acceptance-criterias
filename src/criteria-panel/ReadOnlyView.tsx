@@ -26,7 +26,7 @@ interface ReadOnlyViewProps {
   criteria: IAcceptanceCriteria;
   details?: CriteriaDetailDocument;
   criteriaService: CriteriaService;
-  onDataChange: (criteria: IAcceptanceCriteria, details?: CriteriaDetailDocument) => void;
+  onDataChange: (criteria?: IAcceptanceCriteria, details?: CriteriaDetailDocument) => void;
   canApproveCriteria: boolean;
 }
 
@@ -58,7 +58,8 @@ const ReadOnlyView = ({
         id,
         complete
       );
-      if (result !== undefined && result.criteria !== undefined) {
+      console.log(result);
+      if (result !== undefined) {
         onDataChange(result.criteria, result.details);
 
         // if (result.criteria) {

@@ -12,8 +12,8 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
 import { useEffect, useMemo, useState } from 'react';
 
-import { CriteriaModalResult } from '../common/common';
 import { useCriteriaBuilderContext } from '../common/criterias/CriteriaBuilderContext';
+import { getCriteriaDetails } from '../common/criteriaUtils';
 import useValidation from '../common/hooks/useValidation';
 import CriteriaHistoryService from '../common/services/CriteriaHistoryService';
 import CriteriaService from '../common/services/CriteriaService';
@@ -29,12 +29,10 @@ import {
   isViewMode,
   LoadedCriteriaPanelConfig
 } from '../common/types';
-import { getSchema } from '../common/validationSchemas';
 import HistoryList from './components/HistoryList';
+import CriteriaPanelService from './CriteriaPanelService';
 import EditView from './EditView';
 import ReadOnlyView from './ReadOnlyView';
-import CriteriaPanelService from './CriteriaPanelService';
-import { getCriteriaDetails } from '../common/criteriaUtils';
 
 const CriteriaPanel = (): React.ReactElement => {
   const { state: panelState, dispatch } = useCriteriaBuilderContext();
@@ -64,17 +62,24 @@ const CriteriaPanel = (): React.ReactElement => {
   const [detailsError, setDetailsError] = useState<boolean>(false);
   const { errors, validate } = useValidation();
 
-  function setCriteriaInfo(crit: IAcceptanceCriteria, passedDetails?: CriteriaDetailDocument) {
-    dispatch({ type: 'SET_TYPE', data: crit.type });
-    dispatch({ type: 'SET_APPROVER', data: crit.requiredApprover });
-    dispatch({ type: 'SET_TITLE', data: crit.title });
+  function setCriteriaInfo(crit?: IAcceptanceCriteria, passedDetails?: CriteriaDetailDocument) {
+    if (criteria !== undefined || details !== undefined) {
+      toggleWasChanged(true);
+    }
+    if (crit) {
+      dispatch({ type: 'SET_TYPE', data: crit.type });
+      dispatch({ type: 'SET_APPROVER', data: crit.requiredApprover });
+      dispatch({ type: 'SET_TITLE', data: crit.title });
+      setCriteria(crit);
+    }
 
-    setCriteria(crit);
     if (passedDetails !== undefined) {
-      dispatch({
-        type: 'SET_CRITERIA',
-        data: getCriteriaDetails(crit.type, passedDetails)
-      });
+      if (crit) {
+        dispatch({
+          type: 'SET_CRITERIA',
+          data: getCriteriaDetails(crit.type, passedDetails)
+        });
+      }
       setDetails(passedDetails);
       setDetailsError(passedDetails === undefined && details === undefined);
     }
@@ -165,7 +170,7 @@ const CriteriaPanel = (): React.ReactElement => {
     <PanelWrapper
       rootClassName="custom-scrollbar scroll-hidden"
       contentClassName="full-height h-scroll-hidden"
-      cancelButton={{ text: 'Close', onClick: () => panelService.dismissPanel() }}
+      cancelButton={{ text: 'Close', onClick: () => panelService.dismissPanel(wasChanged) }}
       okButton={
         isViewMode(mode)
           ? showEditButton
@@ -237,7 +242,7 @@ const CriteriaPanel = (): React.ReactElement => {
                 canApproveCriteria={canApprove}
                 criteriaService={criteriaService}
                 onDataChange={(
-                  crit: IAcceptanceCriteria,
+                  crit?: IAcceptanceCriteria,
                   passedDetails?: CriteriaDetailDocument
                 ) => {
                   setCriteriaInfo(crit, passedDetails);

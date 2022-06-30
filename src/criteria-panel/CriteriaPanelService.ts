@@ -1,3 +1,8 @@
+import * as DevOps from 'azure-devops-extension-sdk';
+
+import { CriteriaModalResult } from '../common/common';
+import { ICriteriaBuilderContextState } from '../common/criterias/CriteriaBuilderContext';
+import { ValidationFunc } from '../common/hooks/useValidation';
 import {
   AcceptanceCriteriaState,
   CriteriaDetailDocument,
@@ -5,11 +10,7 @@ import {
   IAcceptanceCriteria,
   LoadedCriteriaPanelConfig
 } from '../common/types';
-import * as DevOps from 'azure-devops-extension-sdk';
 import { getSchema } from '../common/validationSchemas';
-import { ICriteriaBuilderContextState } from '../common/criterias/CriteriaBuilderContext';
-import { CriteriaModalResult } from '../common/common';
-import { ValidationFunc } from '../common/hooks/useValidation';
 
 interface CriteriaSavePayload {
   criteria: IAcceptanceCriteria;
@@ -73,12 +74,12 @@ class CriteriaPanelService {
     }
   }
 
-  public dismissPanel(): void {
+  public dismissPanel(wasChanged = false): void {
     const config = DevOps.getConfiguration() as LoadedCriteriaPanelConfig;
     if (config.panel) {
       const res: CriteriaModalResult = {
         result: 'CANCEL',
-        wasChanged: false
+        wasChanged
       };
       config.panel.close(res);
     }
