@@ -2,7 +2,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 
 import {
   mockGetContributionId,
-  mockGetExtensionContext
+  mockGetExtensionContext,
+  mockGetResourceAreaLocation
 } from '../../__mocks__/azure-devops-extension-sdk';
 import testTheory from '../../__test-utils__/JestTheory';
 import AdminHub from '../../admin-hub/AdminHub';
@@ -21,6 +22,7 @@ describe('AdminHub', () => {
     mockGetExtensionContext.mockReturnValue(context);
     getTemplatesSpy.mockResolvedValue([]);
     getAllCriteriasSpy.mockResolvedValue([]);
+    mockGetResourceAreaLocation.mockResolvedValue('https://myapp.local/');
   });
 
   testTheory(
