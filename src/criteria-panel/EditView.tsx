@@ -55,6 +55,35 @@ const EditView = ({ errors, settings, showTypePicker = true }: EditViewProps): J
   return (
     <>
       <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
+        {showTypePicker && (
+          <FormItem label="Criteria Type" className="flex-grow">
+            <Dropdown
+              placeholder="Select an Option"
+              items={criteriaTypeItemsFiltered}
+              selection={typeSelection}
+              onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
+              renderItem={(
+                rowIndex: number,
+                columnIndex: number,
+                tableColumn: ITableColumn<IListBoxItem>,
+                tableItem: IListBoxItem
+              ) => {
+                return (
+                  <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
+                    <div className="flex-column justify-center">
+                      <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
+                      {tableItem.disabled && (
+                        <span className="font-size-xs error-text margin-top-4">
+                          This criteria type is disallowed by setting set by a project admin
+                        </span>
+                      )}
+                    </div>
+                  </SimpleTableCell>
+                );
+              }}
+            />
+          </FormItem>
+        )}
         <FormItem
           label="Title"
           error={hasError(errors, 'title')}
@@ -84,37 +113,6 @@ const EditView = ({ errors, settings, showTypePicker = true }: EditViewProps): J
             onClear={() => dispatch({ type: 'SET_APPROVER' })}
           />
         </FormItem>
-        {showTypePicker && (
-          <FormItem label="Criteria Type" className="flex-grow">
-            <Dropdown
-              // disabled={isReadOnly}
-              placeholder="Select an Option"
-              items={criteriaTypeItemsFiltered}
-              selection={typeSelection}
-              onSelect={(_, i) => dispatch({ type: 'SET_TYPE', data: i.id })}
-              renderItem={(
-                rowIndex: number,
-                columnIndex: number,
-                tableColumn: ITableColumn<IListBoxItem>,
-                tableItem: IListBoxItem
-              ) => {
-                const date: any = tableItem.data;
-                return (
-                  <SimpleTableCell key={tableItem.id} columnIndex={columnIndex}>
-                    <div className="flex-column justify-center">
-                      <CriteriaTypeDisplay type={tableItem.id as CriteriaTypes} />
-                      {tableItem.disabled && (
-                        <span className="font-size-xs error-text margin-top-4">
-                          This criteria type is disallowed by setting set by a project admin
-                        </span>
-                      )}
-                    </div>
-                  </SimpleTableCell>
-                );
-              }}
-            />
-          </FormItem>
-        )}
       </div>
 
       <ConditionalChildren renderChildren={panelState.type === 'scenario'}>
