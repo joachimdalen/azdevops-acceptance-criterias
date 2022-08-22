@@ -75,6 +75,7 @@ class CriteriaPanelService {
   }
 
   public dismissPanel(wasChanged = false): void {
+    console.log('wasChanged', wasChanged);
     const config = DevOps.getConfiguration() as LoadedCriteriaPanelConfig;
     if (config.panel) {
       const res: CriteriaModalResult = {

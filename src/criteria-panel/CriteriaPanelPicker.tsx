@@ -10,7 +10,6 @@ const CriteriaPanelPicker = () => {
   const [mode, setMode] = useState<CriteriaPanelMode | undefined>();
   useEffect(() => {
     async function initModule() {
-      console.log('Hello');
       try {
         await DevOps.init({
           loaded: false,
@@ -18,7 +17,6 @@ const CriteriaPanelPicker = () => {
         });
         const config = DevOps.getConfiguration() as LoadedCriteriaPanelConfig;
         setMode(config.mode);
-        console.log('Setting mode', config.mode);
       } catch (error) {
         WebLogger.error('Load failed', error);
       } finally {

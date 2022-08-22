@@ -47,7 +47,6 @@ const CriteriaTemplateTypes = ({
       title: `New ${type} template`,
       size: 2,
       onClose: async (result: CriteriaTemplateModalResult | undefined) => {
-        console.log(result);
         try {
           if (result?.result === 'SAVE' && result.data) {
             onAdd(result.data);
