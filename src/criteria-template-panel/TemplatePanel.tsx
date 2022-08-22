@@ -65,7 +65,7 @@ const TemplatePanel = (): React.ReactElement => {
           if (loadedTemplate) {
             criteriaDispatch({ type: 'SET_TYPE', data: loadedTemplate.type });
             dispatch({ type: 'SET_NAME', data: loadedTemplate.name });
-            dispatch({ type: 'SET_DESCRIPTION', data: loadedTemplate.name });
+            dispatch({ type: 'SET_DESCRIPTION', data: loadedTemplate.description });
             criteriaDispatch({
               type: 'SET_CRITERIA',
               data: getCriteriaDetails(loadedTemplate.type, loadedTemplate)

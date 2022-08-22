@@ -141,7 +141,7 @@ const CriteriaTemplateTypes = ({
           tableColumn: ITableColumn<CriteriaTemplateDocument>,
           tableItem: CriteriaTemplateDocument,
           ariaRowIndex?: number
-        ) => renderIdentityCell(columnIndex, tableColumn, tableItem.createdBy, ariaRowIndex)
+        ) => renderIdentityCell(columnIndex, tableColumn, tableItem.createdBy, ariaRowIndex, false)
       },
       {
         id: 'createdAt',
@@ -168,7 +168,7 @@ const CriteriaTemplateTypes = ({
           tableColumn: ITableColumn<CriteriaTemplateDocument>,
           tableItem: CriteriaTemplateDocument,
           ariaRowIndex?: number
-        ) => renderIdentityCell(columnIndex, tableColumn, tableItem.updatedBy, ariaRowIndex)
+        ) => renderIdentityCell(columnIndex, tableColumn, tableItem.updatedBy, ariaRowIndex, false)
       },
       {
         id: 'updatedAt',

@@ -8,10 +8,12 @@ import { getRawLocalItem, LocalStorageRawKeys } from '../localStorage';
 
 const ApproverDisplay = ({
   approver,
-  large = false
+  large = false,
+  showUnassigned = true
 }: {
   approver?: IInternalIdentity;
   large?: boolean;
+  showUnassigned?: boolean;
 }): JSX.Element => {
   const imageUrl = useMemo(() => {
     const baseUrl = getRawLocalItem(LocalStorageRawKeys.HostUrl);
@@ -21,6 +23,10 @@ const ApproverDisplay = ({
       : `${url}${approver?.image}`;
     return imageUrl;
   }, [approver]);
+
+  if (approver === undefined && showUnassigned === false) {
+    return <div className="secondary-text"></div>;
+  }
 
   if (approver === undefined) {
     return (

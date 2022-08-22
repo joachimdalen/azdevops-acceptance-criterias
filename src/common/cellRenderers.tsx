@@ -43,9 +43,15 @@ export const renderIdentityCell = <T,>(
   columnIndex: number,
   tableColumn: ITableColumn<T>,
   identity?: IInternalIdentity,
-  ariaRowIndex?: number
+  ariaRowIndex?: number,
+  showUnassigned = true
 ): JSX.Element =>
-  renderBaseCell(columnIndex, tableColumn, <ApproverDisplay approver={identity} />, ariaRowIndex);
+  renderBaseCell(
+    columnIndex,
+    tableColumn,
+    <ApproverDisplay showUnassigned={showUnassigned} approver={identity} />,
+    ariaRowIndex
+  );
 export const renderAgoCell = <T,>(
   columnIndex: number,
   tableColumn: ITableColumn<T>,
