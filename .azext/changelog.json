@@ -1,5 +1,68 @@
 [
   {
+    "publishDate": "2022-08-XX",
+    "version": "1.3.0",
+    "modules": [
+      {
+        "name": "admin-hub",
+        "version": "1.2.0",
+        "changes": [
+          {
+            "type": "enhancement",
+            "description": "Redesigned the configuration view. Moved from tabs to dedicated pages.",
+            "pullRequest": 41
+          },
+          {
+            "type": "feature",
+            "description": "Added support for creating templates",
+            "pullRequest": 41,
+            "issue": 37
+          }
+        ]
+      },
+      {
+        "name": "criteria-panel",
+        "version": "1.3.0",
+        "changes": [
+          {
+            "type": "enhancement",
+            "description": "Moved the type dropdown to the top of the panel",
+            "pullRequest": 41
+          },
+          {
+            "type": "maint",
+            "description": "Internal refactoring to improve flows",
+            "pullRequest": 41
+          }
+        ]
+      },
+      {
+        "name": "criteria-template-panel",
+        "version": "1.0.0",
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Added panel for creating templates",
+            "pullRequest": 41,
+            "issue": 37
+          }
+        ]
+      },
+      {
+        "name": "wi-control",
+        "version": "1.1.0",
+        "changes": [
+          {
+            "type": "feature",
+            "description": "Added support for creating criterias from a template",
+            "pullRequest": 41,
+            "issue": 37
+          }
+        ]
+      }
+    ]
+  },
+  {
     "publishDate": "2022-05-22",
     "version": "1.2.0",
     "changes": [

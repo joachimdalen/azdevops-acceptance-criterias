@@ -1,11 +1,49 @@
 # Changelog
 
+## 1.3.0 (2022-08-XX)
+
+### 📣 Enhancements (2)
+
+#### `admin-hub@1.2.0`
+
+- Redesigned the configuration view. Moved from tabs to dedicated pages.
+  - Improved in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
+
+#### `criteria-panel@1.3.0`
+
+- Moved the type dropdown to the top of the panel
+  - Improved in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
+
+### 🚀 Features (3)
+
+#### `admin-hub@1.2.0`
+
+- Added support for creating templates
+  - Suggested in [GH#37 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/37)
+  - Added in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
+
+#### `criteria-template-panel@1.0.0`
+
+- Added panel for creating templates
+  - Suggested in [GH#37 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/37)
+  - Added in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
+
+#### `wi-control@1.1.0`
+
+- Added support for creating criterias from a template
+  - Suggested in [GH#37 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/37)
+  - Added in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
+
+### 🛠️ Maintenance (1)
+
+#### `criteria-panel@1.3.0`
+
+- Internal refactoring to improve flows
+  - Changed in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
+
+---
+
 ## 1.2.0 (2022-05-22)
-
-### 📝 Documentation (1)
-
-- Update README with correct features
-  - Changed in [PR#23 - Update readme with correct features](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/23)
 
 ### 🛠️ Maintenance (1)
 
@@ -13,7 +51,38 @@
   - Scheduled in [GH#22 - Build sets the wrong extension version in scripts when setting the version manually](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/22)
   - Changed in [PR#24 - Fix pipeline setting wrong extension version when defined manually](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/24)
 
+### 📝 Documentation (1)
+
+- Update README with correct features
+  - Changed in [PR#23 - Update readme with correct features](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/23)
+
 ## 📦 Module changes
+
+### 📣 Enhancements (1)
+
+#### `admin-hub@1.1.0`
+
+- Redesigned and cleaned up the configuration view
+  - Suggested in [GH#30 - Reset all settings does not reset the admin view](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/30)
+  - Improved in [PR#32 - Redesign and fixes to Admin Hub](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/32)
+
+### 🚀 Features (3)
+
+#### `criteria-panel@1.2.0`
+
+- Add key board shortcuts. See the [documentation](https://devops-extensions.dev/docs/extensions/acceptance-criterias/shortcuts) for details.
+  - Suggested in [GH#25 - Add keyboard shortcuts for improved navigation and UX](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/25)
+  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
+
+#### `admin-hub@1.1.0`
+
+- Update documentation urls
+  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
+
+#### `work-hub@1.1.0`
+
+- Add buttons to open documentation
+  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
 
 ### 🐛 Fixes (6)
 
@@ -50,32 +119,6 @@
   - Reported in [GH#33 - Filter should be case-insensitive](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/33)
   - Fixed in [PR#34 - Fix filter issues](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/34)
 
-### 🚀 Features (3)
-
-#### `criteria-panel@1.2.0`
-
-- Add key board shortcuts. See the [documentation](https://devops-extensions.dev/docs/extensions/acceptance-criterias/shortcuts) for details.
-  - Suggested in [GH#25 - Add keyboard shortcuts for improved navigation and UX](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/25)
-  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
-
-#### `admin-hub@1.1.0`
-
-- Update documentation urls
-  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
-
-#### `work-hub@1.1.0`
-
-- Add buttons to open documentation
-  - Added in [PR#29 - Add keyboard shortcuts](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/29)
-
-### 📣 Enhancements (1)
-
-#### `admin-hub@1.1.0`
-
-- Redesigned and cleaned up the configuration view
-  - Suggested in [GH#30 - Reset all settings does not reset the admin view](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/30)
-  - Improved in [PR#32 - Redesign and fixes to Admin Hub](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/32)
-
 ## 🌟 Contributors
 
 Thank you to the following for contributing to the latest release
@@ -93,12 +136,18 @@ Thank you to the following for contributing to the latest release
 
 ## 📦 Module changes
 
-### 📝 Documentation (1)
+### 🚀 Features (2)
 
-#### `admin-hub@1.0.1`
+#### `criteria-panel@1.1.0`
 
-- Update documentation url
-  - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+- Added processing history. See [history](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing/history)
+
+  - Suggested in [GH#3 - Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
+  - Added in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+
+- Added processing comments. See [approvals and rejections](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing#approvals-and-rejections)
+  - Suggested in [GH#4 - Approval / Rejection comments](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4)
+  - Added in [PR#21 - Add processing comment](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/21)
 
 ### 🛠️ Maintenance (2)
 
@@ -112,6 +161,13 @@ Thank you to the following for contributing to the latest release
 - Remove unused code
   - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
+### 📝 Documentation (1)
+
+#### `admin-hub@1.0.1`
+
+- Update documentation url
+  - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+
 ### 🐛 Fixes (2)
 
 #### `criteria-panel@1.1.0`
@@ -122,19 +178,6 @@ Thank you to the following for contributing to the latest release
 
 - Fixed an issue where the checklist would be out of sync when performing multiple processing actions without closing the panel
   - Fixed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
-
-### 🚀 Features (2)
-
-#### `criteria-panel@1.1.0`
-
-- Added processing history. See [history](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing/history)
-
-  - Suggested in [GH#3 - Processing history](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/3)
-  - Added in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
-
-- Added processing comments. See [approvals and rejections](https://devops-extensions.dev/docs/extensions/acceptance-criterias/processing#approvals-and-rejections)
-  - Suggested in [GH#4 - Approval / Rejection comments](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/4)
-  - Added in [PR#21 - Add processing comment](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/21)
 
 ---
 
