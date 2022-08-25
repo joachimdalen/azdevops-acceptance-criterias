@@ -17,6 +17,7 @@
 
 - Make scenario description optional instead of required
   - Suggested in [GH#43 - Make scenario description an optional field](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/43)
+  - Improved in [PR#47 - Make scenario description optional](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/47)
 
 ### 🚀 Features (3)
 

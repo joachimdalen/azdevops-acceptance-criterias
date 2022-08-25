@@ -37,7 +37,8 @@
           {
             "type": "enhancement",
             "description": "Make scenario description optional instead of required",
-            "issue": 43
+            "issue": 43,
+            "pullRequest": 47
           }
         ]
       },
