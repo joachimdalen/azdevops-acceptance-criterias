@@ -33,6 +33,11 @@
             "type": "maint",
             "description": "Internal refactoring to improve flows",
             "pullRequest": 41
+          },
+          {
+            "type": "enhancement",
+            "description": "Make scenario description optional instead of required",
+            "issue": 43
           }
         ]
       },
