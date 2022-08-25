@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import AdminDocumentManagementPage from '../../../admin-hub/pages/AdminDocumentManagementPage';
 import { StorageService } from '../../../common/services/StorageService';
 
-describe('AdminTemplatesPage', () => {
+describe('AdminDocumentManagementPage', () => {
   const getTemplatesSpy = jest.spyOn(StorageService.prototype, 'getTemplates');
   const getAllCriteriasSpy = jest.spyOn(StorageService.prototype, 'getAllCriterias');
   beforeEach(() => {
