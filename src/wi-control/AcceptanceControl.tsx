@@ -12,6 +12,7 @@ import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroDa
 import { getHostUrl } from '@joachimdalen/azdevops-ext-core/HostUtils';
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import {
+  IWorkItemChangedArgs,
   IWorkItemFormService,
   IWorkItemLoadedArgs,
   IWorkItemNotificationListener
@@ -52,6 +53,12 @@ const AcceptanceControl = (): React.ReactElement => {
     const listener: Partial<IWorkItemNotificationListener> = {
       onLoaded: async function (workItemLoadedArgs: IWorkItemLoadedArgs): Promise<void> {
         setIsNew(workItemLoadedArgs.isNew);
+      },
+      onSaved: async function (savedEventArgs: IWorkItemChangedArgs) {
+        if (isNew) {
+          setIsNew(false);
+          await initList();
+        }
       }
     };
     return listener;
@@ -65,6 +72,20 @@ const AcceptanceControl = (): React.ReactElement => {
     await criteriaService.load(undefined, id.toString(), true);
     devOpsService.showToast('Refreshed data');
   };
+
+  async function initList() {
+    const id = await devOpsService.getCurrentWorkItemId();
+
+    if (id !== undefined && id !== 0) {
+      await criteriaService.load(data => {
+        if (data.length > 0) {
+          setCriteriaDocument(data[0]);
+        } else {
+          setCriteriaDocument(undefined);
+        }
+      }, id.toString());
+    }
+  }
 
   useEffect(() => {
     async function initModule() {
@@ -80,17 +101,7 @@ const AcceptanceControl = (): React.ReactElement => {
         await DevOps.ready();
         DevOps.register(DevOps.getContributionId(), provider);
 
-        const id = await devOpsService.getCurrentWorkItemId();
-
-        if (id !== undefined && id !== 0) {
-          await criteriaService.load(data => {
-            if (data.length > 0) {
-              setCriteriaDocument(data[0]);
-            } else {
-              setCriteriaDocument(undefined);
-            }
-          }, id.toString());
-        }
+        await initList();
 
         setLoading(false);
       } catch (error: any) {
