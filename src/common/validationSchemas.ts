@@ -31,7 +31,7 @@ export const getSchema = (type: CriteriaTypes, approverRequired = false): yup.Ob
       return baseSchema.concat(
         yup.object().shape({
           scenario: yup.object().shape({
-            scenario: yup.string().required().min(4),
+            scenario: yup.string(),
             criterias: yup
               .array()
               .of(
