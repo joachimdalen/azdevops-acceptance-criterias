@@ -1,7 +1,6 @@
 import { WebLogger } from '@joachimdalen/azdevops-ext-core/WebLogger';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
 import { FormItem } from 'azure-devops-ui/FormItem';
-import { MessageCard, MessageCardSeverity } from 'azure-devops-ui/MessageCard';
 
 import ApproverDisplay from '../common/components/ApproverDisplay';
 import StatusTag from '../common/components/StatusTag';
@@ -42,7 +41,6 @@ const ReadOnlyView = ({
     if (workItemId && parseInt(workItemId) > 0) {
       const result = await criteriaService.processCriteria(workItemId, id, approve, comment);
       if (result !== undefined) {
-        // toggleWasChanged(true);
         onDataChange(result.criteria, result.details);
       }
     } else {
@@ -61,10 +59,6 @@ const ReadOnlyView = ({
       console.log(result);
       if (result !== undefined) {
         onDataChange(result.criteria, result.details);
-
-        // if (result.criteria) {
-        //   await checkApproval(result.criteria);
-        // }
       }
     } else {
       WebLogger.error('Precondition failed ' + workItemId, criteria?.id);
@@ -73,30 +67,6 @@ const ReadOnlyView = ({
   return (
     <>
       <div className="rhythm-vertical-16 flex-grow border-bottom-light padding-bottom-16">
-        {/* <ConditionalChildren
-          renderChildren={
-            isCompleted(criteria) &&
-            editAfterComplete === false &&
-            canEdit &&
-            criteria.state !== AcceptanceCriteriaState.Rejected
-          }
-        >
-          <MessageCard
-            className="flex-self-stretch"
-            severity={MessageCardSeverity.Warning}
-            buttonProps={[
-              {
-                text: 'Edit',
-                onClick: () => {
-                  toggleEditAfterComplete();
-                  setIsReadOnly(false);
-                }
-              }
-            ]}
-          >
-            {`This criteria has already been ${criteria.state}. You can still edit it, but it may reset history and progress.`}
-          </MessageCard>
-        </ConditionalChildren> */}
         <div className="flex-row rhythm-horizontal-8">
           <FormItem label="Required Approver" className="flex-grow">
             <ApproverDisplay approver={criteria?.requiredApprover} large />

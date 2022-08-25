@@ -45,14 +45,12 @@ const AcceptanceControl = (): React.ReactElement => {
   );
   const [criteriaDocument, setCriteriaDocument] = useState<CriteriaDocument>();
   const [loading, setLoading] = useState(true);
-  const [isReadOnly, setReadOnly] = useState<boolean>(false);
   const [isNew, setIsNew] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
 
   const provider = useMemo(() => {
     const listener: Partial<IWorkItemNotificationListener> = {
       onLoaded: async function (workItemLoadedArgs: IWorkItemLoadedArgs): Promise<void> {
-        setReadOnly(workItemLoadedArgs.isReadOnly);
         setIsNew(workItemLoadedArgs.isNew);
       }
     };
@@ -224,17 +222,17 @@ const AcceptanceControl = (): React.ReactElement => {
     );
   }
 
-  // if (isNew) {
-  //   return (
-  //     <div className="acceptance-control-container">
-  //       <ZeroData
-  //         imageAltText={''}
-  //         iconProps={{ iconName: 'Save' }}
-  //         secondaryText="Save the work item to start adding acceptance criterias"
-  //       />
-  //     </div>
-  //   );
-  // }
+  if (isNew) {
+    return (
+      <div className="acceptance-control-container">
+        <ZeroData
+          imageAltText={''}
+          iconProps={{ iconName: 'Save' }}
+          secondaryText="Save the work item to start adding acceptance criterias"
+        />
+      </div>
+    );
+  }
 
   async function onDelete(id: string) {
     const config: IConfirmationConfig = {
