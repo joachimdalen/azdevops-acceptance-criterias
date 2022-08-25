@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1350821296,
+      "number": 43,
+      "submitter": "joachimdalen",
+      "title": "Make scenario description an optional field",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/43"
+    },
+    {
       "id": 1351073711,
       "number": 45,
       "submitter": "joachimdalen",
@@ -79,6 +86,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 1037034558,
+      "number": 47,
+      "submitter": "joachimdalen",
+      "title": "Make scenario description optional",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/47"
+    },
     {
       "id": 1036938275,
       "number": 46,

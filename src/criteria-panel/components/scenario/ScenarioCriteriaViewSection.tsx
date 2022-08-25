@@ -39,10 +39,12 @@ const ScenarioCriteriaViewSection = ({
 
   return (
     <div className="rhythm-vertical-16 flex-grow margin-top-8">
-      <div>
-        <span className="font-weight-semibold font-size">Scenario</span>
-        <p>{details.scenario?.scenario}</p>
-      </div>
+      {details?.scenario?.scenario && (
+        <div>
+          <span className="font-weight-semibold font-size">Scenario</span>
+          <p>{details.scenario?.scenario}</p>
+        </div>
+      )}
       <ScrollableList itemProvider={provider} renderRow={renderRow} width="100%" />
     </div>
   );

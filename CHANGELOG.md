@@ -2,7 +2,7 @@
 
 ## 1.3.0 (2022-08-XX)
 
-### 📣 Enhancements (2)
+### 📣 Enhancements (3)
 
 #### `admin-hub@1.2.0`
 
@@ -12,7 +12,12 @@
 #### `criteria-panel@1.3.0`
 
 - Moved the type dropdown to the top of the panel
+
   - Improved in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
+
+- Make scenario description optional instead of required
+  - Suggested in [GH#43 - Make scenario description an optional field](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/43)
+  - Improved in [PR#47 - Make scenario description optional](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/47)
 
 ### 🚀 Features (3)
 
