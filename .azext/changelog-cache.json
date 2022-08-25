@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1351073711,
+      "number": 45,
+      "submitter": "joachimdalen",
+      "title": "Can not add criterias on a newly created work item",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/45"
+    },
+    {
       "id": 1268285775,
       "number": 37,
       "submitter": "joachimdalen",
@@ -72,6 +79,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 1036938275,
+      "number": 46,
+      "submitter": "joachimdalen",
+      "title": "Fix unable to create on new work item",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/46"
+    },
     {
       "id": 1032906062,
       "number": 41,
