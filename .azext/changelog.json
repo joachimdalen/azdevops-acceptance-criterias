@@ -61,6 +61,7 @@
           {
             "type": "fix",
             "description": "Fixed 'Save the work item to start adding acceptance criterias' showing even after the work item has been saved",
+            "pullRequest": 46,
             "issue": 45
           }
         ]

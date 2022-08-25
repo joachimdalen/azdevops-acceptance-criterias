@@ -47,6 +47,7 @@
 
 - Fixed 'Save the work item to start adding acceptance criterias' showing even after the work item has been saved
   - Reported in [GH#45 - Can not add criterias on a newly created work item](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/45)
+  - Fixed in [PR#46 - Fix unable to create on new work item](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/46)
 
 ---
 
