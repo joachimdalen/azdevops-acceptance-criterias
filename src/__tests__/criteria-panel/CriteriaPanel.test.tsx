@@ -7,15 +7,15 @@ import { StorageService } from '../../common/services/StorageService';
 import {
   AcceptanceCriteriaState,
   CriteriaPanelConfig,
+  CriteriaPanelMode,
   FullCriteriaStatus,
   HistoryDocument,
-  HistoryEvent
+  HistoryEvent,
+  LoadedCriteriaPanelConfig
 } from '../../common/types';
 import CriteriaPanel from '../../criteria-panel/CriteriaPanel';
-import { CriteriaPanelProvider } from '../../criteria-panel/CriteriaPanelContext';
+import { CriteriaBuilderProvider } from '../../common/criterias/CriteriaBuilderContext';
 import { getApprover, getTextCriteria } from '../../testdata';
-
-type CpCon = (CriteriaPanelConfig & { panel: any }) | undefined;
 
 const history: HistoryDocument = {
   __etag: 1,
@@ -56,10 +56,12 @@ describe('CriteriaPanel', () => {
   });
 
   it('should render default edit mode', async () => {
-    const config: CpCon = {
-      panel: true,
+    const config: LoadedCriteriaPanelConfig = {
+      panel: {
+        close: jest.fn()
+      },
       workItemId: '1',
-      canEdit: true
+      mode: CriteriaPanelMode.Edit
     };
 
     mockGetConfiguration.mockReturnValue(config);
@@ -73,21 +75,21 @@ describe('CriteriaPanel', () => {
     });
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Title/));
   });
 
   it('should fetch and render criteria', async () => {
-    const config: CpCon = {
+    const config: LoadedCriteriaPanelConfig = {
       panel: {
-        onClose: jest.fn()
+        close: jest.fn()
       },
       workItemId: '1',
-      canEdit: true,
+      mode: CriteriaPanelMode.View,
       criteriaId: 'AC-1-1'
     };
     const { criteria, details } = getTextCriteria(
@@ -110,21 +112,21 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/This is the content/));
   });
 
   it('should render complete container', async () => {
-    const config: CpCon = {
+    const config: LoadedCriteriaPanelConfig = {
       panel: {
-        onClose: jest.fn()
+        close: jest.fn()
       },
       workItemId: '1',
-      isReadOnly: true,
+      mode: CriteriaPanelMode.View,
       criteriaId: 'AC-1-1'
     };
     const { criteria, details } = getTextCriteria(
@@ -147,20 +149,20 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Complete criteria\?/));
   });
   it('should render completed container', async () => {
-    const config: CpCon = {
+    const config: LoadedCriteriaPanelConfig = {
       panel: {
-        onClose: jest.fn()
+        close: jest.fn()
       },
       workItemId: '1',
-      isReadOnly: true,
+      mode: CriteriaPanelMode.View,
       criteriaId: 'AC-1-1'
     };
     const { criteria, details } = getTextCriteria(
@@ -182,20 +184,20 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/This criteria was completed/));
   });
   it('should render ready for approval container', async () => {
-    const config: CpCon = {
+    const config: LoadedCriteriaPanelConfig = {
       panel: {
-        onClose: jest.fn()
+        close: jest.fn()
       },
       workItemId: '1',
-      isReadOnly: true,
+      mode: CriteriaPanelMode.View,
       criteriaId: 'AC-1-1'
     };
     const { criteria, details } = getTextCriteria(
@@ -218,20 +220,20 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/Ready for approval/));
   });
   it('should render approval container', async () => {
-    const config: CpCon = {
+    const config: LoadedCriteriaPanelConfig = {
       panel: {
-        onClose: jest.fn()
+        close: jest.fn()
       },
       workItemId: '1',
-      isReadOnly: true,
+      mode: CriteriaPanelMode.View,
       criteriaId: 'AC-1-1'
     };
     const { criteria, details } = getTextCriteria(
@@ -255,20 +257,20 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(history);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/This criteria needs your attention/));
   });
   it('should render history tab when criteria have history', async () => {
-    const config: CpCon = {
+    const config: LoadedCriteriaPanelConfig = {
       panel: {
-        onClose: jest.fn()
+        close: jest.fn()
       },
       workItemId: '1',
-      isReadOnly: true,
+      mode: CriteriaPanelMode.View,
       criteriaId: 'AC-1-1'
     };
     const { criteria, details } = getTextCriteria(
@@ -292,9 +294,9 @@ describe('CriteriaPanel', () => {
     getHistorySpy.mockResolvedValue(historyWithContent);
 
     render(
-      <CriteriaPanelProvider>
+      <CriteriaBuilderProvider>
         <CriteriaPanel />
-      </CriteriaPanelProvider>
+      </CriteriaBuilderProvider>
     );
 
     await waitFor(() => screen.findAllByText(/History/));

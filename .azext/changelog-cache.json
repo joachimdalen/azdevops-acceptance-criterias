@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1268285775,
+      "number": 37,
+      "submitter": "joachimdalen",
+      "title": "Criteria templates",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/37"
+    },
+    {
       "id": 1244048801,
       "number": 33,
       "submitter": "joachimdalen",
@@ -65,6 +72,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 1032906062,
+      "number": 41,
+      "submitter": "joachimdalen",
+      "title": "Criteria templates",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41"
+    },
     {
       "id": 943501754,
       "number": 34,

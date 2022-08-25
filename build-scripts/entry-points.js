@@ -17,6 +17,12 @@ const modules = [
     ]
   },
   {
+    name: 'criteria-template-panel',
+    entry: './src/criteria-template-panel/module',
+    root: 'criteria-template-panel-container',
+    generate: true
+  },
+  {
     name: 'criteria-panel',
     entry: './src/criteria-panel/module',
     root: 'criteria-panel-container',

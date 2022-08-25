@@ -1,7 +1,7 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { ISimpleTableCell } from 'azure-devops-ui/Table';
 
-import { CriteriaModalResult } from './common';
+import { CriteriaModalResult, CriteriaTemplateModalResult } from './common';
 import { ProgressBarLabelType } from './components/ProgressBar';
 
 export interface CriteriaDocument {
@@ -12,6 +12,13 @@ export interface CriteriaDocument {
   readonly __etag?: number;
   counter: number;
 }
+
+export interface IHasCriterias {
+  scenario?: IScenario;
+  text?: ITextCriteria;
+  checklist?: ICheckList;
+}
+
 export interface IAcceptanceCriteria {
   id: string;
   order?: number;
@@ -19,6 +26,25 @@ export interface IAcceptanceCriteria {
   state: AcceptanceCriteriaState;
   type: CriteriaTypes;
   title: string;
+}
+
+export interface CriteriaTemplateDocument extends IHasCriterias {
+  readonly __etag?: number;
+  id: string;
+  type: CriteriaTypes;
+  name: string;
+  title: string;
+  description?: string;
+  approver?: IInternalIdentity;
+  createdBy: IInternalIdentity;
+  updatedBy?: IInternalIdentity;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface CriteriaTemplateSettings {
+  requireApprover: boolean;
+  allowChanges: boolean;
 }
 
 export type CriteriaTypes = 'scenario' | 'text' | 'checklist';
@@ -37,13 +63,10 @@ export const criteriaIcons: Map<CriteriaTypes, CriteriaIconMapping> = new Map<
   ['scenario', { iconName: 'icon_chat_bubble', color: '735ae6' }]
 ]);
 
-export interface CriteriaDetailDocument {
+export interface CriteriaDetailDocument extends IHasCriterias {
   id: string;
   latestComment?: string;
   processed?: IAcceptanceCriteriaProcess;
-  scenario?: IScenario;
-  text?: ITextCriteria;
-  checklist?: ICheckList;
   readonly __etag?: number;
 }
 
@@ -108,15 +131,29 @@ export interface IProgressStatus {
   type: ProgressBarLabelType;
 }
 
+export interface ContribPanel<T> {
+  panel: {
+    close: (data: T) => Promise<void>;
+  };
+}
 export interface CriteriaPanelConfig {
   workItemId?: string;
   criteriaId?: string;
-  isReadOnly?: boolean;
-  isNew?: boolean;
-  canEdit?: boolean;
+  mode: CriteriaPanelMode;
   onClose?: (result: CriteriaModalResult | undefined) => Promise<void>;
 }
+export interface LoadedCriteriaPanelConfig
+  extends CriteriaPanelConfig,
+    ContribPanel<CriteriaModalResult | undefined> {}
 
+export interface TemplatePanelConfig {
+  type: CriteriaTypes;
+  templateId?: string;
+}
+
+export interface LoadedTemplatePanelConfig
+  extends TemplatePanelConfig,
+    ContribPanel<CriteriaTemplateModalResult | undefined> {}
 export interface GlobalSettingsDocument {
   readonly id: string;
   readonly __etag?: number;
@@ -183,3 +220,19 @@ export const historyEventProperties: Map<HistoryEvent, EventProperties> = new Ma
     { icon: 'StatusErrorFull', iconColor: 'text-red', title: 'Rejected criteria' }
   ]
 ]);
+export enum CriteriaPanelMode {
+  New = 'new',
+  NewFromTemplate = 'new-from-template',
+  Edit = 'edit',
+  View = 'view',
+  ViewWithEdit = 'view-with-edit'
+}
+export enum TemplatePanelMode {
+  Edit = 'edit',
+  Import = 'import'
+}
+
+export const isViewMode = (mode: CriteriaPanelMode): boolean =>
+  mode === CriteriaPanelMode.View || mode === CriteriaPanelMode.ViewWithEdit;
+
+export type ValidationErrors = { [key: string]: string[] } | undefined;

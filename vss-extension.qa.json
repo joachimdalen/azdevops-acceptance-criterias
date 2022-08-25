@@ -79,11 +79,11 @@
       ]
     },
     {
-      "id": "confirmation-dialog",
+      "id": "criteria-template-panel",
       "type": "ms.vss-web.external-content",
       "targets": [],
       "properties": {
-        "uri": "dist/confirmation-dialog.html"
+        "uri": "dist/criteria-template-panel.html"
       },
       "constraints": [
         {
@@ -95,14 +95,11 @@
       ]
     },
     {
-      "id": "admin-hub",
-      "type": "ms.vss-web.hub",
-      "description": "Configuration hub for Acceptance Criterias",
-      "targets": ["ms.vss-web.project-admin-hub-group"],
+      "id": "confirmation-dialog",
+      "type": "ms.vss-web.external-content",
+      "targets": [],
       "properties": {
-        "name": "Acceptance Criterias (QA)",
-        "order": 1,
-        "uri": "dist/admin-hub.html"
+        "uri": "dist/confirmation-dialog.html"
       },
       "constraints": [
         {
@@ -206,6 +203,94 @@
         "icon": {
           "light": "dist/assets/hub-icon-dark.png",
           "dark": "dist/assets/hub-icon-light.png"
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "acceptance-project-settings-tab-group",
+      "type": "ms.vss-web.tab-group",
+      "targets": [
+        "ms.vss-admin-web.project-admin-hub-component",
+        "ms.vss-admin-web.project-admin-hub-component-icons",
+        "ms.vss-admin-web.project-admin-hub-component-collapsible",
+        "ms.vss-admin-web.project-admin-hub-component-icons-collapsible"
+      ],
+      "properties": {
+        "name": "Acceptance Criterias (QA)",
+        "order": 70
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin-configuration",
+      "type": "ms.vss-web.tab",
+      "targets": [".acceptance-project-settings-tab-group"],
+      "properties": {
+        "name": "Configuration",
+        "uri": "dist/admin-hub.html",
+        "iconProps": {
+          "iconName": "Configuration",
+          "className": "admin-tab-icon",
+          "order": 1
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin-templates",
+      "type": "ms.vss-web.tab",
+      "targets": [".acceptance-project-settings-tab-group"],
+      "properties": {
+        "name": "Templates",
+        "uri": "dist/admin-hub.html",
+        "iconProps": {
+          "iconName": "FileTemplate",
+          "className": "dist/admin-tab-icon",
+          "order": 2
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-qa.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
+      "id": "admin-document-mgmt",
+      "type": "ms.vss-web.tab",
+      "targets": [".acceptance-project-settings-tab-group"],
+      "properties": {
+        "name": "Orphaned Criterias",
+        "uri": "dist/admin-hub.html",
+        "iconProps": {
+          "iconName": "ExploreData",
+          "className": "admin-tab-icon",
+          "order": 3
         }
       },
       "constraints": [

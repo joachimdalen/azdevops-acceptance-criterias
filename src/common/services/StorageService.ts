@@ -1,10 +1,12 @@
 import { DevOpsService, IDevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { IExtensionDataService } from 'azure-devops-extension-api';
 import * as DevOps from 'azure-devops-extension-sdk';
+import { DevOpsError, DevOpsErrorCodes } from '../DevOpsError';
 
 import {
   CriteriaDetailDocument,
   CriteriaDocument,
+  CriteriaTemplateDocument,
   GlobalSettingsDocument,
   HistoryDocument
 } from '../types';
@@ -18,7 +20,8 @@ enum CollectionNames {
   Criterias = 'AcceptanceCriterias',
   Details = 'AcceptanceCriteriaDetails',
   Settings = 'Settings',
-  History = 'History'
+  History = 'History',
+  Templates = 'Templates'
 }
 
 export interface IStorageService {
@@ -33,6 +36,10 @@ export interface IStorageService {
   resetSettings(): Promise<GlobalSettingsDocument>;
   getHistory(id: string): Promise<HistoryDocument | undefined>;
   setHistory(data: HistoryDocument): Promise<HistoryDocument>;
+  getTemplates(): Promise<CriteriaTemplateDocument[]>;
+  setTemplate(data: CriteriaTemplateDocument): Promise<CriteriaTemplateDocument>;
+  deleteTemplate(id: string): Promise<void>;
+  getTemplate(id: string): Promise<CriteriaTemplateDocument | undefined>;
 }
 class StorageService implements IStorageService {
   private readonly _devOpsService: IDevOpsService;
@@ -41,6 +48,7 @@ class StorageService implements IStorageService {
   private _criteriaCollection?: string;
   private _criteriaDetailsCollection?: string;
   private _criteriaHistoryCollection?: string;
+  private _criteriaTemplateCollection?: string;
   private _settingsCollection?: string;
   private _projectId?: string;
   private defaultSettingsDocument: GlobalSettingsDocument = {
@@ -67,7 +75,8 @@ class StorageService implements IStorageService {
       this._criteriaCollection === undefined ||
       this._criteriaDetailsCollection === undefined ||
       this._settingsCollection === undefined ||
-      this._criteriaHistoryCollection === undefined
+      this._criteriaHistoryCollection === undefined ||
+      this._criteriaTemplateCollection === undefined
     ) {
       const project = await this._devOpsService.getProject();
 
@@ -79,6 +88,7 @@ class StorageService implements IStorageService {
       this._criteriaDetailsCollection = `${project.id}-${CollectionNames.Details}`;
       this._settingsCollection = `${project.id}-${CollectionNames.Settings}`;
       this._criteriaHistoryCollection = `${project.id}-${CollectionNames.History}`;
+      this._criteriaTemplateCollection = `${project.id}-${CollectionNames.Templates}`;
       this._projectId = project.id;
     }
 
@@ -189,10 +199,10 @@ class StorageService implements IStorageService {
 
       return document;
     } catch (error: any) {
-      if (error?.status !== 404) {
-        throw new Error(error);
-      } else {
+      if (error?.status === 404) {
         return this.defaultSettingsDocument;
+      } else {
+        throw new Error(error);
       }
     }
   }
@@ -329,6 +339,81 @@ class StorageService implements IStorageService {
     return dataManager.setDocument(this._criteriaHistoryCollection, data, {
       scopeType: ScopeType.Default
     });
+  }
+
+  public async getTemplates(): Promise<CriteriaTemplateDocument[]> {
+    const dataService = await this.getDataService();
+    if (this._criteriaTemplateCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    const documents: CriteriaTemplateDocument[] | undefined = await dataManager.getDocuments(
+      this._criteriaTemplateCollection,
+      {
+        scopeType: this.scopeType,
+        defaultValue: undefined
+      }
+    );
+
+    return documents;
+  }
+
+  public async setTemplate(data: CriteriaTemplateDocument): Promise<CriteriaTemplateDocument> {
+    const dataService = await this.getDataService();
+    if (this._criteriaTemplateCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    return dataManager.setDocument(this._criteriaTemplateCollection, data, {
+      scopeType: ScopeType.Default
+    });
+  }
+  public async deleteTemplate(id: string): Promise<void> {
+    try {
+      const dataService = await this.getDataService();
+      if (this._criteriaTemplateCollection === undefined) {
+        throw new Error('Failed to initialize ');
+      }
+      const dataManager = await dataService.getExtensionDataManager(
+        DevOps.getExtensionContext().id,
+        await DevOps.getAccessToken()
+      );
+      await dataManager.deleteDocument(this._criteriaTemplateCollection, id, {
+        scopeType: this.scopeType
+      });
+    } catch (error: any) {
+      if (error?.status !== 404) {
+        throw new Error(error);
+      }
+    }
+  }
+  public async getTemplate(id: string): Promise<CriteriaTemplateDocument | undefined> {
+    const dataService = await this.getDataService();
+
+    if (this._criteriaTemplateCollection === undefined) {
+      throw new Error('Failed to initialize ');
+    }
+
+    const dataManager = await dataService.getExtensionDataManager(
+      DevOps.getExtensionContext().id,
+      await DevOps.getAccessToken()
+    );
+    const document: CriteriaTemplateDocument | undefined = await dataManager.getDocument(
+      this._criteriaTemplateCollection,
+      id,
+      {
+        scopeType: this.scopeType,
+        defaultValue: undefined
+      }
+    );
+
+    return document;
   }
 }
 
