@@ -41,6 +41,13 @@
 - Internal refactoring to improve flows
   - Changed in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
 
+### 🐛 Fixes (1)
+
+#### `wi-control@1.1.0`
+
+- Fixed 'Save the work item to start adding acceptance criterias' showing even after the work item has been saved
+  - Reported in [GH#45 - Can not add criterias on a newly created work item](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/45)
+
 ---
 
 ## 1.2.0 (2022-05-22)
@@ -161,13 +168,6 @@ Thank you to the following for contributing to the latest release
 - Remove unused code
   - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
-### 📝 Documentation (1)
-
-#### `admin-hub@1.0.1`
-
-- Update documentation url
-  - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
-
 ### 🐛 Fixes (2)
 
 #### `criteria-panel@1.1.0`
@@ -178,6 +178,13 @@ Thank you to the following for contributing to the latest release
 
 - Fixed an issue where the checklist would be out of sync when performing multiple processing actions without closing the panel
   - Fixed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
+
+### 📝 Documentation (1)
+
+#### `admin-hub@1.0.1`
+
+- Update documentation url
+  - Changed in [PR#19 - Refactor and introduce base history](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/19)
 
 ---
 
