@@ -1,12 +1,13 @@
 import { IdentityPicker } from '@joachimdalen/azdevops-ext-core/IdentityPicker';
+import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
 import { getCombined, hasError } from '@joachimdalen/azdevops-ext-core/ValidationUtils';
 import { ConditionalChildren } from 'azure-devops-ui/ConditionalChildren';
+import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { FormItem } from 'azure-devops-ui/FormItem';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { ITableColumn, SimpleTableCell } from 'azure-devops-ui/Table';
 import { TextField, TextFieldWidth } from 'azure-devops-ui/TextField';
-import { Dropdown } from 'azure-devops-ui/Dropdown';
-import { title } from 'process';
+import { useMemo } from 'react';
 
 import CriteriaTypeDisplay from '../common/components/CriteriaTypeDisplay';
 import CheckListCriteriaSection from '../common/criterias/checklist/CheckListCriteriaSection';
@@ -15,8 +16,6 @@ import ScenarioCriteriaSection from '../common/criterias/scenario/ScenarioCriter
 import TextCriteriaSection from '../common/criterias/text/TextCriteriaSection';
 import { LocalStorageRawKeys } from '../common/localStorage';
 import { CriteriaTypes, GlobalSettingsDocument } from '../common/types';
-import { useDropdownSelection } from '@joachimdalen/azdevops-ext-core/useDropdownSelection';
-import { useMemo } from 'react';
 
 interface EditViewProps {
   errors: any;
@@ -54,7 +53,7 @@ const EditView = ({ errors, settings, showTypePicker = true }: EditViewProps): J
 
   return (
     <>
-      <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-bottom-16">
+      <div className="rhythm-vertical-8 flex-grow border-bottom-light padding-vertical-8 padding-bottom-16">
         {showTypePicker && (
           <FormItem label="Criteria Type" className="flex-grow">
             <Dropdown

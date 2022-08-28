@@ -12,6 +12,7 @@ import { Surface, SurfaceBackground } from 'azure-devops-ui/Surface';
 import { Tab, TabBar, TabSize } from 'azure-devops-ui/Tabs';
 import { useEffect, useMemo, useState } from 'react';
 
+import WorkItemPicker from '../common/components/WorkItemPicker';
 import { useCriteriaBuilderContext } from '../common/criterias/CriteriaBuilderContext';
 import { getCriteriaDetails } from '../common/criteriaUtils';
 import useValidation from '../common/hooks/useValidation';
@@ -70,6 +71,7 @@ const CriteriaPanel = (): React.ReactElement => {
       dispatch({ type: 'SET_TYPE', data: crit.type });
       dispatch({ type: 'SET_APPROVER', data: crit.requiredApprover });
       dispatch({ type: 'SET_TITLE', data: crit.title });
+      dispatch({ type: 'SET_WORKITEMS', data: crit.workItems });
       setCriteria(crit);
     }
 
@@ -197,28 +199,29 @@ const CriteriaPanel = (): React.ReactElement => {
       showVersion={mode === CriteriaPanelMode.Edit}
       moduleVersion={process.env.CRITERIA_PANEL_VERSION}
     >
-      <ConditionalChildren
-        renderChildren={
-          historyEvents !== undefined && historyEvents.items.length > 0 && isViewMode(mode)
-        }
-      >
-        <Surface background={SurfaceBackground.callout}>
-          <TabBar
-            tabSize={TabSize.Compact}
-            onSelectedTabChanged={t => setTabId(t)}
-            selectedTabId={tabId}
-            className="margin-bottom-16"
+      <Surface background={SurfaceBackground.callout}>
+        <TabBar
+          tabSize={TabSize.Compact}
+          onSelectedTabChanged={t => setTabId(t)}
+          selectedTabId={tabId}
+          className="margin-bottom-8"
+        >
+          <Tab id="details" name="Details" iconProps={{ iconName: 'Page' }} />
+          <Tab id="work-items" name="Work Items" iconProps={{ iconName: 'WorkItem' }} />
+          <ConditionalChildren
+            renderChildren={
+              historyEvents !== undefined && historyEvents.items.length > 0 && isViewMode(mode)
+            }
           >
-            <Tab id="details" name="Details" iconProps={{ iconName: 'Page' }} />
             <Tab
               id="history"
               name="History"
               badgeCount={historyEvents?.items.length}
               iconProps={{ iconName: 'History' }}
             />
-          </TabBar>
-        </Surface>
-      </ConditionalChildren>
+          </ConditionalChildren>
+        </TabBar>
+      </Surface>
 
       <ConditionalChildren
         renderChildren={tabId === 'details' || historyEvents?.items?.length === 0}
@@ -234,7 +237,7 @@ const CriteriaPanel = (): React.ReactElement => {
               An error occurred. Please refresh and try again
             </MessageCard>
           </ConditionalChildren>
-          <ConditionalChildren renderChildren={isViewMode(mode)}>
+          <ConditionalChildren renderChildren={isViewMode(mode) && tabId === 'details'}>
             {criteria && (
               <ReadOnlyView
                 criteria={criteria}
@@ -253,7 +256,10 @@ const CriteriaPanel = (): React.ReactElement => {
           </ConditionalChildren>
 
           <ConditionalChildren
-            renderChildren={mode === CriteriaPanelMode.Edit || mode === CriteriaPanelMode.New}
+            renderChildren={
+              (mode === CriteriaPanelMode.Edit || mode === CriteriaPanelMode.New) &&
+              tabId === 'details'
+            }
           >
             {settings && <EditView errors={errors} settings={settings} />}
           </ConditionalChildren>
@@ -261,6 +267,16 @@ const CriteriaPanel = (): React.ReactElement => {
       </ConditionalChildren>
       <ConditionalChildren renderChildren={tabId === 'history' && historyEvents !== undefined}>
         {historyEvents && <HistoryList events={historyEvents} />}
+      </ConditionalChildren>
+      <ConditionalChildren renderChildren={tabId === 'work-items'}>
+        <WorkItemPicker
+          disabled={isViewMode(mode)}
+          workItems={criteria?.workItems}
+          onWorkItemSelected={(workItemIds: number[]) => {
+            dispatch({ type: 'SET_WORKITEMS', data: workItemIds });
+          }}
+          mode={mode}
+        />
       </ConditionalChildren>
     </PanelWrapper>
   );

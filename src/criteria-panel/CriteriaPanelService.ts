@@ -29,7 +29,8 @@ class CriteriaPanelService {
       requiredApprover: state.approver,
       state: criteria?.state || AcceptanceCriteriaState.New,
       type: state.type,
-      title: state.title
+      title: state.title,
+      workItems: state.workItems
     };
 
     const acd: CriteriaDetailDocument = {

@@ -1,4 +1,5 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { WorkItemType } from 'azure-devops-extension-api/WorkItemTracking';
 import React, { createContext, Dispatch, useContext, useReducer } from 'react';
 
 import { CriteriaTypes, ICheckList, IScenario, ITextCriteria } from '../types';
@@ -10,6 +11,8 @@ export interface ICriteriaBuilderContextState {
   scenario?: IScenario;
   text?: ITextCriteria;
   checklist?: ICheckList;
+  workItems?: number[];
+  workItemTypes?: WorkItemType[];
 }
 
 export interface ReducerAction {
@@ -29,7 +32,14 @@ export interface ICriteriaBuilderContext {
 
 const CriteriaBuilderContext = createContext<ICriteriaBuilderContext>({} as any);
 
-export type ContextAction = 'INIT' | 'SET_CRITERIA' | 'SET_TYPE' | 'SET_TITLE' | 'SET_APPROVER';
+export type ContextAction =
+  | 'INIT'
+  | 'SET_CRITERIA'
+  | 'SET_TYPE'
+  | 'SET_TITLE'
+  | 'SET_APPROVER'
+  | 'SET_WORKITEMS'
+  | 'SET_WORKITEM_TYPES';
 type CriteriaBuilderProviderProps = {
   children: React.ReactNode;
   defaultState?: ICriteriaBuilderContextState;
@@ -50,6 +60,12 @@ function panelReducer(
     }
     case 'SET_APPROVER': {
       return { ...state, approver: action.data };
+    }
+    case 'SET_WORKITEMS': {
+      return { ...state, workItems: action.data };
+    }
+    case 'SET_WORKITEM_TYPES': {
+      return { ...state, workItemTypes: action.data };
     }
 
     case 'SET_CRITERIA': {

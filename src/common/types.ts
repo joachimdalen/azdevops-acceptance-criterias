@@ -26,6 +26,7 @@ export interface IAcceptanceCriteria {
   state: AcceptanceCriteriaState;
   type: CriteriaTypes;
   title: string;
+  workItems?: number[];
 }
 
 export interface CriteriaTemplateDocument extends IHasCriterias {
@@ -234,5 +235,7 @@ export enum TemplatePanelMode {
 
 export const isViewMode = (mode: CriteriaPanelMode): boolean =>
   mode === CriteriaPanelMode.View || mode === CriteriaPanelMode.ViewWithEdit;
+export const isEditMode = (mode: CriteriaPanelMode): boolean =>
+  mode === CriteriaPanelMode.Edit || mode === CriteriaPanelMode.New;
 
 export type ValidationErrors = { [key: string]: string[] } | undefined;

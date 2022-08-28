@@ -44,6 +44,7 @@ import {
   IAcceptanceCriteria,
   WorkItemTypeTagProps
 } from '../common/types';
+import { getWorkItemStates, getWorkItemTypeMap } from '../common/workItemUtils';
 import ColumnsPanel from './ColumnsPanel';
 import CriteriaTree from './components/CriteriaTree';
 import HubFilterBar from './components/HubFilterBar';
@@ -182,47 +183,15 @@ const WorkHub = (): JSX.Element => {
   const criterias = useMemo(() => documents.flatMap(x => x.criterias), [documents]);
   const workItemIds = useMemo(() => documents.map(x => parseInt(x.id)), [documents]);
 
-  const wiMap: Map<string, WorkItemTypeTagProps> = useMemo(() => {
-    const mp = new Map<string, WorkItemTypeTagProps>();
-    workItems
-      .map(x => getWorkItemTypeDisplayName(x))
-      .filter(isDefined)
-      .filter(distinct)
-      .map(y => {
-        if (mp.has(y)) return;
-        const refName = getWorkItemReferenceNameFromDisplayName(y, workItemTypes);
-        if (refName === undefined) return;
-        const t = getWorkTypeFromReferenceName(refName, workItemTypes);
-        const pro: WorkItemTypeTagProps = {
-          iconSize: 16,
-          iconUrl: t?.icon.url,
-          type: t?.name
-        };
-        mp.set(y, pro);
-      });
+  const wiMap: Map<string, WorkItemTypeTagProps> = useMemo(
+    () => getWorkItemTypeMap(workItems, workItemTypes),
+    [workItems]
+  );
 
-    return mp;
-  }, [workItems]);
-
-  const wiStates: Map<string, WorkItemStateColor[]> = useMemo(() => {
-    const mp = new Map<string, WorkItemStateColor[]>();
-    workItems
-      .map(x => getWorkItemTypeDisplayName(x))
-      .filter(isDefined)
-      .filter(distinct)
-      .map(y => {
-        if (mp.has(y)) return;
-        const refName = getWorkItemReferenceNameFromDisplayName(y, workItemTypes);
-        if (refName === undefined) return;
-
-        const item = workItemTypes.find(x => x.referenceName === refName);
-        if (item?.states) {
-          mp.set(y, item?.states);
-        }
-      });
-
-    return mp;
-  }, [workItems]);
+  const wiStates: Map<string, WorkItemStateColor[]> = useMemo(
+    () => getWorkItemStates(workItems, workItemTypes),
+    [workItems]
+  );
 
   const innerFilter = (
     items: CriteriaDocument[],
