@@ -1,5 +1,6 @@
 import { createTheme, loadTheme } from '@fluentui/react';
 import { appTheme } from '@joachimdalen/azdevops-ext-core/azure-devops-theme';
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { distinct, isDefined } from '@joachimdalen/azdevops-ext-core/CoreUtils';
 import { DevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
 import { ExtendedZeroData } from '@joachimdalen/azdevops-ext-core/ExtendedZeroData';
@@ -37,7 +38,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { chunk } from '../common/chunkUtil';
 import { SlimErrorBoundary } from '../common/components/SlimErrorBoundary';
-import { getWorkItemIdFromCriteriaId } from '../common/criteriaUtils';
+import { getWorkItemIdFromCriteriaId, isCompleted } from '../common/criteriaUtils';
 import { DOCS_URL_EXTENSION, DOCS_URL_KEYBOARD_SHORTCUTS } from '../common/documentationUrls';
 import useCriteriaId from '../common/hooks/useCriteriaId';
 import { getLocalItem, LocalStorageKeys, LocalStorageRawKeys } from '../common/localStorage';
@@ -45,6 +46,7 @@ import CriteriaService from '../common/services/CriteriaService';
 import { CriteriaDocument, IAcceptanceCriteria, WorkItemTypeTagProps } from '../common/types';
 import CriteriaTree from '../work-hub/components/CriteriaTree';
 import ApproverProgress from './components/ApproverProgress';
+import { ApproverProgressItem } from './types';
 
 interface ProgressReportProps {
   workItemTypes: Map<string, WorkItemTypeTagProps>;
@@ -126,6 +128,48 @@ const AnalyticsHub = (): JSX.Element => {
 
     return mp;
   }, [workItems]);
+  const approverProgressMap: ApproverProgressItem[] = useMemo(() => {
+    const mp = new Map<string, ApproverProgressItem>();
+    documents
+      .flatMap(x => x.criterias)
+      .map(y => {
+        if (!y.requiredApprover) {
+          const ext = mp.get('none');
+          if (ext) {
+            mp.set('none', {
+              id: 'none',
+              current: isCompleted(y) ? ext.current + 1 : ext.current,
+              total: ext.total + 1
+            });
+          } else {
+            mp.set('none', {
+              id: 'none',
+              current: 1,
+              total: 1
+            });
+          }
+        } else {
+          const extId = mp.get(y.requiredApprover.id);
+          if (extId) {
+            mp.set(y.requiredApprover.id, {
+              id: y.requiredApprover,
+              current: isCompleted(y) ? extId.current + 1 : extId.current,
+              total: extId.current + 1
+            });
+          } else {
+            mp.set(y.requiredApprover.id, {
+              id: y.requiredApprover,
+              current: 1,
+              total: 1
+            });
+          }
+        }
+      });
+
+    return Array.from(mp.values());
+  }, [documents]);
+
+  console.log(approverProgressMap);
 
   const wiStates: Map<string, WorkItemStateColor[]> = useMemo(() => {
     const mp = new Map<string, WorkItemStateColor[]>();
@@ -183,7 +227,7 @@ const AnalyticsHub = (): JSX.Element => {
             </Card>
           </div>
           <div className="flex-column flex-grow" style={{ flex: 1 }}>
-            <ApproverProgress />
+            <ApproverProgress approvers={approverProgressMap} />
           </div>
         </div>
       </div>

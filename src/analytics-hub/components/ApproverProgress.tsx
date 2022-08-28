@@ -1,16 +1,13 @@
+import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { Card } from 'azure-devops-ui/Card';
 import { ITableColumn, renderSimpleCell, SimpleTableCell, Table } from 'azure-devops-ui/Table';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
+import ApproverDisplay from '../../common/components/ApproverDisplay';
 
 import ProgressBar from '../../common/components/ProgressBar';
+import { ApproverProgressItem } from '../types';
 
-interface ApproverProgressItem {
-  name: string;
-  max: number;
-  current: number;
-}
-
-const ApproverProgress = (): JSX.Element => {
+const ApproverProgress = ({ approvers }: { approvers: ApproverProgressItem[] }): JSX.Element => {
   return (
     <Card
       headerIconProps={{ iconName: 'Contact' }}
@@ -32,7 +29,12 @@ const ApproverProgress = (): JSX.Element => {
             ) => {
               return (
                 <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn}>
-                  {tableItem.name}
+                  <ApproverDisplay
+                    approver={
+                      tableItem.id === 'none' ? undefined : (tableItem.id as IInternalIdentity)
+                    }
+                    showUnassigned
+                  />
                 </SimpleTableCell>
               );
             }
@@ -51,7 +53,7 @@ const ApproverProgress = (): JSX.Element => {
               return (
                 <SimpleTableCell columnIndex={columnIndex} tableColumn={tableColumn}>
                   <ProgressBar
-                    maxValue={tableItem.max}
+                    maxValue={tableItem.total}
                     currentValue={tableItem.current}
                     labelType="count"
                   />
@@ -60,11 +62,7 @@ const ApproverProgress = (): JSX.Element => {
             }
           }
         ]}
-        itemProvider={
-          new ArrayItemProvider<ApproverProgressItem>([
-            { name: 'Joachim Dalen', max: 100, current: 14 }
-          ])
-        }
+        itemProvider={new ArrayItemProvider(approvers)}
       />
     </Card>
   );
