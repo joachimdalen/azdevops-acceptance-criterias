@@ -221,6 +221,27 @@
       ]
     },
     {
+      "id": "analytics-hub",
+      "type": "ms.vss-web.hub",
+      "targets": [".acceptance-hub"],
+      "properties": {
+        "name": "Analytics",
+        "uri": "analytics-hub.html",
+        "icon": {
+          "light": "dist/assets/hub-icon-dark.png",
+          "dark": "dist/assets/hub-icon-light.png"
+        }
+      },
+      "constraints": [
+        {
+          "name": "Feature",
+          "properties": {
+            "featureId": "joachimdalen.acceptance-criterias-dev.feature-enabled"
+          }
+        }
+      ]
+    },
+    {
       "id": "acceptance-project-settings-tab-group",
       "type": "ms.vss-web.tab-group",
       "targets": [

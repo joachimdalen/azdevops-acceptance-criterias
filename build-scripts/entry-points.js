@@ -17,6 +17,12 @@ const modules = [
     ]
   },
   {
+    name: 'analytics-hub',
+    entry: './src/analytics-hub/module',
+    root: 'analytics-hub-container',
+    generate: true
+  },
+  {
     name: 'criteria-template-panel',
     entry: './src/criteria-template-panel/module',
     root: 'criteria-template-panel-container',
