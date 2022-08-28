@@ -209,7 +209,8 @@
         "icon": {
           "light": "dist/assets/hub-icon-dark.png",
           "dark": "dist/assets/hub-icon-light.png"
-        }
+        },
+        "order": 1
       },
       "constraints": [
         {
@@ -230,7 +231,8 @@
         "icon": {
           "light": "dist/assets/hub-icon-dark.png",
           "dark": "dist/assets/hub-icon-light.png"
-        }
+        },
+        "order": 2
       },
       "constraints": [
         {
