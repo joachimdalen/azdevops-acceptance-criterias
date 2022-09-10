@@ -1,9 +1,9 @@
 import { IInternalIdentity } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 import { Card } from 'azure-devops-ui/Card';
-import { ITableColumn, renderSimpleCell, SimpleTableCell, Table } from 'azure-devops-ui/Table';
+import { ITableColumn, SimpleTableCell, Table } from 'azure-devops-ui/Table';
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
-import ApproverDisplay from '../../common/components/ApproverDisplay';
 
+import ApproverDisplay from '../../common/components/ApproverDisplay';
 import ProgressBar from '../../common/components/ProgressBar';
 import { ApproverProgressItem } from '../types';
 

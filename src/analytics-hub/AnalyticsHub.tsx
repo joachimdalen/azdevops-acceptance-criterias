@@ -193,7 +193,7 @@ const AnalyticsHub = (): JSX.Element => {
 
   const ProgressReport = (): JSX.Element => {
     return (
-      <div className="page-content rhythm-vertical-16">
+      <div className="page-content rhythm-vertical-16 margin-top-8">
         <div className="flex-row rhythm-horizontal-16 flex-grow">
           <Card className="flex-grow" titleProps={{ text: 'Criterias by status' }}>
             ddd
