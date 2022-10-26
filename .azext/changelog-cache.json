@@ -1,6 +1,13 @@
 {
   "issues": [
     {
+      "id": 1422637968,
+      "number": 51,
+      "submitter": "trevonmckay",
+      "title": "Enable text overflow when viewing criteria",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/51"
+    },
+    {
       "id": 1350821296,
       "number": 43,
       "submitter": "joachimdalen",
@@ -86,6 +93,13 @@
     }
   ],
   "pullRequests": [
+    {
+      "id": 1100413528,
+      "number": 53,
+      "submitter": "joachimdalen",
+      "title": "Fix text being truncted in view mode",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/53"
+    },
     {
       "id": 1037034558,
       "number": 47,
