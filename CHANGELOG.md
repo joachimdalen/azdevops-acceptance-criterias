@@ -52,6 +52,7 @@
 
 - Fix text being truncated in panel view
   - Reported in [GH#51 - Enable text overflow when viewing criteria](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/51)
+  - Fixed in [PR#53 - Fix text being truncted in view mode](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/53)
 
 #### `wi-control@1.1.0`
 

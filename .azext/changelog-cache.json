@@ -94,6 +94,13 @@
   ],
   "pullRequests": [
     {
+      "id": 1100413528,
+      "number": 53,
+      "submitter": "joachimdalen",
+      "title": "Fix text being truncted in view mode",
+      "url": "https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/53"
+    },
+    {
       "id": 1037034558,
       "number": 47,
       "submitter": "joachimdalen",

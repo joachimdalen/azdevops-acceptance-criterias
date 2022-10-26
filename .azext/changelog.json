@@ -43,7 +43,8 @@
           {
             "type": "fix",
             "description": "Fix text being truncated in panel view",
-            "issue": 51
+            "issue": 51,
+            "pullRequest": 53
           }
         ]
       },
