@@ -31,14 +31,14 @@ const ScenarioCriteriaViewSection = ({
           <span className="font-weight-semibold font-size text-ellipsis secondary-text">
             {capitalizeFirstLetter(item.type)}
           </span>
-          <span className="text-ellipsis margin-top-4">{item.text}</span>
+          <span className="margin-top-4">{item.text}</span>
         </div>
       </ListItem>
     );
   };
 
   return (
-    <div className="rhythm-vertical-16 flex-grow margin-top-8">
+    <div className="rhythm-vertical-16 flex-grow margin-top-8 checklist">
       {details?.scenario?.scenario && (
         <div>
           <span className="font-weight-semibold font-size">Scenario</span>
