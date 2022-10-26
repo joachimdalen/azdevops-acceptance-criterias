@@ -46,13 +46,24 @@
 - Internal refactoring to improve flows
   - Changed in [PR#41 - Criteria templates](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/41)
 
-### 🐛 Fixes (1)
+### 🐛 Fixes (2)
+
+#### `criteria-panel@1.3.0`
+
+- Fix text being truncated in panel view
+  - Reported in [GH#51 - Enable text overflow when viewing criteria](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/51)
 
 #### `wi-control@1.1.0`
 
 - Fixed 'Save the work item to start adding acceptance criterias' showing even after the work item has been saved
   - Reported in [GH#45 - Can not add criterias on a newly created work item](https://github.com/joachimdalen/azdevops-acceptance-criterias/issues/45)
   - Fixed in [PR#46 - Fix unable to create on new work item](https://github.com/joachimdalen/azdevops-acceptance-criterias/pull/46)
+
+## 🌟 Contributors
+
+Thank you to the following for contributing to the latest release
+
+- [@trevonmckay](https://github.com/trevonmckay)
 
 ---
 

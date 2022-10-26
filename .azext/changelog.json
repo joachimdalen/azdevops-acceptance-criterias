@@ -39,6 +39,11 @@
             "description": "Make scenario description optional instead of required",
             "issue": 43,
             "pullRequest": 47
+          },
+          {
+            "type": "fix",
+            "description": "Fix text being truncated in panel view",
+            "issue": 51
           }
         ]
       },
