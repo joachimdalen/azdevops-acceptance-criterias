@@ -1,10 +1,11 @@
+import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
+import { DevOpsService, IDevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
+import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
+import { v4 as uuidV4 } from 'uuid';
+
+import { CriteriaTemplateModalResult, DialogIds, IConfirmationConfig, PanelIds } from '../common';
 import { CriteriaTemplateDocument } from '../types';
 import { IStorageService, StorageService } from './StorageService';
-import { v4 as uuidV4 } from 'uuid';
-import { getLoggedInUser } from '@joachimdalen/azdevops-ext-core/IdentityUtils';
-import { DevOpsService, IDevOpsService } from '@joachimdalen/azdevops-ext-core/DevOpsService';
-import { CriteriaTemplateModalResult, DialogIds, IConfirmationConfig, PanelIds } from '../common';
-import { ActionResult } from '@joachimdalen/azdevops-ext-core/CommonTypes';
 class CriteriaTemplateService {
   private readonly _dataStore: IStorageService;
   private readonly _devOpsService: IDevOpsService;
